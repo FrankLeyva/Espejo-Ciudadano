@@ -29,8 +29,9 @@ source('R/nominal_module.R')
 source('R/binary_module.R')
 source("R/data_loader.R")
 source("R/question_classifier.R")
-source("R/server.R")
-source("R/ui.R")
+source("R/themes_metadata.R")    
+source("R/public_services_ui.R")
+source("R/public_services_server.R")
 
 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = publicServicesUI, server = publicServicesServer)

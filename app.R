@@ -556,7 +556,7 @@ server <- function(input, output, session) {
       economyServer(input, output, session)
     } else if (current_tab == "cultural") {
       culturalServer(input, output, session)
-    } else if (current_tab == "demographic") {
+    } else if (current_tab == "identity") {
       identityServer(input, output, session)
     } else if (current_tab == "urban") {
       urbanServer(input, output, session)

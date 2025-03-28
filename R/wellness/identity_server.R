@@ -46,7 +46,7 @@ identityServer <- function(input, output, session) {
     # Use the wordcloud2 function
     tryCatch({
       # Get theme colors if available
-      wordcloud2(data = word_freq, size = 0.5, color = "random-dark")
+      wordcloud2(data = word_freq, size =2, color = "random-dark")
     }, error = function(e) {
       return(p(paste("Error al generar la nube de palabras:", e$message)))
     })

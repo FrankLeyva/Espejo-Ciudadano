@@ -285,7 +285,7 @@ calculate_student_presence <- function(survey_data) {
 create_education_overview <- function(survey_data, custom_theme = NULL) {
   #  # Cargar datos de encuesta de Percepción 2024
   survey_data <- reactive({
-    load_survey_data("PER_2024_V2")
+    load_survey_data("PER_2024")
   })
   
   # Cargar datos geográficos
@@ -657,4 +657,881 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
     ),
     position = "topright"
   )
+}
+# Functions for government dashboard visualizations
+
+# Function for Card 1: Officials Knowledge Pie Charts
+create_officials_knowledge_pie <- function(data, question_id, official_type, custom_theme = NULL) {
+  # Extract the data for the specified question
+  values <- data[[question_id]]
+  values <- values[!is.na(values)]
+  
+  # Count responses
+  if(length(values) == 0) {
+    return(plotly_empty() %>% 
+             layout(title = "No hay datos suficientes para visualizar"))
+  }
+  
+  # Handle the reversed mapping for Q7
+  if(question_id == "Q7") {
+    # For Q7: 1 = No conoce, 2 = Sí conoce
+    knows_yes <- sum(values == "2", na.rm = TRUE)
+    knows_no <- sum(values == "1", na.rm = TRUE)
+  } else {
+    # For Q5 and Q9: 1 = Sí conoce, 2 = No conoce
+    knows_yes <- sum(values == "1", na.rm = TRUE)
+    knows_no <- sum(values == "2", na.rm = TRUE)
+  }
+  
+  total <- knows_yes + knows_no
+  
+  # Calculate percentages
+  perc_yes <- round(100 * knows_yes / total, 1)
+  perc_no <- round(100 * knows_no / total, 1)
+  
+  # Prepare data for pie chart
+  pie_data <- data.frame(
+    Response = c("Sí conoce", "No conoce"),
+    Count = c(knows_yes, knows_no),
+    Percentage = c(perc_yes, perc_no)
+  )
+  
+  # Get colors from custom theme if provided
+  pie_colors <- if (!is.null(custom_theme)) {
+    c(custom_theme$colors$primary, custom_theme$colors$secondary)
+  } else {
+    c("#1f77b4", "#E74C3C") # Default colors
+  }
+  
+  # Create pie chart
+  plot_ly(
+    labels = ~pie_data$Response,
+    values = ~pie_data$Count,
+    type = "pie",
+    textinfo = "label+percent",
+    hoverinfo = "text",
+    text = ~paste0(pie_data$Response, ": ", pie_data$Count, " (", pie_data$Percentage, "%)"),
+    marker = list(
+      colors = pie_colors
+    )
+  ) %>%
+    layout(
+      title = list(
+        text = paste("¿Conoce el nombre de su", official_type, "?"),
+        font = if (!is.null(custom_theme)) {
+          list(
+            family = custom_theme$typography$font_family,
+            size = custom_theme$typography$sizes$title,
+            color = custom_theme$colors$text
+          )
+        } else {
+          list(
+            family = "Arial",
+            size = 16,
+            color = "#2C3E50"
+          )
+        }
+      ),
+      showlegend = TRUE
+    )
+}
+
+# Function for Card 2: Inequality Perception Pie Chart
+create_inequality_perception_pie <- function(data, custom_theme = NULL) {
+  # Extract Q87 data for perception of inequality
+  values <- data[["Q87"]]
+  values <- values[!is.na(values)]
+  
+  if(length(values) == 0) {
+    return(plotly_empty() %>% 
+             layout(title = "No hay datos suficientes para visualizar"))
+  }
+  
+  # Create frequency table
+  inequality_table <- table(values)
+  
+  # Create mapping for the 5-point scale
+  inequality_labels <- c(
+    "1" = "Muy alta",
+    "2" = "Alta",
+    "3" = "Media",
+    "4" = "Baja",
+    "5" = "Muy baja"
+  )
+  
+  # Prepare data for pie chart
+  pie_data <- data.frame(
+    Response = sapply(names(inequality_table), function(x) inequality_labels[x]),
+    Count = as.numeric(inequality_table),
+    stringsAsFactors = FALSE
+  ) 
+pie_data <- pie_data %>%
+  drop_na()    
+  # Calculate percentages
+  pie_data$Percentage <- round(100 * pie_data$Count / sum(pie_data$Count), 1)
+  
+  # Get colors from custom theme if provided
+  colorscale <- if (!is.null(custom_theme)) {
+    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(nrow(pie_data))
+  } else {
+    colorRampPalette(c("#1f77b4", "#3498DB"))(nrow(pie_data))
+  }
+  
+  # Create pie chart
+  plot_ly(
+    labels = ~pie_data$Response,
+    values = ~pie_data$Count,
+    type = "pie",
+    textinfo = "label+percent",
+    hoverinfo = "text",
+    text = ~paste0(pie_data$Response, ": ", pie_data$Count, " (", pie_data$Percentage, "%)"),
+    marker = list(
+      colors = colorscale
+    )
+  ) %>%
+    layout(
+      title = list(
+        text = "¿Cómo considera la desigualdad en Ciudad Juárez?",
+        font = if (!is.null(custom_theme)) {
+          list(
+            family = custom_theme$typography$font_family,
+            size = custom_theme$typography$sizes$title,
+            color = custom_theme$colors$text
+          )
+        } else {
+          list(
+            family = "Arial",
+            size = 16,
+            color = "#2C3E50"
+          )
+        }
+      ),
+      showlegend = TRUE
+    )
+}
+
+# Function for Card 3: Government Expectations Bar Plot
+create_government_expectations_plot <- function(data, custom_theme = NULL) {
+  # Extract data for government expectations (Q18, Q19, Q20)
+  federal_exp <- as.numeric(data[["Q18"]])
+  state_exp <- as.numeric(data[["Q19"]])
+  city_exp <- as.numeric(data[["Q20"]])
+  
+  # Calculate means and remove NAs
+  federal_mean <- mean(federal_exp, na.rm = TRUE)
+  state_mean <- mean(state_exp, na.rm = TRUE)
+  city_mean <- mean(city_exp, na.rm = TRUE)
+  
+  # Prepare data for bar chart
+  exp_data <- data.frame(
+    Government = c("Federal", "Estatal", "Municipal"),
+    Expectation = c(federal_mean, state_mean, city_mean)
+  )
+  
+  # Round values for display
+  exp_data$Expectation_rounded <- round(exp_data$Expectation, 1)
+  
+  # Get colors from custom theme if provided
+  bar_colors <- if (!is.null(custom_theme)) {
+    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(3)
+  } else {
+    c("#1f77b4", "#ff7f0e", "#2ca02c")
+  }
+  
+  # Create bar chart
+  plot_ly(
+    data = exp_data,
+    x = ~Government,
+    y = ~Expectation,
+    type = "bar",
+    marker = list(
+      color = bar_colors
+    ),
+    text = ~paste0("Expectativa: ", Expectation_rounded, "/10"),
+    hoverinfo = "text"
+  ) %>%
+    apply_plotly_theme(
+      title = "Expectativas Ciudadanas por Nivel de Gobierno (Escala 1-10)",
+      xlab = "Nivel de Gobierno",
+      ylab = "Expectativa Promedio",
+      custom_theme = custom_theme
+    ) %>%
+    layout(
+      yaxis = list(range = c(0, 10)) # Scale from 0 to 10
+    )
+}
+create_important_problems_plot <- function(data, custom_theme = NULL) {
+  # Extract data for important problems (Q81 and Q82)
+  problem1 <- data[["Q81"]]
+  problem2 <- data[["Q82"]]
+  
+  # Combine both responses
+  all_problems <- c(problem1, problem2)
+  all_problems <- all_problems[!is.na(all_problems)]
+  
+  if(length(all_problems) == 0) {
+    return(plotly_empty() %>% 
+             layout(title = "No hay datos suficientes para visualizar"))
+  }
+  
+  # Create frequency table
+  problems_table <- table(all_problems)
+  
+  # Create correct mapping for problem categories based on provided info
+  problem_labels <- c(
+    "1" = "Servicios básicos",
+    "2" = "Drogadicción",
+    "3" = "Transporte público",
+    "4" = "Falta de hospitales/clínicas de salud",
+    "5" = "Inseguridad/Violencia",
+    "6" = "Pobreza",
+    "7" = "Corrupción",
+    "8" = "Falta de valores",
+    "9" = "Desempleo",
+    "10" = "Economía/Crisis",
+    "11" = "Impunidad",
+    "12" = "Participación ciudadana",
+    "13" = "Alumbrado público",
+    "14" = "Covid 19",
+    "15" = "Calles y pavimentación",
+    "16" = "Drenaje pluvial", 
+    "17" = "Infraestructura",
+    "18" = "Problemas medio ambientales(agua, aire, basura)",
+    "19" = "Otro (especificar cuál)"
+  )
+  
+  # Create data frame for all categories with data
+  bar_data <- data.frame(
+    Category = names(problems_table),
+    Count = as.numeric(problems_table),
+    stringsAsFactors = FALSE
+  )
+  
+  # Add problem labels
+  bar_data$Problem <- sapply(bar_data$Category, function(x) {
+    if(x %in% names(problem_labels)) problem_labels[x] else paste("Categoría", x)
+  })
+  
+  # Calculate percentages
+  total_responses <- sum(bar_data$Count)
+  bar_data$Percentage <- round(100 * bar_data$Count / total_responses, 2)
+  
+  # Sort by count in descending order
+  bar_data <- bar_data[order(-bar_data$Count), ]
+  
+  # Get colors from custom theme
+  primary_color <- if (!is.null(custom_theme)) custom_theme$colors$primary else "#1f77b4"  # Default blue
+  highlight_color <- if (!is.null(custom_theme)) custom_theme$colors$highlight else "#28a745"  # Default green
+  
+  # Create single color vector for all bars
+  colors <- rep(primary_color, nrow(bar_data))
+  
+  # Highlight top three with the same highlight color
+  if(nrow(bar_data) >= 3) {
+    colors[1:3] <- highlight_color
+  } else {
+    colors[1:nrow(bar_data)] <- highlight_color
+  }
+  
+  # Create horizontal bar chart
+  plot_ly(
+    data = bar_data,
+    y = ~Problem,
+    x = ~Count,
+    type = "bar",
+    orientation = 'h',
+    marker = list(
+      color = colors
+    ),
+    hoverinfo = "text",
+    text = ~paste0(Percentage, "%")
+  ) %>%
+    layout(
+      title = "Distribución de Problemas Importantes",
+      xaxis = list(
+        title = "Frecuencia",
+        showgrid = TRUE,
+        gridcolor = "#E1E1E1"
+      ),
+      yaxis = list(
+        title = "",
+        automargin = TRUE,
+        categoryorder = 'total ascending'
+      ),
+      margin = list(l = 160, r = 20, t = 40, b = 30),
+      font = list(
+        family = "Arial",
+        size = 12
+      )
+    ) %>%
+    config(displayModeBar = FALSE)
+}
+# Function to create bicycle distribution pie chart
+create_bicycle_distribution <- function(survey_data, custom_theme = NULL) {
+  # Extract bicycle counts from Q67
+  bicycle_counts <- as.numeric(survey_data$Q67)
+  bicycle_counts <- bicycle_counts[!is.na(bicycle_counts)]
+  
+  # Categorize the counts
+  categories <- c("Ninguno", "1 Bicicleta", "2 Bicicletas", "3 Bicicletas", "4 o más bicicletas")
+  
+  # Calculate counts for each category
+  category_counts <- c(
+    sum(bicycle_counts < 1, na.rm = TRUE),
+    sum(bicycle_counts == 1, na.rm = TRUE),
+    sum(bicycle_counts == 2, na.rm = TRUE),
+    sum(bicycle_counts == 3, na.rm = TRUE),
+    sum(bicycle_counts > 3, na.rm = TRUE)
+  )
+  
+  # Calculate percentages
+  percentages <- round(100 * category_counts / sum(category_counts), 1)
+  
+  # Create data frame for plotting
+  plot_data <- data.frame(
+    Category = categories,
+    Count = category_counts,
+    Percentage = percentages
+  )
+  
+  # Get colors from custom theme if provided
+  pie_colors <- if (!is.null(custom_theme)) {
+    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(length(categories))
+  } else {
+    colorRampPalette(c("#1f77b4", "#3498DB"))(length(categories))
+  }
+  
+  # Create pie chart
+  plot_ly(
+    labels = ~plot_data$Category,
+    values = ~plot_data$Count,
+    type = "pie",
+    textinfo = "label+percent",
+    hoverinfo = "text",
+    text = ~paste0(plot_data$Category, ": ", plot_data$Count, " hogares (", plot_data$Percentage, "%)"),
+    marker = list(
+      colors = pie_colors
+    )
+  ) %>%
+    layout(
+      title = list(
+        text = "Distribución de Bicicletas por Hogar",
+        font = if (!is.null(custom_theme)) {
+          list(
+            family = custom_theme$typography$font_family,
+            size = custom_theme$typography$sizes$title,
+            color = custom_theme$colors$text
+          )
+        } else {
+          list(
+            family = "Arial",
+            size = 16,
+            color = "#2C3E50"
+          )
+        }
+      ),
+      legend = list(
+        orientation = "h",
+        y = -0.1
+      )
+    )
+}
+
+# Function to create vehicle distribution pie chart
+create_vehicle_distribution <- function(survey_data, custom_theme = NULL) {
+  # Extract vehicle counts from Q66
+  vehicle_counts <- as.numeric(survey_data$Q66)
+  vehicle_counts <- vehicle_counts[!is.na(vehicle_counts)]
+  
+  # Categorize the counts
+  categories <- c("Ninguno", "1 Vehículo", "2 Vehículos", "3 Vehículos", "4 o más vehículos")
+  
+  # Calculate counts for each category
+  category_counts <- c(
+    sum(vehicle_counts < 1, na.rm = TRUE),
+    sum(vehicle_counts == 1, na.rm = TRUE),
+    sum(vehicle_counts == 2, na.rm = TRUE),
+    sum(vehicle_counts == 3, na.rm = TRUE),
+    sum(vehicle_counts > 3, na.rm = TRUE)
+  )
+  
+  # Calculate percentages
+  percentages <- round(100 * category_counts / sum(category_counts), 1)
+  
+  # Create data frame for plotting
+  plot_data <- data.frame(
+    Category = categories,
+    Count = category_counts,
+    Percentage = percentages
+  )
+  
+  # Get colors from custom theme if provided
+  pie_colors <- if (!is.null(custom_theme)) {
+    colorRampPalette(c(custom_theme$colors$secondary, custom_theme$colors$highlight))(length(categories))
+  } else {
+    colorRampPalette(c("#E74C3C", "#F39C12"))(length(categories))
+  }
+  
+  # Create pie chart
+  plot_ly(
+    labels = ~plot_data$Category,
+    values = ~plot_data$Count,
+    type = "pie",
+    textinfo = "label+percent",
+    hoverinfo = "text",
+    text = ~paste0(plot_data$Category, ": ", plot_data$Count, " hogares (", plot_data$Percentage, "%)"),
+    marker = list(
+      colors = pie_colors
+    )
+  ) %>%
+    layout(
+      title = list(
+        text = "Distribución de Vehículos Motorizados por Hogar",
+        font = if (!is.null(custom_theme)) {
+          list(
+            family = custom_theme$typography$font_family,
+            size = custom_theme$typography$sizes$title,
+            color = custom_theme$colors$text
+          )
+        } else {
+          list(
+            family = "Arial",
+            size = 16,
+            color = "#2C3E50"
+          )
+        }
+      ),
+      legend = list(
+        orientation = "h",
+        y = -0.1
+      )
+    )
+}
+# Function to create transportation issues bar plot
+create_transport_issues_plot <- function(survey_data, issue_type = "bus", custom_theme = NULL) {
+  # Define questions and labels based on issue type
+  if (issue_type == "bus") {
+    # Bus transportation issues (Q76.1 to Q76.7)
+    question_ids <- paste0("Q76.", 1:7)
+    title <- "Insatisfacción con Aspectos del Servicio de Camión/Rutera"
+  } else {
+    # Juarez Bus transportation issues (Q79.1 to Q79.7)
+    question_ids <- paste0("Q79.", 1:7)
+    title <- "Insatisfacción con Aspectos del Servicio de Juárez Bus"
+  }
+  
+  # Define issue labels
+  issue_labels <- c(
+    "Tiempo de espera", 
+    "Estado de la unidad", 
+    "Estado de la parada", 
+    "Trato de los choferes",
+    "Conducción de la unidad", 
+    "Tarifa", 
+    "Otro"
+  )
+  
+  # Calculate percentages for each issue
+  issue_percentages <- numeric(length(question_ids))
+  for (i in 1:length(question_ids)) {
+    # Extract binary values (1 = Yes, meaning dissatisfied)
+    values <- survey_data[[question_ids[i]]]
+    values <- values[!is.na(values)]
+    
+    # Calculate percentage of "Yes" responses
+    issue_percentages[i] <- 100 * sum(values == "1", na.rm = TRUE) / length(values)
+  }
+  
+  # Create data frame for plotting
+  plot_data <- data.frame(
+    Issue = issue_labels,
+    Percentage = round(issue_percentages, 1)
+  )
+  
+  # Sort by percentage for better visualization
+  plot_data <- plot_data[order(-plot_data$Percentage), ]
+  
+  # Get colors from custom theme if provided
+  bar_color <- if (!is.null(custom_theme)) {
+    custom_theme$colors$primary
+  } else {
+    "#1f77b4"  # Default blue
+  }
+  
+  # Create horizontal bar chart
+  plot_ly(
+    data = plot_data,
+    y = ~Issue,
+    x = ~Percentage,
+    type = "bar",
+    orientation = "h",
+    marker = list(
+      color = bar_color
+    ),
+    text = ~paste0(Percentage, "%"),
+    textposition = "auto",
+    hoverinfo = "text",
+    hovertext = ~paste0(Issue, ": ", Percentage, "%")
+  ) %>%
+    apply_plotly_theme(
+      title = title,
+      xlab = "Porcentaje",
+      ylab = "",
+      custom_theme = custom_theme
+    ) %>%
+    layout(
+      xaxis = list(
+        range = c(0, 10)
+      ),
+      yaxis = list(
+        categoryorder = "total ascending"
+      )
+    )
+}
+
+# Function to create transportation comparison plot
+create_transportation_comparison <- function(survey_data, custom_theme = NULL) {
+  # Extract satisfaction ratings for both transportation types
+  bus_ratings <- as.numeric(survey_data$Q75)
+  bus_ratings <- bus_ratings[!is.na(bus_ratings)]
+  
+  juarez_bus_ratings <- as.numeric(survey_data$Q79)
+  juarez_bus_ratings <- juarez_bus_ratings[!is.na(juarez_bus_ratings)]
+  
+  # Calculate average ratings
+  bus_avg <- mean(bus_ratings, na.rm = TRUE)
+  juarez_bus_avg <- mean(juarez_bus_ratings, na.rm = TRUE)
+  
+  # Calculate median ratings
+  bus_median <- median(bus_ratings, na.rm = TRUE)
+  juarez_bus_median <- median(juarez_bus_ratings, na.rm = TRUE)
+  
+  # Get colors from custom theme if provided
+  colors <- if (!is.null(custom_theme)) {
+    c(custom_theme$colors$primary, custom_theme$colors$secondary)
+  } else {
+    c("#1f77b4", "#ff7f0e")
+  }
+  
+  # Create comparison plot
+  plot_data <- data.frame(
+    TransportType = c("Camión/Rutera", "Juárez Bus"),
+    Average = c(bus_avg, juarez_bus_avg),
+    Median = c(bus_median, juarez_bus_median)
+  )
+  
+  # Melt the data for easier plotting
+  plot_data_melted <- reshape2::melt(
+    plot_data, 
+    id.vars = "TransportType", 
+    variable.name = "Metric",
+    value.name = "Rating"
+  )
+  
+  # Label mapping for Spanish
+  metric_labels <- c("Average" = "Promedio", "Median" = "Mediana")
+  plot_data_melted$Metric <- factor(plot_data_melted$Metric, 
+                                   levels = c("Average", "Median"),
+                                   labels = c("Promedio", "Mediana"))
+  
+  # Create grouped bar chart
+  plot_ly(
+    data = plot_data_melted,
+    x = ~TransportType,
+    y = ~Rating,
+    color = ~Metric,
+    type = "bar",
+    colors = colors,
+    text = ~paste0(round(Rating, 1)),
+    textposition = "auto",
+    hoverinfo = "text",
+    hovertext = ~paste0(TransportType, " - ", Metric, ": ", round(Rating, 1))
+  ) %>%
+    apply_plotly_theme(
+      title = "Comparación de Satisfacción por Tipo de Transporte",
+      xlab = "Tipo de Transporte",
+      ylab = "Calificación (1-10)",
+      custom_theme = custom_theme
+    ) %>%
+    layout(
+      yaxis = list(
+        range = c(0, 10)
+      ),
+      barmode = "group"
+    )
+}
+# Function to create environmental problems plot
+create_env_problems_plot <- function(survey_data, custom_theme = NULL) {
+  # Extract environmental problems data from Q97
+  env_problems <- survey_data$Q97
+  env_problems <- env_problems[!is.na(env_problems)]
+  
+  # Define problem categories
+  problem_categories <- c(
+    "1" = "Neumáticos/llantas tiradas",
+    "2" = "Calles sucias/Basura en las calles",
+    "3" = "Parques sucios/descuidados",
+    "4" = "Falta de recolección de residuos",
+    "5" = "Basureros clandestinos/Casas-terrenos",
+    "6" = "Terrenos baldíos",
+    "7" = "Otro"
+  )
+  
+  # Create frequency table
+  problem_table <- table(env_problems)
+  
+  # Create data frame for plotting
+  plot_data <- data.frame(
+    Problem = sapply(names(problem_table), function(x) problem_categories[x]),
+    Count = as.numeric(problem_table),
+    stringsAsFactors = FALSE
+  )
+  
+  # Calculate percentages
+  plot_data$Percentage <- round(100 * plot_data$Count / sum(plot_data$Count), 1)
+  
+  # Sort by count descending
+  plot_data <- plot_data[order(-plot_data$Count), ]
+  
+  # Get color from custom theme if provided
+  bar_color <- if (!is.null(custom_theme)) {
+    custom_theme$colors$primary
+  } else {
+    "#20c997"  # Default teal green
+  }
+  
+  # Create bar chart
+  plot_ly(
+    data = plot_data,
+    x = ~Problem,
+    y = ~Percentage,
+    type = "bar",
+    marker = list(
+      color = bar_color
+    ),
+    text = ~paste0(Percentage, "%"),
+    textposition = "auto",
+    hoverinfo = "text",
+    hovertext = ~paste0(Problem, ": ", Count, " respuestas (", Percentage, "%)")
+  ) %>%
+    apply_plotly_theme(
+      title = "Mayor Problema Ambiental en la Colonia",
+      xlab = "",
+      ylab = "Porcentaje",
+      custom_theme = custom_theme
+    ) %>%
+    layout(
+      xaxis = list(
+        tickangle = 45,
+          categoryorder = 'total ascending'
+      )
+    )
+}
+
+# Function to create environmental comparison plot
+create_env_comparison_plot <- function(survey_data, custom_theme = NULL) {
+  # Define the environmental aspect questions
+  env_questions <- c("Q89", "Q90", "Q91", "Q92")
+  env_labels <- c("Calidad del Aire", "Arbolado Urbano", "Limpieza de Calles", "Calidad del Agua")
+  
+  # Calculate averages for each aspect
+  env_means <- sapply(env_questions, function(q) {
+    values <- as.numeric(survey_data[[q]])
+    mean(values, na.rm = TRUE)
+  })
+  
+  # Calculate medians for each aspect
+  env_medians <- sapply(env_questions, function(q) {
+    values <- as.numeric(survey_data[[q]])
+    median(values, na.rm = TRUE)
+  })
+  
+  # Create data frame for plotting
+  plot_data <- data.frame(
+    Aspect = env_labels,
+    Average = env_means,
+    Median = env_medians
+  )
+  
+  # Melt the data for easier plotting
+  plot_data_melted <- reshape2::melt(
+    plot_data, 
+    id.vars = "Aspect", 
+    variable.name = "Metric",
+    value.name = "Rating"
+  )
+  
+  # Label mapping for Spanish
+  metric_labels <- c("Average" = "Promedio", "Median" = "Mediana")
+  plot_data_melted$Metric <- factor(plot_data_melted$Metric, 
+                                   levels = c("Average", "Median"),
+                                   labels = c("Promedio", "Mediana"))
+  
+  # Get colors from custom theme if provided
+  colors <- if (!is.null(custom_theme)) {
+    c(custom_theme$colors$primary, custom_theme$colors$secondary)
+  } else {
+    c("#20c997", "#28a745")  # Green tones
+  }
+  
+  # Create grouped bar chart
+  plot_ly(
+    data = plot_data_melted,
+    x = ~Aspect,
+    y = ~Rating,
+    color = ~Metric,
+    type = "bar",
+    colors = colors,
+    text = ~paste0(round(Rating, 1)),
+    textposition = "auto",
+    hoverinfo = "text",
+    hovertext = ~paste0(Aspect, " - ", Metric, ": ", round(Rating, 1))
+  ) %>%
+    apply_plotly_theme(
+      title = "Comparación de Satisfacción con Aspectos Ambientales",
+      xlab = "Aspecto Ambiental",
+      ylab = "Calificación (1-10)",
+      custom_theme = custom_theme
+    ) %>%
+    layout(
+      yaxis = list(
+        range = c(0, 10)
+      ),
+      xaxis = list(
+        categoryorder = 'total ascending'
+      ),
+      barmode = "group"
+    )
+}
+
+
+# Function to create environmental quality bar plot
+create_env_quality_plot <- function(survey_data, custom_theme = NULL) {
+  # Define the environmental aspect questions
+  env_questions <- c("Q89", "Q90", "Q91", "Q92")
+  env_labels <- c("Calidad del Aire", "Arbolado Urbano", "Limpieza de Calles", "Calidad del Agua")
+  
+  # Calculate averages for each aspect
+  env_means <- sapply(env_questions, function(q) {
+    values <- as.numeric(survey_data[[q]])
+    mean(values, na.rm = TRUE)
+  })
+  
+  # Create data frame for plotting
+  plot_data <- data.frame(
+    Aspect = factor(env_labels, levels = env_labels),
+    Average = env_means
+  )
+  
+  # Get colors from custom theme
+  bar_colors <- if (!is.null(custom_theme)) {
+    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(length(env_questions))
+  } else {
+    c("#3498db", "#2ecc71", "#f1c40f", "#9b59b6")
+  }
+  
+  # Create bar chart
+  plot_ly(
+    data = plot_data,
+    x = ~Aspect,
+    y = ~Average,
+    type = "bar",
+    marker = list(
+      color = bar_colors
+    ),
+    text = ~paste0(round(Average, 1)),
+    textposition = "auto",
+    hoverinfo = "text",
+    hovertext = ~paste0(Aspect, ": ", round(Average, 1), "/10")
+  ) %>%
+    apply_plotly_theme(
+      title = "Satisfacción con Aspectos Ambientales",
+      xlab = "",
+      ylab = "Calificación Promedio (1-10)",
+      custom_theme = custom_theme
+    ) %>%
+    layout(
+      yaxis = list(
+        range = c(0, 10)
+      )
+    )
+}
+create_transport_modes_plot <- function(survey_data, mode_type = "work", custom_theme = NULL) {
+  # Define questions and labels based on mode type
+  if (mode_type == "work") {
+    # Work transportation questions (Q72.1 to Q72.11)
+    question_ids <- paste0("Q72.", 1:11)
+    title <- "Modos de Transporte para ir al Trabajo"
+    mode_labels <- c(
+      "Caminando", "Bicicleta", "Autobús escolar", "Autobús especial", 
+      "Taxi", "Uber/Didi/InDriver", "Motocicleta", "Vehículo propio",
+      "Camión/Rutera/Autobús", "Juarez Bus", "Otro medio"
+    )
+  } else {
+    # General transportation questions (Q73.1 to Q73.11)
+    question_ids <- paste0("Q73.", 1:11)
+    title <- "Modos de Transporte General"
+    mode_labels <- c(
+      "Caminando", "Bicicleta", "Autobús escolar", "Autobús especial", 
+      "Taxi", "Uber/Didi/InDriver", "Motocicleta", "Vehículo propio",
+      "Camión/Rutera/Autobús", "Juarez Bus", "Otro medio"
+    )
+  }
+  
+  # Calculate percentages for each mode
+  mode_percentages <- numeric(length(question_ids))
+  for (i in 1:length(question_ids)) {
+    # Extract binary values (1 = Yes)
+    values <- survey_data[[question_ids[i]]]
+    values <- values[!is.na(values)]
+    
+    # Calculate percentage of "Yes" responses
+    mode_percentages[i] <- 100 * sum(values == "1", na.rm = TRUE) / length(values)
+  }
+  
+  # Create data frame for plotting
+  plot_data <- data.frame(
+    Mode = mode_labels,
+    Percentage = round(mode_percentages, 1)
+  )
+  
+  # Sort by percentage for better visualization
+  plot_data <- plot_data[order(-plot_data$Percentage), ]
+  
+  # Get colors from custom theme if provided
+  bar_color <- if (!is.null(custom_theme)) {
+    custom_theme$colors$primary
+  } else {
+    "#1f77b4"  # Default blue
+  }
+  
+  # Create horizontal bar chart
+  plot_ly(
+    data = plot_data,
+    y = ~Mode,
+    x = ~Percentage,
+    type = "bar",
+    orientation = "h",
+    marker = list(
+      color = bar_color
+    ),
+    text = ~paste0(Percentage, "%"),
+    textposition = "auto",
+    hoverinfo = "text",
+    hovertext = ~paste0(Mode, ": ", Percentage, "%")
+  ) %>%
+    apply_plotly_theme(
+      title = title,
+      xlab = "Porcentaje",
+      ylab = "",
+      custom_theme = custom_theme
+    ) %>%
+    layout(
+      xaxis = list(
+        range = c(0, 100)
+      ),
+      yaxis = list(
+        categoryorder = "total ascending"
+      )
+    )
 }

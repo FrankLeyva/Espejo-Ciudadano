@@ -2,7 +2,7 @@
 publicServicesServer <- function(input, output, session) {
   # Cargar datos de encuesta de Percepción 2024
   survey_data <- reactive({
-    load_survey_data("PER_2024_V2")
+    load_survey_data("PER_2024")
   })
   geo_data <- reactive({
     tryCatch({

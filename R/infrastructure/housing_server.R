@@ -1,8 +1,8 @@
-  # Función del servidor para el Dashboard de Servicios de Salud
-healthcareServer <- function(input, output, session) {
+ # Función del servidor para el Dashboard de Vivienda
+housingServer <- function(input, output, session) {
   # Cargar datos de encuesta de Percepción 2024
   survey_data <- reactive({
-    load_survey_data("PER_2024_V2")
+    load_survey_data("PER_2024")
   })
   
   # Cargar datos geográficos
@@ -18,18 +18,8 @@ healthcareServer <- function(input, output, session) {
   # Almacenar tema actual
   current_theme <- reactiveVal(theme_config)
 
-  # Mapeo de preguntas de satisfacción con servicios de salud
-  health_questions <- c(
-    "health_services" = "Q19",   # Servicios de salud en general
-    "facilities" = "Q20",        # Instalaciones
-    "attention_time" = "Q21",    # Tiempo de atención
-    "medication" = "Q22",        # Disponibilidad de medicamentos
-    "service_quality" = "Q23",   # Calidad del servicio
-    "distance" = "Q24"           # Distancia al centro de salud
-  )
-  
-  # Función para preparar datos de satisfacción
-  prepare_health_data <- function(question_id) {
+  # Funciones auxiliares para preparar datos
+  prepare_housing_data <- function(question_id) {
     req(survey_data(), question_id)
     
     prepare_interval_data(
@@ -39,14 +29,7 @@ healthcareServer <- function(input, output, session) {
     )
   }
   
-  # Datos reactivos para cada pregunta de satisfacción
-  health_data_list <- lapply(health_questions, function(q_id) {
-    reactive({
-      prepare_health_data(q_id)
-    })
-  })
-  
-  # Función para crear mapas de satisfacción
+  # Crear mapa para visualizar datos de satisfacción
   create_satisfaction_map <- function(prepared_data, title) {
     req(prepared_data, geo_data())
     
@@ -174,142 +157,139 @@ healthcareServer <- function(input, output, session) {
     )
   }
   
-  # Procesar y preparar datos de proveedores de salud (Q17.1 a Q17.8)
-  healthcare_providers_data <- reactive({
-    req(survey_data())
-    
-    responses <- survey_data()$responses
-    
-    # Definir proveedores y sus correspondientes preguntas
-    providers <- c(
-      "IMSS" = "Q17.1",
-      "ISSSTE" = "Q17.2",
-      "Instituto de Salud de Bienestar" = "Q17.3",
-      "Médicos de farmacias/genéricos" = "Q17.4",
-      "Servicio médico privado/particulares" = "Q17.5",
-      "No tiene servicio médico" = "Q17.6",
-      "Otro" = "Q17.7",
-      "MEDICHIHUAHUA" = "Q17.8"
-    )
-    
-    # Calcular porcentajes de "Sí" para cada proveedor
-    provider_percentages <- sapply(providers, function(col) {
-      vals <- responses[[col]]
-      vals <- vals[!is.na(vals)]
-      
-      # Contar respuestas "Sí" (valor 1)
-      yes_count <- sum(vals == "1")
-      percentage <- 100 * yes_count / length(vals)
-      
-      return(percentage)
-    })
-    
-    # Crear dataframe para la visualización
-    result_df <- data.frame(
-      provider = names(providers),
-      percentage = provider_percentages
-    )
-    
-    # Ordenar por porcentaje (descendente)
-    result_df <- result_df[order(result_df$percentage, decreasing = TRUE),]
-    
-    return(result_df)
+  # Datos reactivos para cada aspecto de vivienda
+  materials_data <- reactive({
+    prepare_housing_data("Q26")
   })
   
-  # Renderizar mapas para cada aspecto de satisfacción con servicios de salud
-  map_outputs <- c(
-    "health_services_map", "facilities_map", "attention_time_map", 
-    "medication_map", "service_quality_map", "distance_map"
-  )
+  spaces_data <- reactive({
+    prepare_housing_data("Q27")
+  })
   
-  for (i in seq_along(map_outputs)) {
-    local({
-      output_id <- map_outputs[i]
-      data_key <- names(health_questions)[i]
-      title <- paste("Satisfacción con", gsub("_", " ", data_key))
-      
-      output[[output_id]] <- renderLeaflet({
-        create_satisfaction_map(health_data_list[[data_key]](), title)
-      })
-    })
-  }
+  location_data <- reactive({
+    prepare_housing_data("Q28")
+  })
   
-  # Renderizar promedios generales
-  for (aspect in names(health_questions)) {
-    local({
-      current_aspect <- aspect
-      output_id <- paste0(current_aspect, "_avg")
-      
-      output[[output_id]] <- renderText({
-        req(health_data_list[[current_aspect]]())
-        avg <- mean(health_data_list[[current_aspect]]()$value_num, na.rm = TRUE)
-        sprintf("%.1f / 10", avg)
-      })
-    })
-  }
+  # Renderizar mapas para cada aspecto
+  output$materials_map <- renderLeaflet({
+    create_satisfaction_map(materials_data(), "Satisfacción con la Calidad de los Materiales")
+  })
   
-  # Renderizar distritos con mayor satisfacción
-  for (aspect in names(health_questions)) {
-    local({
-      current_aspect <- aspect
-      output_id <- paste0(current_aspect, "_best_district")
-      
-      output[[output_id]] <- renderText({
-        req(health_data_list[[current_aspect]]())
-        
-        district_stats <- health_data_list[[current_aspect]]() %>%
-          group_by(district) %>%
-          summarise(
-            mean_value = mean(value_num, na.rm = TRUE),
-            .groups = 'drop'
-          )
-        
-        best_district <- district_stats %>%
-          filter(mean_value == max(mean_value, na.rm = TRUE))
-        
-        sprintf("Distrito %s (%.1f)", best_district$district[1], best_district$mean_value[1])
-      })
-    })
-  }
+  output$spaces_map <- renderLeaflet({
+    create_satisfaction_map(spaces_data(), "Satisfacción con el Tamaño y Espacios")
+  })
   
-  # Renderizar gráfico de proveedores de servicios de salud
-  output$healthcare_providers_chart <- renderPlotly({
-    req(healthcare_providers_data())
+  output$location_map <- renderLeaflet({
+    create_satisfaction_map(location_data(), "Satisfacción con la Ubicación y Accesibilidad")
+  })
+  
+  # Calcular y mostrar promedios generales
+  output$materials_avg <- renderText({
+    req(materials_data())
+    avg <- mean(materials_data()$value_num, na.rm = TRUE)
+    sprintf("%.1f / 10", avg)
+  })
+  
+  output$spaces_avg <- renderText({
+    req(spaces_data())
+    avg <- mean(spaces_data()$value_num, na.rm = TRUE)
+    sprintf("%.1f / 10", avg)
+  })
+  
+  output$location_avg <- renderText({
+    req(location_data())
+    avg <- mean(location_data()$value_num, na.rm = TRUE)
+    sprintf("%.1f / 10", avg)
+  })
+  
+  # Mostrar distritos con mayor satisfacción
+  output$materials_best_district <- renderText({
+    req(materials_data())
     
-    providers_data <- healthcare_providers_data()
+    district_stats <- materials_data() %>%
+      group_by(district) %>%
+      summarise(
+        mean_value = mean(value_num, na.rm = TRUE),
+        .groups = 'drop'
+      )
     
-    # Colores para el gráfico
-    bar_color <- if (!is.null(current_theme()$colors$primary)) {
-      current_theme()$colors$primary
-    } else {
-      "#1f77b4"  # Default blue
-    }
+    best_district <- district_stats %>%
+      filter(mean_value == max(mean_value, na.rm = TRUE))
     
-    # Crear gráfico de barras horizontal
-    plot_ly(
-      data = providers_data,
-      y = ~reorder(provider, percentage),
-      x = ~percentage,
-      type = "bar",
-      orientation = "h",
-      marker = list(
-        color = bar_color
-      ),
-      text = ~paste0(round(percentage, 1), "%"),
-      textposition = "auto",
-      hoverinfo = "text",
-      hovertext = ~paste0(provider, ": ", round(percentage, 1), "%")
-    ) %>%
+    sprintf("Distrito %s (%.1f)", best_district$district[1], best_district$mean_value[1])
+  })
+  
+  output$spaces_best_district <- renderText({
+    req(spaces_data())
+    
+    district_stats <- spaces_data() %>%
+      group_by(district) %>%
+      summarise(
+        mean_value = mean(value_num, na.rm = TRUE),
+        .groups = 'drop'
+      )
+    
+    best_district <- district_stats %>%
+      filter(mean_value == max(mean_value, na.rm = TRUE))
+    
+    sprintf("Distrito %s (%.1f)", best_district$district[1], best_district$mean_value[1])
+  })
+  
+  output$location_best_district <- renderText({
+    req(location_data())
+    
+    district_stats <- location_data() %>%
+      group_by(district) %>%
+      summarise(
+        mean_value = mean(value_num, na.rm = TRUE),
+        .groups = 'drop'
+      )
+    
+    best_district <- district_stats %>%
+      filter(mean_value == max(mean_value, na.rm = TRUE))
+    
+    sprintf("Distrito %s (%.1f)", best_district$district[1], best_district$mean_value[1])
+  })
+  
+  # Gráfico comparativo
+  output$comparison_plot <- renderPlotly({
+    req(materials_data(), spaces_data(), location_data())
+    
+    # Preparar datos para cada aspecto por distrito
+    materials_by_district <- materials_data() %>%
+      group_by(district) %>%
+      summarise(mean_value = mean(value_num, na.rm = TRUE), .groups = 'drop') %>%
+      mutate(aspect = "Materiales")
+    
+    spaces_by_district <- spaces_data() %>%
+      group_by(district) %>%
+      summarise(mean_value = mean(value_num, na.rm = TRUE), .groups = 'drop') %>%
+      mutate(aspect = "Espacios")
+    
+    location_by_district <- location_data() %>%
+      group_by(district) %>%
+      summarise(mean_value = mean(value_num, na.rm = TRUE), .groups = 'drop') %>%
+      mutate(aspect = "Ubicación")
+    
+    # Combinar datos
+    all_data <- bind_rows(materials_by_district, spaces_by_district, location_by_district)
+    
+    # Colores para cada aspecto
+    aspect_colors <- c(
+      "Materiales" = "#E76F51",
+      "Espacios" = "#2A9D8F", 
+      "Ubicación" = "#E9C46A"
+    )
+    
+    # Crear gráfico
+    plot_ly(all_data, x = ~district, y = ~mean_value, color = ~aspect,
+           colors = aspect_colors, type = "bar") %>%
       layout(
-        title = "Porcentaje de Ciudadanos por Proveedor de Servicios de Salud",
-        xaxis = list(
-          title = "Porcentaje (%)",
-          range = c(0, 100)
-        ),
-        yaxis = list(
-          title = ""
-        ),
-        margin = list(l = 150)  # Más espacio para etiquetas de proveedores
+        title = "Comparación de Satisfacción por Distrito y Aspecto",
+        xaxis = list(title = "Distrito"),
+        yaxis = list(title = "Nivel de Satisfacción (1-10)", range = c(0, 10)),
+        barmode = "group",
+        legend = list(title = list(text = "Aspecto"))
       )
   })
 }

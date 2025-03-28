@@ -62,7 +62,7 @@ infrastructureUI <- function() {
       div(
         class = "nav-card",
         id = "nav_education_card",  # Changed ID to match what overviewNavServer expects
-        onclick = "Shiny.setInputValue('nav_education_card', true, {priority: 'event'})",
+        onclick = "Shiny.setInputValue('nav_target', 'education', {priority: 'event'})",
         card(
           card_body(
             div(class = "text-center nav-card-icon text-primary", 
@@ -77,7 +77,7 @@ infrastructureUI <- function() {
       div(
         class = "nav-card",
         id = "nav_healthcare_card",  # Changed ID to match what overviewNavServer expects
-        onclick = "Shiny.setInputValue('nav_healthcare_card', true, {priority: 'event'})",
+        onclick = "Shiny.setInputValue('nav_target', 'healthcare', {priority: 'event'})",
         card(
           card_body(
             div(class = "text-center nav-card-icon text-danger", 
@@ -92,7 +92,7 @@ infrastructureUI <- function() {
       div(
         class = "nav-card",
         id = "nav_services_card",  # Changed ID to match what overviewNavServer expects
-        onclick = "Shiny.setInputValue('nav_services_card', true, {priority: 'event'})",
+        onclick = "Shiny.setInputValue('nav_target', 'public_services', {priority: 'event'})",
         card(
           card_body(
             div(class = "text-center nav-card-icon text-success", 
@@ -107,7 +107,7 @@ infrastructureUI <- function() {
       div(
         class = "nav-card",
         id = "nav_housing_card",  # Changed ID to match what overviewNavServer expects
-        onclick = "Shiny.setInputValue('nav_housing_card', true, {priority: 'event'})",
+        onclick = "Shiny.setInputValue('nav_target', 'housing', {priority: 'event'})",
         card(
           card_body(
             div(class = "text-center nav-card-icon text-warning", 

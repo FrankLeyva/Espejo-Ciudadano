@@ -75,7 +75,16 @@ housingUI <- function() {
       bootswatch = "litera",
       primary = "#0d6efd"
     ),
-    
+    div(
+      class = "mb-4",
+      tags$a(
+        href = "#",
+        class = "text-decoration-none",
+        onclick = "Shiny.setInputValue('nav_target', 'infrastructure', {priority: 'event'}); return false;",
+        tags$i(class = "fas fa-arrow-left me-2"),
+        "Volver a Infraestructura"
+      )
+    ),
     # Encabezado
     layout_columns(
       fill = FALSE,

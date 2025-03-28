@@ -19,6 +19,7 @@ library(RColorBrewer)
 library(viridisLite)
 
 # Source all necessary files
+# Technical modules
 source("R/global_theme.R")
 source("R/utils.R")
 source("R/survey_config.R")
@@ -32,613 +33,570 @@ source('R/special_module.R')
 source("R/data_loader.R")
 source("R/question_classifier.R")
 source("R/themes_metadata.R")    
-source("R/public_services_ui.R")
-source("R/public_services_server.R")
-source("R/housing_ui.R")
-source("R/housing_server.R")
-source("R/healthcare_ui.R")
-source("R/healthcare_server.R")
-source("R/education_ui.R")
-source("R/education_server.R")
-source("R/infrastructure_ui.R")
-source("R/infrastructure_server.R")
 
-# Define UI
-ui <- page_sidebar(
-  # Page title
+# Source all theme UI and server files for all categories
+# Bienestar Social y Económico
+source("R/wellness/wellness_ui.R")
+source("R/wellness/wellness_server.R")
+source("R/wellness/economy_ui.R")
+source("R/wellness/economy_server.R")
+source("R/wellness/cultural_ui.R")
+source("R/wellness/cultural_server.R")
+source("R/wellness/identity_ui.R")
+source("R/wellness/identity_server.R")
+
+# Movilidad Urbana y Medio Ambiente
+source("R/urban/urban_ui.R")
+source("R/urban/urban_server.R")
+source("R/urban/mobility_ui.R")
+source("R/urban/mobility_server.R")
+source("R/urban/transportation_ui.R")
+source("R/urban/transportation_server.R")
+source("R/urban/environment_ui.R")
+source("R/urban/environment_server.R")
+
+# Gobierno
+source("R/government/government_ui.R")
+source("R/government/government_server.R")
+source("R/government/inequality_ui.R")
+source("R/government/inequality_server.R")
+source("R/government/accountability_ui.R")
+source("R/government/accountability_server.R")
+source("R/government/representation_ui.R")
+source("R/government/representation_server.R")
+source("R/government/expectations_ui.R")
+source("R/government/expectations_server.R")
+source("R/government/trust_ui.R")
+source("R/government/trust_server.R")
+
+# Infraestructura y Servicios
+source("R/infrastructure/infrastructure_ui.R")
+source("R/infrastructure/infrastructure_server.R")
+source("R/infrastructure/public_services_ui.R")
+source("R/infrastructure/public_services_server.R")
+source("R/infrastructure/education_ui.R")
+source("R/infrastructure/education_server.R")
+source("R/infrastructure/healthcare_ui.R")
+source("R/infrastructure/healthcare_server.R")
+source("R/infrastructure/housing_ui.R")
+source("R/infrastructure/housing_server.R")
+
+# Participación Ciudadana
+source("R/participation/participation_ui.R")
+source("R/participation/participation_server.R")
+source("R/participation/civic_ui.R")
+source("R/participation/civic_server.R")
+source("R/participation/community_ui.R")
+source("R/participation/community_server.R")
+
+# Define UI using page_navbar
+ui <- page_navbar(
+  # Title and theme
   title = "Dashboard AEJ 2024",
-  # Add custom JavaScript for navigation
-  tags$head(
-    tags$script(HTML("
-      Shiny.addCustomMessageHandler('refreshUI', function(message) {
-        // Force redraw by triggering window resize
-        window.dispatchEvent(new Event('resize'));
-      });
-    "))
-  ),
+  id = "navbar",
+  bg = "#0d6efd",
+  inverse = TRUE,
   
-  # Sidebar for main navigation
-  sidebar = sidebar(
-    # Logo and title
-    div(
-      class = "p-3 text-center",
-      img(src = "logo.png", width = "80px", class = "mb-2"),
-      h4("Así Estamos Juárez", class = "mt-2")
-    ),
+  # Custom CSS for styling
+  header = tags$head(
+    tags$style(HTML("
+      /* Card styling */
+      .card {
+        margin-bottom: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      
+      /* Navigation card styles */
+      .nav-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        height: 100%;
+      }
+      .nav-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      }
+      .nav-card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        color: #0d6efd;
+      }
+      .nav-card-title {
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+      }
+      
+      /* Badge styling */
+      .badge-implemented {
+        background-color: #28a745;
+        color: white;
+      }
+      
+      /* Back button styling */
+      .back-link {
+        margin-bottom: 15px;
+        padding: 6px 12px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        display: inline-block;
+        text-decoration: none;
+        color: #495057;
+        cursor: pointer;
+      }
+      .back-link:hover {
+        background-color: #e9ecef;
+      }
+    ")),
+    tags$script(HTML("
+    $(document).ready(function() {
+      // Function to close all navbar dropdowns
+      function closeAllDropdowns() {
+        $('.navbar .dropdown-menu').removeClass('show');
+        $('.navbar .dropdown').removeClass('show');
+        $('.navbar .nav-item.dropdown').removeClass('show');
+        $('.navbar .dropdown-toggle').attr('aria-expanded', 'false');
+      }
+      
+      // Close dropdowns after navigation with a 3-second delay
+      $(document).on('shown.bs.tab', function() {
+        setTimeout(closeAllDropdowns, 3000);
+      });
+      
+      // Also close dropdowns when clicking on nav cards - immediate closing
+      $(document).on('click', '.nav-card', function() {
+        // Still show the dropdown for visual feedback
+        setTimeout(closeAllDropdowns, 3000);
+      });
+      
+      // Additional handler for any navigation
+      Shiny.addCustomMessageHandler('closeNavDropdowns', function(message) {
+        setTimeout(closeAllDropdowns, 3000);
+      });
+    });
+  "))
+),
+  
+  # Main overview tab
+  nav_panel(
+    title = "Inicio",
+    icon = icon("home"),
+    value = "overview",
     
-    # Main navigation menu
-    accordion(
-      open = FALSE, # Start closed
+    # Dashboard overview content
+    div(
+      class = "container mt-4",
+      h2("Dashboard General", class = "mb-4"),
+      p("Vista general del estado de Ciudad Juárez según las encuestas más recientes.", class = "lead mb-4"),
       
-      accordion_panel(
-        "Dashboard General",
-        # Dashboard overview link
+      # Grid of category cards
+      div(
+        class = "row",
+        
+        # Bienestar Social y Económico
         div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_overview", "Vista general", 
-                    icon = icon("dashboard"), class = "text-decoration-none")
-        )
-      ),
-      
-      accordion_panel(
-        "Bienestar Social y Económico",
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_economic", "Condiciones Económicas", 
-                    icon = icon("money-bill"), class = "text-decoration-none")
+          class = "col-md-4 mb-4",
+          div(
+            class = "card h-100",
+            div(
+              class = "card-header d-flex justify-content-between align-items-center",
+              h5("Bienestar Social y Económico", class = "m-0"),
+              span(class = "badge badge-implemented", "Implementado")
+            ),
+            div(
+              class = "card-body d-flex flex-column align-items-center text-center",
+              div(
+                class = "nav-card w-100",
+                id = "nav_wellness_card",
+                onclick = "Shiny.setInputValue('nav_target', 'wellness', {priority: 'event'})",
+                div(class = "nav-card-icon", icon("heart")),
+                h4(class = "nav-card-title", "Bienestar"),
+                p("Análisis de condiciones económicas, participación cultural y tendencias demográficas")
+              )
+            )
+          )
         ),
+        
+        # Movilidad Urbana y Medio Ambiente
         div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_cultural", "Participación Cultural", 
-                    icon = icon("palette"), class = "text-decoration-none")
+          class = "col-md-4 mb-4",
+          div(
+            class = "card h-100",
+            div(
+              class = "card-header d-flex justify-content-between align-items-center",
+              h5("Movilidad Urbana y Medio Ambiente", class = "m-0"),
+              span(class = "badge badge-implemented", "Implementado")
+            ),
+            div(
+              class = "card-body d-flex flex-column align-items-center text-center",
+              div(
+                class = "nav-card w-100",
+                id = "nav_urban_card",
+                onclick = "Shiny.setInputValue('nav_target', 'urban', {priority: 'event'})",
+                div(class = "nav-card-icon", icon("bus-alt")),
+                h4(class = "nav-card-title", "Movilidad"),
+                p("Información sobre movilidad, transporte público y medio ambiente")
+              )
+            )
+          )
         ),
+        
+        # Gobierno
         div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_demographic", "Tendencias Demográficas", 
-                    icon = icon("users"), class = "text-decoration-none")
-        )
-      ),
-      
-      accordion_panel(
-        "Movilidad Urbana y Medio Ambiente",
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_mobility", "Movilidad", 
-                    icon = icon("route"), class = "text-decoration-none")
+          class = "col-md-4 mb-4",
+          div(
+            class = "card h-100",
+            div(
+              class = "card-header d-flex justify-content-between align-items-center",
+              h5("Gobierno", class = "m-0"),
+              span(class = "badge badge-implemented", "Implementado")
+            ),
+            div(
+              class = "card-body d-flex flex-column align-items-center text-center",
+              div(
+                class = "nav-card w-100",
+                id = "nav_government_card",
+                onclick = "Shiny.setInputValue('nav_target', 'government', {priority: 'event'})",
+                div(class = "nav-card-icon", icon("landmark")),
+                h4(class = "nav-card-title", "Gobierno"),
+                p("Análisis de desigualdad, rendición de cuentas, representación y confianza")
+              )
+            )
+          )
         ),
+        
+        # Infraestructura y Servicios
         div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_public_transport", "Transporte Público", 
-                    icon = icon("bus"), class = "text-decoration-none")
+          class = "col-md-6 mb-4",
+          div(
+            class = "card h-100",
+            div(
+              class = "card-header d-flex justify-content-between align-items-center",
+              h5("Infraestructura y Servicios", class = "m-0"),
+              span(class = "badge badge-implemented", "Implementado")
+            ),
+            div(
+              class = "card-body d-flex flex-column align-items-center text-center",
+              div(
+                class = "nav-card w-100",
+                id = "nav_infrastructure_card",
+                onclick = "Shiny.setInputValue('nav_target', 'infrastructure', {priority: 'event'})",
+                div(class = "nav-card-icon", icon("building")),
+                h4(class = "nav-card-title", "Infraestructura"),
+                p("Información sobre servicios públicos, educación, salud y vivienda")
+              )
+            )
+          )
         ),
+        
+        # Participación Ciudadana
         div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_environment", "Medio Ambiente", 
-                    icon = icon("leaf"), class = "text-decoration-none")
-        )
-      ),
-      
-      accordion_panel(
-        "Gobierno",
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_inequality", "Desigualdad", 
-                    icon = icon("balance-scale"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_accountability", "Rendición de Cuentas", 
-                    icon = icon("file-contract"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_political", "Representación Política", 
-                    icon = icon("vote-yea"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_gov_expectations", "Expectativas en el gobierno", 
-                    icon = icon("chart-line"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_trust", "Confianza en las instituciones", 
-                    icon = icon("landmark"), class = "text-decoration-none")
-        )
-      ),
-      
-      accordion_panel(
-        "Infraestructura y Servicios",
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_infrastructure", "Infraestructura", 
-                    icon = icon("road"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_public_services", "Servicios Públicos", 
-                    icon = icon("gear"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_education", "Educación", 
-                    icon = icon("book"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_healthcare", "Servicios de Salud", 
-                    icon = icon("heart-pulse"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_housing", "Vivienda", 
-                    icon = icon("house"), class = "text-decoration-none")
-        )
-      ),
-      
-      accordion_panel(
-        "Participación Ciudadana",
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_civic", "Participación Cívica", 
-                    icon = icon("handshake"), class = "text-decoration-none")
-        ),
-        div(
-          class = "nav-item py-2 px-3",
-          actionLink("nav_community", "Participación Comunitaria", 
-                    icon = icon("people-group"), class = "text-decoration-none")
+          class = "col-md-6 mb-4",
+          div(
+            class = "card h-100",
+            div(
+              class = "card-header d-flex justify-content-between align-items-center",
+              h5("Participación Ciudadana", class = "m-0"),
+              span(class = "badge badge-implemented", "Implementado")
+            ),
+            div(
+              class = "card-body d-flex flex-column align-items-center text-center",
+              div(
+                class = "nav-card w-100",
+                id = "nav_participation_card",
+                onclick = "Shiny.setInputValue('nav_target', 'participation', {priority: 'event'})",
+                div(class = "nav-card-icon", icon("users")),
+                h4(class = "nav-card-title", "Participación"),
+                p("Análisis de la participación cívica y comunitaria")
+              )
+            )
+          )
         )
       )
-    ),
-    
-    hr(),
-    
-    # Additional menu items at bottom
-    div(
-      class = "nav-item py-2 px-3",
-      actionLink("nav_reports", "Reportes Personalizados", 
-                icon = icon("file-chart-line"), class = "text-decoration-none")
-    ),
-    div(
-      class = "nav-item py-2 px-3",
-      actionLink("nav_methodology", "Metodología y Descarga de Datos", 
-                icon = icon("download"), class = "text-decoration-none")
-    ),
-    div(
-      class = "nav-item py-2 px-3",
-      actionLink("nav_about", "Acerca del dashboard", 
-                icon = icon("info-circle"), class = "text-decoration-none")
     )
   ),
   
-  # Main content area
-  layout_columns(
-    # Breadcrumb navigation
-    col_widths = c(12),
-    div(
-      id = "breadcrumb_container",
-      class = "mb-3",
-      uiOutput("breadcrumb")
+  # ---- Bienestar Social y Económico ----
+  nav_menu(
+    title = "Bienestar Social y Económico",
+    icon = icon("heart"),
+    
+    # Main Wellness panel
+    nav_panel(
+      title = "Vista General",
+      value = "wellness",
+      wellnessUI()
+    ),
+    
+    # Condiciones Económicas
+    nav_panel(
+      title = "Condiciones Económicas",
+      value = "economic", 
+      economyUI()
+    ),
+    
+    # Participación Cultural
+    nav_panel(
+      title = "Participación Cultural",
+      value = "cultural",
+      culturalUI()
+    ),
+    
+    # Tendencias Demográficas
+    nav_panel(
+      title = "Identidad y pertenencia",
+      value = "identity",
+      identityUI()
     )
   ),
   
-  # Dynamic content based on current page
-  uiOutput("page_content")
+  # ---- Movilidad Urbana y Medio Ambiente ----
+  nav_menu(
+    title = "Movilidad Urbana",
+    icon = icon("bus-alt"),
+    
+    # Main Urban panel
+    nav_panel(
+      title = "Vista General",
+      value = "urban",
+      urbanUI()
+    ),
+    
+    # Movilidad
+    nav_panel(
+      title = "Movilidad",
+      value = "mobility",
+      mobilityUI()
+    ),
+    
+    # Transporte Público
+    nav_panel(
+      title = "Transporte Público",
+      value = "transportation",
+      transportationUI()
+    ),
+    
+    # Medio Ambiente
+    nav_panel(
+      title = "Medio Ambiente",
+      value = "environment",
+      environmentUI()
+    )
+  ),
+  
+  # ---- Gobierno ----
+  nav_menu(
+    title = "Gobierno",
+    icon = icon("landmark"),
+    
+    # Main Government panel
+    nav_panel(
+      title = "Vista General",
+      value = "government",
+      governmentUI()
+    ),
+    
+    # Desigualdad
+    nav_panel(
+      title = "Desigualdad",
+      value = "inequality",
+      inequalityUI()
+    ),
+    
+    # Rendición de Cuentas
+    nav_panel(
+      title = "Rendición de Cuentas",
+      value = "accountability",
+      accountabilityUI()
+    ),
+    
+    # Representación Política
+    nav_panel(
+      title = "Representación Política",
+      value = "representation",
+      representationUI()
+    ),
+    
+    # Expectativas en el gobierno
+    nav_panel(
+      title = "Expectativas",
+      value = "expectations",
+      expectationsUI()
+    ),
+    
+    # Confianza en las instituciones
+    nav_panel(
+      title = "Confianza Institucional",
+      value = "trust",
+      trustUI()
+    )
+  ),
+  
+  # ---- Infraestructura y Servicios ----
+  nav_menu(
+    title = "Infraestructura",
+    icon = icon("building"),
+    
+    # Main Infrastructure panel
+    nav_panel(
+      title = "Vista General",
+      value = "infrastructure",
+      infrastructureUI()
+    ),
+    
+    # Servicios Públicos
+    nav_panel(
+      title = "Servicios Públicos",
+      value = "public_services",
+      publicServicesUI()
+    ),
+    
+    # Educación
+    nav_panel(
+      title = "Educación",
+      value = "education",
+      educationUI()
+    ),
+    
+    # Servicios de Salud
+    nav_panel(
+      title = "Servicios de Salud",
+      value = "healthcare",
+      healthcareUI()
+    ),
+    
+    # Vivienda
+    nav_panel(
+      title = "Vivienda",
+      value = "housing",
+      housingUI()
+    )
+  ),
+  
+  # ---- Participación Ciudadana ----
+  nav_menu(
+    title = "Participación",
+    icon = icon("users"),
+    
+    # Main Participation panel
+    nav_panel(
+      title = "Vista General",
+      value = "participation",
+      participationUI()
+    ),
+    
+    # Participación Cívica
+    nav_panel(
+      title = "Participación Cívica",
+      value = "civic",
+      civicUI()
+    ),
+    
+    # Participación Comunitaria
+    nav_panel(
+      title = "Participación Comunitaria",
+      value = "community",
+      communityUI()
+    )
+  ),
+  
+  # ---- Other Sections ----
+  nav_panel(
+    title = "Reportes",
+    icon = icon("file-alt"),
+    value = "reports",
+    div(
+      class = "container mt-4",
+      h2("Reportes Personalizados"),
+      p("Esta sección le permitirá generar reportes personalizados según sus necesidades específicas.")
+    )
+  ),
+  
+  nav_panel(
+    title = "Metodología",
+    icon = icon("download"),
+    value = "methodology",
+    div(
+      class = "container mt-4",
+      h2("Metodología y Descarga de Datos"),
+      p("Información sobre la metodología utilizada en las encuestas y opciones para descargar los datos.")
+    )
+  ),
+  
+  nav_panel(
+    title = "Acerca de",
+    icon = icon("info-circle"),
+    value = "about",
+    div(
+      class = "container mt-4",
+      h2("Acerca del Dashboard"),
+      p("Información sobre el propósito de este dashboard y el equipo detrás de él.")
+    )
+  )
 )
 
-# Define server logic
+# Define server
 server <- function(input, output, session) {
-  # Reactive values to track navigation state
-  current_main <- reactiveVal("overview")
-  current_sub <- reactiveVal(NULL)
-  
-  # Navigation history for breadcrumbs
-  nav_history <- reactiveVal(list(
-    main = "Dashboard General",
-    sub = NULL
-  ))
-  
-  # Define category mappings for breadcrumb organization
-  category_mappings <- list(
-    # Bienestar Social y Económico
-    economic = list(main = "Bienestar Social y Económico", sub = "Condiciones Económicas"),
-    cultural = list(main = "Bienestar Social y Económico", sub = "Participación Cultural"),
-    demographic = list(main = "Bienestar Social y Económico", sub = "Tendencias Demográficas"),
-    
-    # Movilidad Urbana y Medio Ambiente
-    mobility = list(main = "Movilidad Urbana y Medio Ambiente", sub = "Movilidad"),
-    public_transport = list(main = "Movilidad Urbana y Medio Ambiente", sub = "Transporte Público"),
-    environment = list(main = "Movilidad Urbana y Medio Ambiente", sub = "Medio Ambiente"),
-    
-    # Gobierno
-    inequality = list(main = "Gobierno", sub = "Desigualdad"),
-    accountability = list(main = "Gobierno", sub = "Rendición de Cuentas"),
-    political = list(main = "Gobierno", sub = "Representación Política"),
-    gov_expectations = list(main = "Gobierno", sub = "Expectativas en el gobierno"),
-    trust = list(main = "Gobierno", sub = "Confianza en las instituciones"),
-    
-    # Infraestructura y Servicios
-    infrastructure = list(main = "Infraestructura y Servicios", sub = "Infraestructura"),
-    public_services = list(main = "Infraestructura y Servicios", sub = "Servicios Públicos"),
-    education = list(main = "Infraestructura y Servicios", sub = "Educación"),
-    healthcare = list(main = "Infraestructura y Servicios", sub = "Servicios de Salud"),
-    housing = list(main = "Infraestructura y Servicios", sub = "Vivienda"),
-    
-    # Participación Ciudadana
-    civic = list(main = "Participación Ciudadana", sub = "Participación Cívica"),
-    community = list(main = "Participación Ciudadana", sub = "Participación Comunitaria"),
-    
-    # Other standalone sections
-    reports = list(main = "Reportes Personalizados", sub = NULL),
-    methodology = list(main = "Metodología y Descarga de Datos", sub = NULL),
-    about = list(main = "Acerca del dashboard", sub = NULL)
-  )
-  
-  # Generate breadcrumbs based on navigation history
-  output$breadcrumb <- renderUI({
-    history <- nav_history()
-    
-    breadcrumbList <- tags$ol(class = "breadcrumb")
-    
-    # Home link - always clickable
-    breadcrumbList <- tagAppendChild(
-      breadcrumbList,
-      tags$li(
-        class = "breadcrumb-item",
-        tags$a(
-          href = "javascript:void(0)",
-          onclick = "Shiny.setInputValue('breadcrumb_home', Math.random(), {priority: 'event'})",
-          "Inicio"
-        )
-      )
-    )
-    
-    # Main category - clickable if we're in a subcategory
-    if (!is.null(history$main)) {
-      breadcrumbList <- tagAppendChild(
-        breadcrumbList,
-        tags$li(
-          class = if(is.null(history$sub)) "breadcrumb-item active" else "breadcrumb-item",
-          if(is.null(history$sub)) {
-            history$main  # Not clickable if we're at this level
-          } else {
-            tags$a(
-              href = "javascript:void(0)",
-              onclick = sprintf("Shiny.setInputValue('breadcrumb_main_%s', Math.random(), {priority: 'event'})", 
-                               gsub(" ", "_", tolower(history$main))),
-              history$main
-            )
-          }
-        )
-      )
-    }
-    
-    # Subcategory - never clickable as it's the current location
-    if (!is.null(history$sub)) {
-      breadcrumbList <- tagAppendChild(
-        breadcrumbList,
-        tags$li(
-          class = "breadcrumb-item active",
-          history$sub
-        )
-      )
-    }
-    
-    breadcrumbList
+  # Handle navigation from the overview cards
+  observeEvent(input$nav_target, {
+    nav_value <- input$nav_target
+    updateNavbarPage(session, "navbar", selected = nav_value)
   })
   
-  # Main content renderer
-  output$page_content <- renderUI({
-    main <- current_main()
-    sub <- current_sub()
-    
-    # Log current navigation state for debugging
-    cat("Rendering page content for:", main, "\n")
-    cat("Subcategory:", sub, "\n")
-    
-    # Override main with a placeholder if section is not yet implemented
-    implemented_sections <- c("overview", "infrastructure", "public_services", "education", "healthcare", "housing", "reports", "methodology", "about")
-    
-    if (!(main %in% implemented_sections)) {
-      return(div(
-        class = "container mt-5",
-        div(
-          class = "alert alert-info",
-          icon("info-circle"), 
-          tags$strong("Sección en desarrollo"),
-          p(
-            class = "mt-2",
-            sprintf("La sección '%s%s' estará disponible próximamente.", 
-                   ifelse(is.null(sub), "", paste0(sub, " en ")), 
-                   ifelse(is.null(sub), main, main))
-          )
-        )
-      ))
-    }
-    
-    # Render the appropriate UI based on the current navigation state
-    if (main == "overview") {
-      # This would call your general dashboard UI function
-      overviewUI()
-    } else if (main == "infrastructure") {
-      infrastructureUI()
-    } else if (main == "public_services") {
-      publicServicesUI()
-    } else if (main == "education") {
-      educationUI()
-    } else if (main == "healthcare") {
-      healthcareUI()
-    } else if (main == "housing") {
-      housingUI()
-    } else if (main == "reports") {
-      # Custom reports UI
-      div(
-        h2("Reportes Personalizados"),
-        p("Esta sección le permitirá generar reportes personalizados según sus necesidades específicas.")
-      )
-    } else if (main == "methodology") {
-      # Methodology UI
-      div(
-        h2("Metodología y Descarga de Datos"),
-        p("Información sobre la metodología utilizada en las encuestas y opciones para descargar los datos.")
-      )
-    } else if (main == "about") {
-      # About UI
-      div(
-        h2("Acerca del Dashboard"),
-        p("Información sobre el propósito de este dashboard y el equipo detrás de él.")
-      )
-    } else {
-      # Placeholder for other pages that might be implemented later
-      div(
-        h2(paste("Contenido para", main, if(!is.null(sub)) paste("-", sub) else "")),
-        p("Esta página está en desarrollo.")
-      )
-    }
-  })
-  
-  # Initialize server modules based on current page
+  # Initialize servers based on the current tab
   observe({
-    main <- current_main()
+    # Get the current tab value
+    current_tab <- input$navbar
     
-    if (main == "infrastructure") {
+    # Initialize the appropriate server module
+    if (current_tab == "wellness") {
+      wellnessServer(input, output, session)
+    } else if (current_tab == "economic") {
+      economyServer(input, output, session)
+    } else if (current_tab == "cultural") {
+      culturalServer(input, output, session)
+    } else if (current_tab == "demographic") {
+      identityServer(input, output, session)
+    } else if (current_tab == "urban") {
+      urbanServer(input, output, session)
+    } else if (current_tab == "mobility") {
+      mobilityServer(input, output, session)
+    } else if (current_tab == "transportation") {
+      transportationServer(input, output, session)
+    } else if (current_tab == "environment") {
+      environmentServer(input, output, session)
+    } else if (current_tab == "government") {
+      governmentServer(input, output, session)
+    } else if (current_tab == "inequality") {
+      inequalityServer(input, output, session)
+    } else if (current_tab == "accountability") {
+      accountabilityServer(input, output, session)
+    } else if (current_tab == "representation") {
+      representationServer(input, output, session)
+    } else if (current_tab == "expectations") {
+      expectationsServer(input, output, session)
+    } else if (current_tab == "trust") {
+      trustServer(input, output, session)
+    } else if (current_tab == "infrastructure") {
       infrastructureServer(input, output, session)
-    } else if (main == "public_services") {
+    } else if (current_tab == "public_services") {
       publicServicesServer(input, output, session)
-    } else if (main == "education") {
+    } else if (current_tab == "education") {
       educationServer(input, output, session)
-    } else if (main == "healthcare") {
+    } else if (current_tab == "healthcare") {
       healthcareServer(input, output, session)
-    } else if (main == "housing") {
+    } else if (current_tab == "housing") {
       housingServer(input, output, session)
-    }
-    
-    # Other server modules would be initialized here as they are implemented
-  })
-  
-  # Generic navigation event handler
-  handle_nav <- function(id) {
-    # Extract the section name from the input ID (remove "nav_" prefix)
-    section <- substr(id, 5, nchar(id))
-    
-    # Get mapping for this section
-    mapping <- category_mappings[[section]]
-    
-    if (!is.null(mapping)) {
-      current_main(section)
-      current_sub(NULL)
-      nav_history(list(main = mapping$main, sub = mapping$sub))
-    }
-  }
-  
-  # Set up observers for all navigation links
-  nav_links <- c(
-    "nav_overview", 
-    # Bienestar
-    "nav_economic", "nav_cultural", "nav_demographic",
-    # Movilidad
-    "nav_mobility", "nav_public_transport", "nav_environment",
-    # Gobierno
-    "nav_inequality", "nav_accountability", "nav_political", 
-    "nav_gov_expectations", "nav_trust",
-    # Infraestructura
-    "nav_infrastructure", "nav_public_services", "nav_education", 
-    "nav_healthcare", "nav_housing",
-    # Participación
-    "nav_civic", "nav_community",
-    # Other
-    "nav_reports", "nav_methodology", "nav_about"
-  )
-  
-  # Create observers for all navigation links
-  for (link in nav_links) {
-    local({
-      local_link <- link
-      observeEvent(input[[local_link]], {
-        handle_nav(local_link)
-      })
-    })
-  }
-  
-  # Handle navigation from overview cards
-  observe({
-    # We need to handle navigation events from the overview page
-    if (current_main() == "overview") {
-      overviewNavServer(input, output, session, 
-                        current_main, current_sub, nav_history, category_mappings)
+    } else if (current_tab == "participation") {
+      participationServer(input, output, session)
+    } else if (current_tab == "civic") {
+      civicServer(input, output, session)
+    } else if (current_tab == "community") {
+      communityServer(input, output, session)
     }
   })
-  
-  # Breadcrumb navigation handlers
-  observeEvent(input$breadcrumb_home, {
-    # Print for debugging
-    cat("Breadcrumb home clicked\n")
-    # Force navigation to overview
-    current_main("overview")
-    current_sub(NULL)
-    nav_history(list(main = "Dashboard General", sub = NULL))
-    # Force UI refresh
-    session$sendCustomMessage("refreshUI", list())
-  })
-  
-  # Create observers for breadcrumb main navigation
-  main_categories <- c(
-    "bienestar_social_y_económico", 
-    "movilidad_urbana_y_medio_ambiente", 
-    "gobierno", 
-    "infraestructura_y_servicios", 
-    "participación_ciudadana"
-  )
-  
-  for (category in main_categories) {
-    local({
-      local_category <- category
-      # Create an observer for this category's breadcrumb
-      observeEvent(input[[paste0("breadcrumb_main_", local_category)]], {
-        # Find first section in this category
-        for (section in names(category_mappings)) {
-          if (tolower(gsub(" ", "_", category_mappings[[section]]$main)) == local_category) {
-            # Use the first section we find in this category
-            current_main(section)
-            current_sub(NULL)
-            nav_history(list(
-              main = category_mappings[[section]]$main, 
-              sub = NULL
-            ))
-            break
-          }
-        }
-      })
-    })
-  }
 }
 
-# Function to handle navigation from overview
-overviewNavServer <- function(input, output, session, current_main, current_sub, nav_history, category_mappings) {
-  # Handle clicks on cards in the overview dashboard
-  observeEvent(input$nav_infrastructure_card, {
-    current_main("infrastructure")
-    current_sub(NULL)
-    nav_history(list(
-      main = category_mappings[["infrastructure"]]$main,
-      sub = category_mappings[["infrastructure"]]$sub
-    ))
-  })
-  
-  observeEvent(input$nav_education_card, {
-    current_main("education")
-    current_sub(NULL)
-    nav_history(list(
-      main = category_mappings[["education"]]$main,
-      sub = category_mappings[["education"]]$sub
-    ))
-  })
-  
-  observeEvent(input$nav_healthcare_card, {
-    current_main("healthcare")
-    current_sub(NULL)
-    nav_history(list(
-      main = category_mappings[["healthcare"]]$main,
-      sub = category_mappings[["healthcare"]]$sub
-    ))
-  })
-  
-  observeEvent(input$nav_public_services_card, {
-    current_main("public_services")
-    current_sub(NULL)
-    nav_history(list(
-      main = category_mappings[["public_services"]]$main,
-      sub = category_mappings[["public_services"]]$sub
-    ))
-  })
-  
-  observeEvent(input$nav_housing_card, {
-    current_main("housing")
-    current_sub(NULL)
-    nav_history(list(
-      main = category_mappings[["housing"]]$main,
-      sub = category_mappings[["housing"]]$sub
-    ))
-  })
-  
-  # Add more card navigation handlers as needed
-}
-
-# Basic overview UI (replace with your actual implementation)
-overviewUI <- function() {
-  div(
-    h2("Dashboard General"),
-    p("Vista general del estado de Ciudad Juárez según las encuestas más recientes."),
-    
-    # Grid of category cards
-    layout_columns(
-      fill = FALSE,
-      
-      # Infraestructura y Servicios section cards
-      card(
-        card_header("Infraestructura y Servicios"),
-        layout_columns(
-          col_widths = c(6, 6, 6, 6, 6),
-          card(
-            id = "nav_infrastructure_card", 
-            class = "cursor-pointer",
-            "Infraestructura", 
-            tags$small("Calles, pavimentación, instalaciones")
-          ),
-          card(
-            id = "nav_public_services_card", 
-            class = "cursor-pointer",
-            "Servicios Públicos", 
-            tags$small("Agua, electricidad, recolección")
-          ),
-          card(
-            id = "nav_education_card", 
-            class = "cursor-pointer",
-            "Educación", 
-            tags$small("Escuelas, acceso, calidad")
-          ),
-          card(
-            id = "nav_healthcare_card", 
-            class = "cursor-pointer",
-            "Servicios de Salud", 
-            tags$small("Hospitales, atención médica")
-          ),
-          card(
-            id = "nav_housing_card", 
-            class = "cursor-pointer",
-            "Vivienda", 
-            tags$small("Condiciones, acceso")
-          )
-        )
-      ),
-      
-      # Other sections as needed
-      # Bienestar Social
-      card(
-        card_header("Bienestar Social y Económico"),
-        # Cards for this section
-      ),
-      
-      # Movilidad Urbana
-      card(
-        card_header("Movilidad Urbana y Medio Ambiente"),
-        # Cards for this section
-      ),
-      
-      # Gobierno
-      card(
-        card_header("Gobierno"),
-        # Cards for this section
-      ),
-      
-      # Participación
-      card(
-        card_header("Participación Ciudadana"),
-        # Cards for this section
-      )
-    )
-  )
-}
-
-# Run the app
-shinyApp(ui, server)
+# Run the application
+shinyApp(ui = ui, server = server)

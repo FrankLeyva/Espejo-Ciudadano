@@ -1,7 +1,7 @@
 infrastructureServer <- function(input, output, session) {
   # Load survey data
   survey_data <- reactive({
-    load_survey_data("PER_2024_V2")
+    load_survey_data("PER_2024")
   })
   
   # Load geographical data
@@ -40,26 +40,5 @@ infrastructureServer <- function(input, output, session) {
     req(survey_data(), geo_data())
     create_housing_overview(survey_data()$responses, geo_data(), current_theme())
   })
-  
-  # Navigation handlers
-  observeEvent(input$nav_education, {
-    # Navigate to education dashboard
-    # In a real app, use updateTabsetPanel, session$sendCustomMessage, etc.
-    showNotification("Navegando al dashboard de Educación...", type = "message")
-  })
-  
-  observeEvent(input$nav_healthcare, {
-    # Navigate to healthcare dashboard
-    showNotification("Navegando al dashboard de Salud...", type = "message")
-  })
-  
-  observeEvent(input$nav_services, {
-    # Navigate to public services dashboard
-    showNotification("Navegando al dashboard de Servicios Públicos...", type = "message")
-  })
-  
-  observeEvent(input$nav_housing, {
-    # Navigate to housing dashboard
-    showNotification("Navegando al dashboard de Vivienda...", type = "message")
-  })
+ 
 }

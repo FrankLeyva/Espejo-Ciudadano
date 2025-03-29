@@ -89,6 +89,10 @@ source("R/participation/civic_server.R")
 source("R/participation/community_ui.R")
 source("R/participation/community_server.R")
 
+# Extra section
+source("R/extra/methodology_ui.R")
+source("R/extra/methodology_server.R")
+
 # Define UI using page_navbar
 ui <- page_navbar(
   # Title and theme
@@ -128,11 +132,6 @@ ui <- page_navbar(
         margin-bottom: 10px;
       }
       
-      /* Badge styling */
-      .badge-implemented {
-        background-color: #28a745;
-        color: white;
-      }
       
       /* Back button styling */
       .back-link {
@@ -200,11 +199,6 @@ ui <- page_navbar(
           div(
             class = "card h-100",
             div(
-              class = "card-header d-flex justify-content-between align-items-center",
-              h5("Bienestar Social y Económico", class = "m-0"),
-              span(class = "badge badge-implemented", "Implementado")
-            ),
-            div(
               class = "card-body d-flex flex-column align-items-center text-center",
               div(
                 class = "nav-card w-100",
@@ -223,11 +217,6 @@ ui <- page_navbar(
           class = "col-md-4 mb-4",
           div(
             class = "card h-100",
-            div(
-              class = "card-header d-flex justify-content-between align-items-center",
-              h5("Movilidad Urbana y Medio Ambiente", class = "m-0"),
-              span(class = "badge badge-implemented", "Implementado")
-            ),
             div(
               class = "card-body d-flex flex-column align-items-center text-center",
               div(
@@ -248,11 +237,6 @@ ui <- page_navbar(
           div(
             class = "card h-100",
             div(
-              class = "card-header d-flex justify-content-between align-items-center",
-              h5("Gobierno", class = "m-0"),
-              span(class = "badge badge-implemented", "Implementado")
-            ),
-            div(
               class = "card-body d-flex flex-column align-items-center text-center",
               div(
                 class = "nav-card w-100",
@@ -272,11 +256,6 @@ ui <- page_navbar(
           div(
             class = "card h-100",
             div(
-              class = "card-header d-flex justify-content-between align-items-center",
-              h5("Infraestructura y Servicios", class = "m-0"),
-              span(class = "badge badge-implemented", "Implementado")
-            ),
-            div(
               class = "card-body d-flex flex-column align-items-center text-center",
               div(
                 class = "nav-card w-100",
@@ -295,11 +274,6 @@ ui <- page_navbar(
           class = "col-md-6 mb-4",
           div(
             class = "card h-100",
-            div(
-              class = "card-header d-flex justify-content-between align-items-center",
-              h5("Participación Ciudadana", class = "m-0"),
-              span(class = "badge badge-implemented", "Implementado")
-            ),
             div(
               class = "card-body d-flex flex-column align-items-center text-center",
               div(
@@ -517,11 +491,7 @@ ui <- page_navbar(
     title = "Metodología",
     icon = icon("download"),
     value = "methodology",
-    div(
-      class = "container mt-4",
-      h2("Metodología y Descarga de Datos"),
-      p("Información sobre la metodología utilizada en las encuestas y opciones para descargar los datos.")
-    )
+    methodologyUI()
   ),
   
   nav_panel(
@@ -594,6 +564,8 @@ server <- function(input, output, session) {
       civicServer(input, output, session)
     } else if (current_tab == "community") {
       communityServer(input, output, session)
+    }else if (current_tab == "methodology") {
+      methodologyServer(input, output, session)
     }
   })
 }

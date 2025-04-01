@@ -179,8 +179,7 @@ healthcareServer <- function(input, output, session) {
     req(survey_data())
     
     responses <- survey_data()$responses
-    
-    # Definir proveedores y sus correspondientes preguntas
+    if (survey_id == 'PER_2024') {
     providers <- c(
       "IMSS" = "Q17.1",
       "ISSSTE" = "Q17.2",
@@ -190,7 +189,16 @@ healthcareServer <- function(input, output, session) {
       "No tiene servicio médico" = "Q17.6",
       "Otro" = "Q17.7",
       "MEDICHIHUAHUA" = "Q17.8"
-    )
+    )} else {
+      providers <- c(
+        "IMSS" = "Q17.1",
+        "ISSSTE" = "Q17.2",
+        "Instituto de Salud de Bienestar" = "Q17.3",
+        "Médicos de farmacias/genéricos" = "Q17.4",
+        "Servicio médico privado/particulares" = "Q17.5",
+        "No tiene servicio médico" = "Q17.6",
+        "Otro" = "Q17.7")
+    }
     
     # Calcular porcentajes de "Sí" para cada proveedor
     provider_percentages <- sapply(providers, function(col) {

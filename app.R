@@ -17,6 +17,7 @@ library(shinyjs)
 library(colourpicker)
 library(RColorBrewer)
 library(viridisLite)
+library(bsicons)
 
 # Source all necessary files
 # Technical modules
@@ -96,7 +97,16 @@ source("R/extra/methodology_server.R")
 # Define UI using page_navbar
 ui <- page_navbar(
   # Title and theme
-  title = "Dashboard AEJ 2024",
+  title = div(
+    span("Dashboard AEJ 2024"),
+    span(
+      style = "float: right; margin-right: 20px;",
+      radioButtons("surveyYear", "Año:", 
+                  choices = c("2023", "2024"), 
+                  selected = "2024",
+                  inline = TRUE)
+    )
+  ),
   id = "navbar",
   bg = "#0d6efd",
   inverse = TRUE,
@@ -509,6 +519,11 @@ ui <- page_navbar(
 # Define server
 server <- function(input, output, session) {
   # Handle navigation from the overview cards
+  selectedYear <- reactive({
+    input$surveyYear
+  })
+  session$userData$selectedYear <- selectedYear
+
   observeEvent(input$nav_target, {
     nav_value <- input$nav_target
     updateNavbarPage(session, "navbar", selected = nav_value)

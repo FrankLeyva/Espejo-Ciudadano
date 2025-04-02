@@ -1,8 +1,11 @@
 # Función del servidor para el Dashboard de Educación
 educationServer <- function(input, output, session) {
-  # Cargar datos de encuesta de Percepción 2024
+  selectedYear <- session$userData$selectedYear
+  
+  # Load survey data with dynamic year
   survey_data <- reactive({
-    load_survey_data("PER_2024")
+    survey_id <- paste0("PER_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Cargar datos geográficos

@@ -36,8 +36,10 @@ representationUI <- function() {
                      div(style = "height: 500px;", leafletOutput("regidor_knowledge_map"))),
             tabPanel("Síndico(a)", 
                      div(style = "height: 500px;", leafletOutput("sindico_knowledge_map"))),
-            tabPanel("Diputado(a)", 
-                     div(style = "height: 500px;", leafletOutput("diputado_knowledge_map")))
+            tabPanel("Diputado(a) Local Y/O Estatal", 
+                     div(style = "height: 500px;", leafletOutput("diputadol_knowledge_map"))),
+            tabPanel("Diputado(a) Federal", 
+                     div(style = "height: 500px;", leafletOutput("diputadof_knowledge_map")))
           )
         ),
         

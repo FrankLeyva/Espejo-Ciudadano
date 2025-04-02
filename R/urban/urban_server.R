@@ -1,9 +1,13 @@
 # urbanServer.R
 urbanServer <- function(input, output, session) {
-  # Load survey data
-  survey_data <- reactive({
-    load_survey_data("PER_2024")
-  })
+   # Get the selected year from userData
+   selectedYear <- session$userData$selectedYear
+  
+   # Load survey data with dynamic year
+   survey_data <- reactive({
+     survey_id <- paste0("PER_", selectedYear())
+     load_survey_data(survey_id)
+   })
   
   # Use the current theme
   current_theme <- reactiveVal(theme_config)
@@ -14,10 +18,9 @@ urbanServer <- function(input, output, session) {
     
     # Extract binary values for public transport usage
     pt_values <- survey_data()$responses$Q72.9
-    pt_values <- pt_values[!is.na(pt_values)]
     
     # Calculate percentage
-    pt_percentage <- 100 * sum(pt_values == "1") / length(pt_values)
+    pt_percentage <- 100 * sum(pt_values == "1", na.rm=T) / length(pt_values)
     
     sprintf("%.1f%%", pt_percentage)
   })
@@ -28,10 +31,9 @@ urbanServer <- function(input, output, session) {
     
     # Extract binary values for private vehicle usage
     veh_values <- survey_data()$responses$Q73.8
-    veh_values <- veh_values[!is.na(veh_values)]
     
     # Calculate percentage
-    veh_percentage <- 100 * sum(veh_values == "1") / length(veh_values)
+    veh_percentage <- 100 * sum(veh_values == "1", na.rm=T) / length(veh_values)
     
     sprintf("%.1f%%", veh_percentage)
   })
@@ -69,7 +71,5 @@ urbanServer <- function(input, output, session) {
     req(survey_data())
     create_env_quality_plot(survey_data()$responses, custom_theme = current_theme())
   })
-
-
 
 }

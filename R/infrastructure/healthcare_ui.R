@@ -217,7 +217,8 @@ healthcareUI <- function() {
       class = "provider-card",
       card_header(
         h4("Proveedores de Servicios de Salud")
-      )
+      ),
+      plotlyOutput('healthcare_providers_chart')
     ),
     
     # Pie de página

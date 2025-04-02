@@ -1,7 +1,9 @@
 representationServer <- function(input, output, session) {
-  # Load survey data
+  selectedYear <- session$userData$selectedYear
+  
   survey_data <- reactive({
-    load_survey_data("PAR_2024")
+    survey_id <- paste0("PAR_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Load geo data
@@ -61,14 +63,24 @@ representationServer <- function(input, output, session) {
       custom_theme = current_theme()
     )
   })
-  
+    # Q8: Map of knowledge of Diputado Local
+    output$diputadol_knowledge_map <- renderLeaflet({
+      req(survey_data(), geo_data())
+      create_knowledge_district_map(
+        data = survey_data()$responses,
+        question_id = "Q8",
+        title = "Conocimiento del nombre del Diputado(a) Local y/o Estatal",
+        geo_data = geo_data(),
+        custom_theme = current_theme()
+      )
+    })
   # Q9: Map of knowledge of Diputado
-  output$diputado_knowledge_map <- renderLeaflet({
+  output$diputadof_knowledge_map <- renderLeaflet({
     req(survey_data(), geo_data())
     create_knowledge_district_map(
       data = survey_data()$responses,
-      question_id = "Q9",
-      title = "Conocimiento del nombre del Diputado(a)",
+      question_id = "Q10",
+      title = "Conocimiento del nombre del Diputado(a) Federal",
       geo_data = geo_data(),
       custom_theme = current_theme()
     )
@@ -90,7 +102,6 @@ representationServer <- function(input, output, session) {
       if (question_id %in% names(data)) {
         # Get binary responses (1 = Yes, knows the representative)
         values <- data[[question_id]]
-        values <- values[!is.na(values)]
         
         # Calculate percentage of positive responses
         if (length(values) > 0) {
@@ -155,7 +166,9 @@ representationServer <- function(input, output, session) {
           range = c(0, 10)
         ),
         yaxis = list(
-          title = ""
+          title = "",
+        categoryorder = 'total ascending'
+
         ),
         margin = list(l = 150)  # More space for labels
       )
@@ -165,7 +178,8 @@ representationServer <- function(input, output, session) {
         layout(title = "No hay datos disponibles")
     }
   }
-  
+  if (selectedYear() == '2024') {
+
   # Define actual labels for representatives from metadata
   regidores_labels <- c(
     "Alejandro Daniel Acosta Aviña",
@@ -209,7 +223,28 @@ representationServer <- function(input, output, session) {
     "Lilia Aguilar Gil (Distrito 03)", 
     "Alejandro Perez Cuellar (Distrito 04)"
   )
+} else {
+   # Define actual labels for representatives from metadata
+   regidores_labels <- c("María Dolores Adame Alvarado", "Alma Edith Arredondo Salinas", "Héctor Hugo Avitia Arellanes",
+   "Amparo Beltrán Ceballos", "Jorge Marcial Bueno Quiroz", "Mayra Karina Castillo Tapia",
+   "Antonio Domínguez Alderete", "Karla Michael Escalante Ramírez", "Ana Carmen Estrada García",
+   "Joob Quintin Flores Silva", "Austria Elizabeth Galindo Rodríguez", "Jorge Alberto Gutiérrez Casas",
+   "Tania Maldonado Garduño", "Pedro Alberto Matus Peña", "Martha Patricia Mendoza Rodríguez",
+   "Vanessa Mora de la O", "Mireya Porras Armendáriz", "Yolanda Cecilia Reyes Castro",
+   "Víctor Manuel Talamantes Vázquez", "Enrique Torres Valadez")
+ 
   
+  diputados_locales_labels <-c("Leticia Ortega Máynez (Distrito 02)", "Oscar Daniel Avitia Arellanes (Distrito 03)", 
+  "Rosana Díaz Reyes (Distrito 04)", "Marisela Terrazas Muñoz (Distrito 05)", 
+  "Jael Argüelles Díaz (Distrito 06)", "Gustavo de la Rosa Hickerson (Distrito 07)", 
+  "Edin Cuauhtémoc Estrada Sotelo (Distrito 08)", "Magdalena Rentería Pérez (Distrito 09)", 
+  "María Antonieta Pérez Reyes (Distrito 10)")
+
+  
+  diputados_federales_labels <- c("Daniel Murguía Lardizabal (Distrito 01)", "Teresita de Jesús Vargas Meráz (Distrito 02)", 
+  "Lilia Aguilar Gil (Distrito 03)", "Daniela Soraya Álvarez Hernández (Distrito 04)")
+
+}
   # Q6.1-6.20: Knowledge of Regidores
   output$regidores_knowledge_chart <- renderPlotly({
     req(survey_data())
@@ -227,7 +262,7 @@ representationServer <- function(input, output, session) {
     req(survey_data())
     create_representative_knowledge_chart(
       data = survey_data()$responses, 
-      question_prefix = "Q8", 
+      question_prefix = "Q9", 
       count = 9,  # Only use 9 instead of 10 since Q8.10 is not a name
       labels = diputados_locales_labels,
       custom_theme = current_theme()
@@ -239,7 +274,7 @@ representationServer <- function(input, output, session) {
     req(survey_data())
     create_representative_knowledge_chart(
       data = survey_data()$responses, 
-      question_prefix = "Q10", 
+      question_prefix = "Q11", 
       count = 4, 
       labels = diputados_federales_labels,
       custom_theme = current_theme()
@@ -264,24 +299,24 @@ representationServer <- function(input, output, session) {
   # Q11: Regidores representation rating
   output$regidores_rating <- renderText({
     req(survey_data())
-    calculate_avg_rating(survey_data()$responses, "Q11")
+    calculate_avg_rating(survey_data()$responses, "Q12")
   })
   
   # Q12: Síndico representation rating
   output$sindico_rating <- renderText({
     req(survey_data())
-    calculate_avg_rating(survey_data()$responses, "Q12")
+    calculate_avg_rating(survey_data()$responses, "Q13")
   })
   
   # Q13: Local deputy representation rating
   output$diputado_local_rating <- renderText({
     req(survey_data())
-    calculate_avg_rating(survey_data()$responses, "Q13")
+    calculate_avg_rating(survey_data()$responses, "Q14")
   })
   
   # Q14: Federal deputy representation rating
   output$diputado_federal_rating <- renderText({
     req(survey_data())
-    calculate_avg_rating(survey_data()$responses, "Q14")
+    calculate_avg_rating(survey_data()$responses, "Q15")
   })
 }

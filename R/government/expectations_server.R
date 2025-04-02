@@ -1,7 +1,9 @@
 expectationsServer <- function(input, output, session) {
-  # Load survey data
+  selectedYear <- session$userData$selectedYear
+  
   survey_data <- reactive({
-    load_survey_data("PAR_2024") # Using PAR survey
+    survey_id <- paste0("PAR_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Load geographical data
@@ -24,7 +26,7 @@ expectationsServer <- function(input, output, session) {
     # Prepare interval data for Q18
     municipal_data <- prepare_interval_data(
       data = survey_data()$responses,
-      question_id = "Q18",
+      question_id = "Q19",
       metadata = survey_data()$metadata
     )
     
@@ -47,7 +49,7 @@ expectationsServer <- function(input, output, session) {
     # Prepare interval data for Q19
     state_data <- prepare_interval_data(
       data = survey_data()$responses,
-      question_id = "Q19",
+      question_id = "Q20",
       metadata = survey_data()$metadata
     )
     
@@ -70,7 +72,7 @@ expectationsServer <- function(input, output, session) {
     # Prepare interval data for Q20
     federal_data <- prepare_interval_data(
       data = survey_data()$responses,
-      question_id = "Q20",
+      question_id = "Q21",
       metadata = survey_data()$metadata
     )
     
@@ -92,9 +94,9 @@ expectationsServer <- function(input, output, session) {
     
     # Define the questions we want to compare
     question_ids <- list(
-      municipal = c("Q15.2", "Q15.3", "Q15.4"),
-      state = c("Q16.2", "Q16.3", "Q16.4"),
-      federal = c("Q17.2", "Q17.3", "Q17.4")
+      municipal = c("Q16.2", "Q16.3", "Q16.4"),
+      state = c("Q17.2", "Q17.3", "Q17.4"),
+      federal = c("Q18.2", "Q18.3", "Q18.4")
     )
     
     # Labels for the questions

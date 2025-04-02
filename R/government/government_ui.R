@@ -145,7 +145,8 @@ governmentUI <- function() {
         tabsetPanel(
           tabPanel("Regidor/a", plotlyOutput("officials_knowledge_regidor_plot", height = "400px")),
           tabPanel("Síndico/a", plotlyOutput("officials_knowledge_sindico_plot", height = "400px")),
-          tabPanel("Diputado/a Federal", plotlyOutput("officials_knowledge_diputado_plot", height = "400px"))
+          tabPanel("Diputado/a Local y/o Estatal", plotlyOutput("officials_knowledge_diputadol_plot", height = "400px")),
+          tabPanel("Diputado/a Federal", plotlyOutput("officials_knowledge_diputadof_plot", height = "400px"))
         )
       ),
       

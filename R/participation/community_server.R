@@ -1,8 +1,10 @@
 # Función del servidor para el Dashboard de Participación Comunitaria
 communityServer <- function(input, output, session) {
-  # Load survey data
+  selectedYear <- session$userData$selectedYear
+  
   survey_data <- reactive({
-    load_survey_data("PAR_2024")
+    survey_id <- paste0("PAR_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Store current theme
@@ -14,7 +16,7 @@ communityServer <- function(input, output, session) {
     
     tryCatch({
       # List of organization questions
-      organization_questions <- paste0("Q132.", 1:11)
+      organization_questions <- paste0("Q134.", 1:11)
       
       # Organization labels
       organization_labels <- c(
@@ -124,7 +126,7 @@ communityServer <- function(input, output, session) {
     
     tryCatch({
       # List of activity questions
-      activity_questions <- paste0("Q136.", 1:14)
+      activity_questions <- paste0("Q138.", 1:14)
       
       # Activity labels
       activity_labels <- c(

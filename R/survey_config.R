@@ -39,8 +39,8 @@ survey_config <- list(
   ),
   PAR_2024 = list(
     district_col = "Q2",
-    gender_col = "Q142",
-    age_col = "Q144",
+    gender_col = "Q144",
+    age_col = "Q146",
     gender_mapping = c(
       "1" = "Hombre",
       "2" = "Mujer",

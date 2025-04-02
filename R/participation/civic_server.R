@@ -1,8 +1,10 @@
 # Función del servidor para el Dashboard de Participación Cívica
 civicServer <- function(input, output, session) {
-  # Load survey data
+  selectedYear <- session$userData$selectedYear
+  
   survey_data <- reactive({
-    load_survey_data("PAR_2024")
+    survey_id <- paste0("PAR_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Load geographical data
@@ -24,7 +26,7 @@ civicServer <- function(input, output, session) {
     
     prepare_interval_data(
       data = survey_data()$responses,
-      question_id = "Q130",
+      question_id = "Q131",
       metadata = survey_data()$metadata
     )
   })
@@ -51,7 +53,7 @@ civicServer <- function(input, output, session) {
     
     tryCatch({
       # List of mechanisms questions
-      mechanism_questions <- paste0("Q138.", 1:13)
+      mechanism_questions <- paste0("Q140.", 1:13)
       
       # Mechanism labels
       mechanism_labels <- c(
@@ -163,7 +165,7 @@ civicServer <- function(input, output, session) {
     
     tryCatch({
       # List of requirement questions
-      requirement_questions <- paste0("Q131.", 1:6)
+      requirement_questions <- paste0("Q132.", 1:6)
       
       # Requirement labels
       requirement_labels <- c(

@@ -64,20 +64,6 @@ urbanUI <- function() {
             p(class = "text-center", "Satisfacción con el servicio")
           )
         )
-      ),
-      
-      # Environment Card
-      div(
-        class = "nav-card",
-        id = "nav_environment_card",
-        onclick = "Shiny.setInputValue('nav_target', 'environment', {priority: 'event'})",
-        card(
-          card_body(
-            div(class = "text-center nav-card-icon", bsicons::bs_icon("tree-fill")),
-            h4(class = "text-center", "Medio Ambiente"),
-            p(class = "text-center", "Calidad ambiental")
-          )
-        )
       )
     ),
     

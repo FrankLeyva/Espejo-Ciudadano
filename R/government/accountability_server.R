@@ -1,8 +1,10 @@
 # Server function for Accountability Dashboard
 accountabilityServer <- function(input, output, session) {
-  # Load survey data
+  selectedYear <- session$userData$selectedYear
+  
   survey_data <- reactive({
-    load_survey_data("PAR_2024") # Using PAR survey
+    survey_id <- paste0("PAR_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Use the current theme
@@ -13,7 +15,7 @@ accountabilityServer <- function(input, output, session) {
     req(survey_data())
     
     # Get values for Q122
-    values <- as.numeric(survey_data()$responses$Q122)
+    values <- as.numeric(survey_data()$responses$Q123)
     
     # Remove NS/NC (value 5)
     values <- values[!is.na(values) & values != 5]
@@ -39,7 +41,7 @@ accountabilityServer <- function(input, output, session) {
     req(survey_data())
     
     # Get values for Q123
-    values <- as.numeric(survey_data()$responses$Q123)
+    values <- as.numeric(survey_data()$responses$Q124)
     
     # Remove NS/NC (value 5)
     values <- values[!is.na(values) & values != 5]
@@ -91,7 +93,7 @@ accountabilityServer <- function(input, output, session) {
     req(survey_data())
     
     # Get values for Q124
-    values <- as.numeric(survey_data()$responses$Q124)
+    values <- as.numeric(survey_data()$responses$Q125)
     
     # Remove NS/NC (value 5)
     values <- values[!is.na(values) & values != 5]
@@ -140,7 +142,7 @@ accountabilityServer <- function(input, output, session) {
     req(survey_data())
     
     # Get values for Q125
-    values <- as.numeric(survey_data()$responses$Q125)
+    values <- as.numeric(survey_data()$responses$Q126)
     
     # Remove NS/NC (value 5)
     values <- values[!is.na(values) & values != 5]
@@ -251,7 +253,7 @@ accountabilityServer <- function(input, output, session) {
     req(survey_data())
     
     # Get values for Q15.1
-    values <- as.numeric(survey_data()$responses$Q15.1)
+    values <- as.numeric(survey_data()$responses$Q16.1)
     
     create_corruption_pie(
       values, 
@@ -264,7 +266,7 @@ accountabilityServer <- function(input, output, session) {
     req(survey_data())
     
     # Get values for Q16.1
-    values <- as.numeric(survey_data()$responses$Q16.1)
+    values <- as.numeric(survey_data()$responses$Q17.1)
     
     create_corruption_pie(
       values, 
@@ -278,7 +280,7 @@ accountabilityServer <- function(input, output, session) {
     req(survey_data())
     
     # Get values for Q17.1
-    values <- as.numeric(survey_data()$responses$Q17.1)
+    values <- as.numeric(survey_data()$responses$Q18.1)
     
     create_corruption_pie(
       values, 

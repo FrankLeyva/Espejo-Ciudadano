@@ -813,9 +813,9 @@ pie_data <- pie_data %>%
 # Function for Card 3: Government Expectations Bar Plot
 create_government_expectations_plot <- function(data, custom_theme = NULL) {
   # Extract data for government expectations (Q18, Q19, Q20)
-  federal_exp <- as.numeric(data[["Q18"]])
-  state_exp <- as.numeric(data[["Q19"]])
-  city_exp <- as.numeric(data[["Q20"]])
+  federal_exp <- as.numeric(data[["Q19"]])
+  state_exp <- as.numeric(data[["Q20"]])
+  city_exp <- as.numeric(data[["Q21"]])
   
   # Calculate means and remove NAs
   federal_mean <- mean(federal_exp, na.rm = TRUE)
@@ -1136,7 +1136,6 @@ create_transport_issues_plot <- function(survey_data, issue_type = "bus", custom
   for (i in 1:length(question_ids)) {
     # Extract binary values (1 = Yes, meaning dissatisfied)
     values <- survey_data[[question_ids[i]]]
-    values <- values[!is.na(values)]
     
     # Calculate percentage of "Yes" responses
     issue_percentages[i] <- 100 * sum(values == "1", na.rm = TRUE) / length(values)
@@ -1483,7 +1482,6 @@ create_transport_modes_plot <- function(survey_data, mode_type = "work", custom_
   for (i in 1:length(question_ids)) {
     # Extract binary values (1 = Yes)
     values <- survey_data[[question_ids[i]]]
-    values <- values[!is.na(values)]
     
     # Calculate percentage of "Yes" responses
     mode_percentages[i] <- 100 * sum(values == "1", na.rm = TRUE) / length(values)

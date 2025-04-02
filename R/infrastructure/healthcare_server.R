@@ -1,8 +1,11 @@
   # Función del servidor para el Dashboard de Servicios de Salud
 healthcareServer <- function(input, output, session) {
-  # Cargar datos de encuesta de Percepción 2024
+  selectedYear <- session$userData$selectedYear
+  
+  # Load survey data with dynamic year
   survey_data <- reactive({
-    load_survey_data("PER_2024")
+    survey_id <- paste0("PER_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Cargar datos geográficos
@@ -179,7 +182,8 @@ healthcareServer <- function(input, output, session) {
     req(survey_data())
     
     responses <- survey_data()$responses
-    if (survey_id == 'PER_2024') {
+    
+    if (selectedYear() == '2024') {
     providers <- c(
       "IMSS" = "Q17.1",
       "ISSSTE" = "Q17.2",
@@ -203,10 +207,9 @@ healthcareServer <- function(input, output, session) {
     # Calcular porcentajes de "Sí" para cada proveedor
     provider_percentages <- sapply(providers, function(col) {
       vals <- responses[[col]]
-      vals <- vals[!is.na(vals)]
       
       # Contar respuestas "Sí" (valor 1)
-      yes_count <- sum(vals == "1")
+      yes_count <- sum(vals == "1", na.rm=T)
       percentage <- 100 * yes_count / length(vals)
       
       return(percentage)

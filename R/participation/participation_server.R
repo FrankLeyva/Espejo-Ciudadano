@@ -1,8 +1,10 @@
 # Función del servidor para el Dashboard de Participación
 participationServer <- function(input, output, session) {
-  # Load survey data
+  selectedYear <- session$userData$selectedYear
+  
   survey_data <- reactive({
-    load_survey_data("PAR_2024")
+    survey_id <- paste0("PAR_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Load geographical data
@@ -24,12 +26,12 @@ participationServer <- function(input, output, session) {
     
     tryCatch({
       # Extract Q134 values
-      values <- survey_data()$responses[["Q134"]]
+      values <- survey_data()$responses[["Q136"]]
       values <- values[!is.na(values)]
       
       if(length(values) > 0) {
         # Calculate percentage of "Yes" responses (value = 1)
-        support_count <- sum(values == "1")
+        support_count <- sum(values == "1", na.rm=T)
         support_percent <- 100 * support_count / length(values)
         
         # Format for display
@@ -51,7 +53,7 @@ participationServer <- function(input, output, session) {
       # Prepare data for Q137
       voting_data <- prepare_interval_data(
         data = survey_data()$responses,
-        question_id = "Q137",
+        question_id = "Q139",
         metadata = survey_data()$metadata
       )
       
@@ -80,7 +82,7 @@ participationServer <- function(input, output, session) {
     
     tryCatch({
       # Extract Q130 values
-      interest_values <- survey_data()$responses[["Q130"]]
+      interest_values <- survey_data()$responses[["Q131"]]
       interest_values <- interest_values[!is.na(interest_values)]
       
       if(length(interest_values) == 0) {

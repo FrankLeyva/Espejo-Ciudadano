@@ -45,7 +45,8 @@ source("R/wellness/cultural_ui.R")
 source("R/wellness/cultural_server.R")
 source("R/wellness/identity_ui.R")
 source("R/wellness/identity_server.R")
-
+source("R/wellness/environment_ui.R")
+source("R/wellness/environment_server.R")
 # Movilidad Urbana y Medio Ambiente
 source("R/urban/urban_ui.R")
 source("R/urban/urban_server.R")
@@ -53,8 +54,7 @@ source("R/urban/mobility_ui.R")
 source("R/urban/mobility_server.R")
 source("R/urban/transportation_ui.R")
 source("R/urban/transportation_server.R")
-source("R/urban/environment_ui.R")
-source("R/urban/environment_server.R")
+
 
 # Gobierno
 source("R/government/government_ui.R")
@@ -332,6 +332,13 @@ ui <- page_navbar(
       title = "Identidad y pertenencia",
       value = "identity",
       identityUI()
+    ),
+    
+    # Medio Ambiente
+    nav_panel(
+      title = "Medio Ambiente",
+      value = "environment",
+      environmentUI()
     )
   ),
   
@@ -359,13 +366,6 @@ ui <- page_navbar(
       title = "Transporte Público",
       value = "transportation",
       transportationUI()
-    ),
-    
-    # Medio Ambiente
-    nav_panel(
-      title = "Medio Ambiente",
-      value = "environment",
-      environmentUI()
     )
   ),
   

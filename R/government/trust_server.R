@@ -1,7 +1,9 @@
 trustServer <- function(input, output, session) {
-  # Load survey data
+  selectedYear <- session$userData$selectedYear
+  
   survey_data <- reactive({
-    load_survey_data("PAR_2024")
+    survey_id <- paste0("PAR_", selectedYear())
+    load_survey_data(survey_id)
   })
   
   # Use the current theme
@@ -17,7 +19,7 @@ trustServer <- function(input, output, session) {
     # Process each question
     for (i in 1:length(question_ids)) {
       q_id <- question_ids[i]
-      full_q_id <- paste0("Q21.", q_id)
+      full_q_id <- paste0("Q22.", q_id)
       
       # Get data for this question
       values <- data[[full_q_id]]

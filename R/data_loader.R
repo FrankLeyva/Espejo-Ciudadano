@@ -8,10 +8,10 @@ load_survey_data <- function(survey_id = "PER_2023") {
     metadata_path <- "data/processed/PAR_2024_metadata_classified_V4.csv"
   } else if (survey_id == "PER_2024") {
     response_path <- "data/processed/PER_2024_responses_V4.csv"
-    metadata_path <- "data/processed/PER_2024_metadata_classified_V3.csv"
+    metadata_path <- "data/processed/PER_2024_metadata_classified_V4.csv"
   } else { 
-    response_path <- "data/processed/PER_2023_responses_V2.csv"
-    metadata_path <- "data/processed/PER_2023_metadata_classified.csv"
+    response_path <- "data/processed/PER_2023_responses_V3.csv"
+    metadata_path <- "data/processed/PER_2023_metadata_classified_V2.csv"
   }
   
   message("Loading survey data from: ", response_path)

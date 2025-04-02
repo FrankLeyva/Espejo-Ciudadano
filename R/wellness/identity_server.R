@@ -35,26 +35,85 @@ identityServer <- function(input, output, session) {
     )
   })
   
-  # Create monuments wordcloud
-  output$monuments_wordcloud <- renderUI({
-    req(monuments_data())
+
+  output$monuments_bar <- renderPlotly({
+    req(survey_data())
     
-    # Create word frequency table with filters
-    word_freq <- create_word_freq_table(
-      monuments_data(),
-      max_words = 100,
-      exclude_stopwords = TRUE,
-      min_chars = 1
+    # Count frequencies
+    monument_counts <- table(survey_data()$responses$Q65)
+    monument_mapping <- c(
+      "1" = "La X",
+      "2" = "El Monumento A Benito Juárez",
+      "3" = "La Catedral",
+      "4" = "El Parque Central",
+      "5" = "El Chamizal",
+      "6" = "La Casa De Juan Gabriel",
+      "7" = "El Centro",
+      "8" = "La Presidencia",
+      "9" = "Umbral Del Milenio",
+      "10" = "El Museo De La Ex-Aduana",
+      "11" = "El Parque Borunda",
+      "12" = "El Monumento A Zapata",
+      "13" = "La Rodadora",
+      "14" = "Letras JRZ",
+      "15" = "La Plaza De Toros",
+      "16" = "Monumento A Los Indomables",
+      "17" = "Gimnasios Públicos",
+      "18" = "La Torre Centinela",
+      "19" = "El Gardie",
+      "20" = "El Cigarro",
+      "21" = "Estadio Benito Juárez",
+      "22" = "La Iglesia De San Lorenzo",
+      "23" = "Mercado Juárez",
+      "24" = "Monumento A Tin Tan",
+      "25" = "Monumento Al Trabajo",
+      "26" = "Otro",
+      "27" = "Ninguno"
     )
     
-    # Use the wordcloud2 function
-    tryCatch({
-      # Get theme colors if available
-      wordcloud2(data = word_freq, size =2, color = "random-dark")
-    }, error = function(e) {
-      return(p(paste("Error al generar la nube de palabras:", e$message)))
-    })
+    # Create data frame
+    freq_df <- data.frame(
+      code = names(monument_counts),
+      monument = sapply(names(monument_counts), function(x) monument_mapping[x]),
+      count = as.vector(monument_counts)
+    )
+    
+    # Sort by count
+    freq_df <- freq_df[order(-freq_df$count), ]
+    
+    # Limit to top 15
+    freq_df <- head(freq_df, 15)
+    
+    # Get color from theme
+    bar_color <- current_theme()$colors$primary
+    
+    # Create horizontal bar chart
+    plot_ly(
+      data = freq_df,
+      y = ~reorder(monument, count),
+      x = ~count,
+      type = "bar",
+      orientation = 'h',
+      marker = list(color = bar_color),
+      text = ~count,
+      textposition = "auto",
+      hoverinfo = "text",
+      hovertext = ~paste0(monument, ": ", count, " menciones")
+    ) %>%
+      apply_plotly_theme(
+        title = "Lugares emblemáticos de Ciudad Juárez",
+        xlab = "Número de menciones",
+        ylab = "",
+        custom_theme = current_theme()
+      ) %>% 
+        layout(
+          yaxis = list(
+            categoryorder = "total ascending"
+          )
+        )
   })
+
+
   
   # Process Q80 data for city pride pie chart
   city_pride_data <- reactive({

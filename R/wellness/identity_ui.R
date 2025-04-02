@@ -47,7 +47,7 @@ identityUI <- function() {
           "Monumentos importantes para la identidad juarense",
           class = "bg-light"
         ),
-        htmlOutput("monuments_wordcloud"),
+        plotlyOutput("monuments_bar", height = "400px"),
         card_footer(
           "Frecuencia de menciones de monumentos representativos de Ciudad Juárez (Q65H)"
         )

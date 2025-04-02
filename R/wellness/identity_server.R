@@ -22,19 +22,6 @@ identityServer <- function(input, output, session) {
   
   # Use the current theme
   current_theme <- reactiveVal(theme_config)
-  
-  # Process Q65H data for monuments wordcloud
-  monuments_data <- reactive({
-    req(survey_data())
-    
-    # Prepare nominal data for Q65H
-    prepare_nominal_data(
-      data = survey_data()$responses,
-      question_id = "Q65H",
-      metadata = survey_data()$metadata
-    )
-  })
-  
 
   output$monuments_bar <- renderPlotly({
     req(survey_data())
@@ -76,7 +63,18 @@ identityServer <- function(input, output, session) {
       code = names(monument_counts),
       monument = sapply(names(monument_counts), function(x) monument_mapping[x]),
       count = as.vector(monument_counts)
-    )
+    ) %>% filter(!monument %in% c("Otro", "Ninguno"))
+    freq_df <- data.frame(
+      code = names(monument_counts),
+      monument = sapply(names(monument_counts), function(x) monument_mapping[x]),
+      count = as.vector(monument_counts)
+    ) %>% filter(!monument %in% c("Otro", "Ninguno"))
+    
+    # Calculate total for percentages (excluding "Otro" and "Ninguno")
+    total_responses <- sum(freq_df$count)
+    
+    # Add percentage column
+    freq_df$percentage <- round(100 * freq_df$count / total_responses, 1)
     
     # Sort by count
     freq_df <- freq_df[order(-freq_df$count), ]
@@ -91,28 +89,31 @@ identityServer <- function(input, output, session) {
     plot_ly(
       data = freq_df,
       y = ~reorder(monument, count),
-      x = ~count,
+      x = ~percentage,  # Changed to percentage for the x-axis
       type = "bar",
       orientation = 'h',
       marker = list(color = bar_color),
-      text = ~count,
+      text = ~paste0(percentage, "%"),  # Display percentage on bars
       textposition = "auto",
       hoverinfo = "text",
-      hovertext = ~paste0(monument, ": ", count, " menciones")
+      hovertext = ~paste0(monument, ": ", count, " menciones (", percentage, "%)")
     ) %>%
       apply_plotly_theme(
         title = "Lugares emblemáticos de Ciudad Juárez",
-        xlab = "Número de menciones",
+        xlab = "Porcentaje de menciones (%)",  # Updated axis label
         ylab = "",
         custom_theme = current_theme()
       ) %>% 
-        layout(
-          yaxis = list(
-            categoryorder = "total ascending"
-          )
+      layout(
+        yaxis = list(
+          categoryorder = "total ascending"
+        ),
+        xaxis = list(
+          # Add a % sign to the x-axis values
+          ticksuffix = "%"
         )
+      )
   })
-
 
   
   # Process Q80 data for city pride pie chart

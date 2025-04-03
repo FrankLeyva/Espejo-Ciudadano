@@ -94,111 +94,190 @@ source("R/participation/community_server.R")
 source("R/extra/methodology_ui.R")
 source("R/extra/methodology_server.R")
 
+
+
+# Header component function
+create_dashboard_header <- function(title, subtitle = NULL) {
+  div(
+    class = "dashboard-header mb-4",
+    div(
+      class = "container-fluid",  # Use fluid container for full width
+      div(
+        class = "row align-items-center",
+        div(
+          class = "col",
+          h1(class = "display-5 fw-bold text-primary", title),
+          if (!is.null(subtitle)) {
+            p(class = "lead text-muted", subtitle)
+          }
+        ),
+        # Only include logo if you have one
+        # div(
+        #   class = "col-auto",
+        #   img(src = "logo.png", height = "60px", alt = "Logo")
+        # )
+      )
+    )
+  )
+}
+
+# Footer component function
+create_dashboard_footer <- function() {
+  div(
+    class = "border-top mt-5 pt-4 pb-4 text-center text-muted",
+    div(
+      class = "container-fluid",
+      p("Dashboard creado por Plan Estratégico de Juárez", class = "mb-1"),
+      p("Datos actualizados: Marzo 2025", class = "mb-0 small")
+    )
+  )
+}
+
+
+
 # Define UI using page_navbar
 ui <- page_navbar(
-  # Title and theme
+  # Title with proper positioning for timeline slider
   title = div(
-    span("Dashboard AEJ 2024"),
-    span(
-      style = "float: right; margin-right: 20px;",
-      radioButtons("surveyYear", "Año:", 
-                  choices = c("2023", "2024"), 
-                  selected = "2024",
-                  inline = TRUE)
+    class = "navbar-title-container d-flex align-items-center",
+    span("Dashboard AEJ", class = "me-5"),
+    div(
+      class = "year-timeline d-flex align-items-center ms15",
+      div(class = "year-connector"),
+      div(
+        class = "year-dot", id = "dot2023",
+        div(class = "year-label", "2023"),
+        onclick = "selectTimelineYear('2023')"
+      ),
+      div(
+        class = "year-dot active", id = "dot2024",
+        div(class = "year-label", "2024"),
+        onclick = "selectTimelineYear('2024')"
+      )
     )
   ),
   id = "navbar",
-  bg = "#0d6efd",
+  bg = "#0d6efd", 
   inverse = TRUE,
-  
-  # Custom CSS for styling
+  # Custom CSS for styling - Update this part
   header = tags$head(
+    # Add link to external CSS file
+    tags$link(rel = "stylesheet", href = "styles.css"),
+    tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
+    tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"),
+    
+    # Updated Timeline Slider CSS
     tags$style(HTML("
-      /* Card styling */
-      .card {
-        margin-bottom: 20px;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      /* Navbar styling */
+      .navbar {
+        background-color: #0d6efd !important;
       }
       
-      /* Navigation card styles */
-      .nav-card {
-        transition: transform 0.3s, box-shadow 0.3s;
+      .navbar-title-container {
+        display: flex;
+        align-items: center;
+        padding: 0;
+        min-width: 350px; /* Ensure enough space */
+      }
+      /* Timeline Slider */
+      .year-timeline {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(to right, #7b68ee, #0d6efd);
+        border-radius: 20px;
+        padding: 6px 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        width: 150px;
+        margin-left: 15px;
+      }
+      .year-dot {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        margin: 0 10px;
         cursor: pointer;
-        height: 100%;
+        z-index: 2;
       }
-      .nav-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      .year-dot::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 14px;
+        height: 14px;
+        background-color: white;
+        border-radius: 50%;
+        transition: all 0.3s;
       }
-      .nav-card-icon {
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-        color: #0d6efd;
+      .year-dot.active::before {
+        width: 20px;
+        height: 20px;
+        background-color: #ffd700;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
       }
-      .nav-card-title {
+      .year-label {
+        position: absolute;
+        top: -22px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
         font-weight: bold;
-        font-size: 1.2rem;
-        margin-bottom: 10px;
+        font-size: 13px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
       }
-      
-      
-      /* Back button styling */
-      .back-link {
-        margin-bottom: 15px;
-        padding: 6px 12px;
-        background-color: #f8f9fa;
-        border-radius: 4px;
-        display: inline-block;
-        text-decoration: none;
-        color: #495057;
-        cursor: pointer;
+      .year-connector {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: rgba(255,255,255,0.5);
+        transform: translateY(-50%);
+        z-index: 1;
       }
-      .back-link:hover {
-        background-color: #e9ecef;
+      .navbar-nav {
+        margin-left: 20px;
+      }
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .navbar-title-container {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .year-timeline {
+          margin-left: 0;
+          margin-top: 8px;
+        }
       }
     ")),
+    
+    # Timeline slider JavaScript
     tags$script(HTML("
-    $(document).ready(function() {
-      // Function to close all navbar dropdowns
-      function closeAllDropdowns() {
-        $('.navbar .dropdown-menu').removeClass('show');
-        $('.navbar .dropdown').removeClass('show');
-        $('.navbar .nav-item.dropdown').removeClass('show');
-        $('.navbar .dropdown-toggle').attr('aria-expanded', 'false');
+      function selectTimelineYear(year) {
+        $('.year-dot').removeClass('active');
+        $('#dot' + year).addClass('active');
+        Shiny.setInputValue('surveyYear', year);
       }
       
-      // Close dropdowns after navigation with a 3-second delay
-      $(document).on('shown.bs.tab', function() {
-        setTimeout(closeAllDropdowns, 3000);
+      $(document).ready(function() {
+        // Initialize with the default selected year
+        selectTimelineYear('2024');
       });
-      
-      // Also close dropdowns when clicking on nav cards - immediate closing
-      $(document).on('click', '.nav-card', function() {
-        // Still show the dropdown for visual feedback
-        setTimeout(closeAllDropdowns, 3000);
-      });
-      
-      // Additional handler for any navigation
-      Shiny.addCustomMessageHandler('closeNavDropdowns', function(message) {
-        setTimeout(closeAllDropdowns, 3000);
-      });
-    });
-  "))
-),
+    "))
+  ),
   
   # Main overview tab
   nav_panel(
     title = "Inicio",
     icon = icon("home"),
     value = "overview",
-    
+    create_dashboard_header("Dashboard General", "Vista general del estado de Ciudad Juárez según las encuestas más recientes."),
+
     # Dashboard overview content
     div(
-      class = "container mt-4",
-      h2("Dashboard General", class = "mb-4"),
-      p("Vista general del estado de Ciudad Juárez según las encuestas más recientes.", class = "lead mb-4"),
-      
+ 
       # Grid of category cards
       div(
         class = "row",
@@ -298,7 +377,7 @@ ui <- page_navbar(
           )
         )
       )
-    )
+    ),create_dashboard_footer()
   ),
   
   # ---- Bienestar Social y Económico ----
@@ -486,39 +565,41 @@ ui <- page_navbar(
   ),
   
   # ---- Other Sections ----
-  nav_panel(
-    title = "Reportes",
-    icon = icon("file-alt"),
-    value = "reports",
-    div(
-      class = "container mt-4",
-      h2("Reportes Personalizados"),
-      p("Esta sección le permitirá generar reportes personalizados según sus necesidades específicas.")
+  nav_menu(
+    title = "Extras",
+    icon = icon("ellipsis-h"),
+    nav_panel(
+      title = "Reportes",
+      icon = icon("file-alt"),
+      value = "reports",
+      div(
+        class = "container mt-4",
+        h2("Reportes Personalizados"),
+        p("Esta sección le permitirá generar reportes personalizados según sus necesidades específicas.")
+      )
+    ),
+    nav_panel(
+      title = "Metodología",
+      icon = icon("download"),
+      value = "methodology",
+      methodologyUI()
+    ),
+    nav_panel(
+      title = "Acerca de",
+      icon = icon("info-circle"),
+      value = "about",
+      div(
+        class = "container mt-4",
+        h2("Acerca del Dashboard"),
+        p("Información sobre el propósito de este dashboard y el equipo detrás de él.")
+      )
     )
   ),
-  
-  nav_panel(
-    title = "Metodología",
-    icon = icon("download"),
-    value = "methodology",
-    methodologyUI()
-  ),
-  
-  nav_panel(
-    title = "Acerca de",
-    icon = icon("info-circle"),
-    value = "about",
-    div(
-      class = "container mt-4",
-      h2("Acerca del Dashboard"),
-      p("Información sobre el propósito de este dashboard y el equipo detrás de él.")
-    )
-  )
 )
 
 # Define server
 server <- function(input, output, session) {
-  # Handle navigation from the overview cards
+  selectedYear <- reactiveVal("2024")
   selectedYear <- reactive({
     input$surveyYear
   })
@@ -531,6 +612,7 @@ server <- function(input, output, session) {
   
   # Initialize servers based on the current tab
   observe({
+    req(input$navbar)
     # Get the current tab value
     current_tab <- input$navbar
     

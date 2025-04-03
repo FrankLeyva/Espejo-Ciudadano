@@ -92,6 +92,19 @@ methodologyUI <- function() {
           border-left-color: #f0ad4e;
           background-color: #faf8f4;
         }
+        
+        /* Year tabs styling */
+        .year-tabs .nav-link {
+          padding: 10px 20px;
+          border-radius: 5px 5px 0 0;
+          font-weight: 600;
+        }
+        
+        .year-tabs .nav-link.active {
+          background-color: #0d6efd;
+          color: white;
+          border-color: #0d6efd;
+        }
       "))
     ),
     
@@ -117,62 +130,146 @@ methodologyUI <- function() {
         h3("Descargar Datos de Encuestas", class = "m-0")
       ),
       card_body(
-        layout_columns(
-          col_widths = c(6, 6),
-          
-          # Tarjeta de descarga para PER_2024
-          div(
-            class = "download-card",
-            card(
-              card_body(
-                div(class = "text-center"),
-                div(class = "download-icon", bsicons::bs_icon("clipboard-data")),
-                h4(class = "text-center", "Encuesta de Percepción Ciudadana"),
-                p(class = "text-center", "Datos recopilados en febrero 2025"),
-                p(class = "text-center text-muted", textOutput("per_info")),
+        # Add class to the container div instead
+        div(
+          class = "year-tabs",
+          # Tabs for switching between years - removing the class parameter
+          navset_pill(
+            id = "download_year_tabs",
+            
+            nav_panel(
+              title = "Datos 2024",
+              value = "2024",
+              
+              layout_columns(
+                col_widths = c(6, 6),
+                
+                # Tarjeta de descarga para PER_2024
                 div(
-                  class = "d-grid gap-2",
-                  downloadButton(
-                    "download_per_2024", 
-                    "Descargar PER_2024 (CSV)",
-                    class = "btn-primary"
-                  ),
-                  actionLink(
-                    "view_per_metadata", 
-                    "Ver diccionario de datos",
-                    class = "text-center"
+                  class = "download-card",
+                  card(
+                    card_body(
+                      div(class = "text-center"),
+                      div(class = "download-icon", bsicons::bs_icon("clipboard-data")),
+                      h4(class = "text-center", "Encuesta de Percepción Ciudadana 2024"),
+                      p(class = "text-center", "Datos recopilados en febrero 2025"),
+                      p(class = "text-center text-muted", textOutput("per_2024_info")),
+                      div(
+                        class = "d-grid gap-2",
+                        downloadButton(
+                          "download_per_2024", 
+                          "Descargar PER_2024 (CSV)",
+                          class = "btn-primary"
+                        ),
+                        actionLink(
+                          "view_per_2024_metadata", 
+                          "Ver diccionario de datos",
+                          class = "text-center"
+                        )
+                      )
+                    )
+                  )
+                ),
+                
+                # Tarjeta de descarga para PAR_2024
+                div(
+                  class = "download-card",
+                  card(
+                    card_body(
+                      div(class = "text-center"),
+                      div(class = "download-icon", bsicons::bs_icon("people-fill")),
+                      h4(class = "text-center", "Encuesta de Participación Ciudadana 2024"),
+                      p(class = "text-center", "Datos recopilados en febrero 2025"),
+                      p(class = "text-center text-muted", textOutput("par_2024_info")),
+                      div(
+                        class = "d-grid gap-2",
+                        downloadButton(
+                          "download_par_2024", 
+                          "Descargar PAR_2024 (CSV)",
+                          class = "btn-primary"
+                        ),
+                        actionLink(
+                          "view_par_2024_metadata", 
+                          "Ver diccionario de datos",
+                          class = "text-center"
+                        )
+                      )
+                    )
                   )
                 )
               )
-            )
-          ),
-          
-          # Tarjeta de descarga para PAR_2024
-          div(
-            class = "download-card",
-            card(
-              card_body(
-                div(class = "text-center"),
-                div(class = "download-icon", bsicons::bs_icon("people-fill")),
-                h4(class = "text-center", "Encuesta de Participación Ciudadana"),
-                p(class = "text-center", "Datos recopilados en febrero 2025"),
-                p(class = "text-center text-muted", textOutput("par_info")),
+            ),
+            
+            nav_panel(
+              title = "Datos 2023",
+              value = "2023",
+              
+              layout_columns(
+                col_widths = c(6, 6),
+                
+                # Tarjeta de descarga para PER_2023
                 div(
-                  class = "d-grid gap-2",
-                  downloadButton(
-                    "download_par_2024", 
-                    "Descargar PAR_2024 (CSV)",
-                    class = "btn-primary"
-                  ),
-                  actionLink(
-                    "view_par_metadata", 
-                    "Ver diccionario de datos",
-                    class = "text-center"
+                  class = "download-card",
+                  card(
+                    card_body(
+                      div(class = "text-center"),
+                      div(class = "download-icon", bsicons::bs_icon("clipboard-data")),
+                      h4(class = "text-center", "Encuesta de Percepción Ciudadana 2023"),
+                      p(class = "text-center", "Datos recopilados en noviembre 2023"),
+                      p(class = "text-center text-muted", textOutput("per_2023_info")),
+                      div(
+                        class = "d-grid gap-2",
+                        downloadButton(
+                          "download_per_2023", 
+                          "Descargar PER_2023 (CSV)",
+                          class = "btn-primary"
+                        ),
+                        actionLink(
+                          "view_per_2023_metadata", 
+                          "Ver diccionario de datos",
+                          class = "text-center"
+                        )
+                      )
+                    )
+                  )
+                ),
+                
+                # Tarjeta de descarga para PAR_2023
+                div(
+                  class = "download-card",
+                  card(
+                    card_body(
+                      div(class = "text-center"),
+                      div(class = "download-icon", bsicons::bs_icon("people-fill")),
+                      h4(class = "text-center", "Encuesta de Participación Ciudadana 2023"),
+                      p(class = "text-center", "Datos recopilados en noviembre 2023"),
+                      p(class = "text-center text-muted", textOutput("par_2023_info")),
+                      div(
+                        class = "d-grid gap-2",
+                        downloadButton(
+                          "download_par_2023", 
+                          "Descargar PAR_2023 (CSV)",
+                          class = "btn-primary"
+                        ),
+                        actionLink(
+                          "view_par_2023_metadata", 
+                          "Ver diccionario de datos",
+                          class = "text-center"
+                        )
+                      )
+                    )
                   )
                 )
               )
             )
           )
+        ),
+        
+        # Information callout about data comparison
+        div(
+          class = "callout callout-info mt-3",
+          h4("Comparación de datos entre años"),
+          p("Las encuestas de 2023 y 2024 siguen la misma metodología, lo que permite hacer comparaciones directas entre ambos conjuntos de datos. Los usuarios pueden descargar ambos años para realizar análisis comparativos o de tendencias. Algunas preguntas específicas pueden haber cambiado o sido actualizadas entre los diferentes años, consulte el diccionario de datos para más detalles.")
         ),
         
         # Data dictionary modal controls (hidden)
@@ -204,6 +301,14 @@ methodologyUI <- function() {
           p("Ambos estudios fueron diseñados con características metodológicas distintas y muestras específicas. Sin embargo, se realizaron de forma simultánea durante el mismo período de tiempo, dado que forman parte de una consulta ciudadana integral."),
           
           p("Las encuestas están respaldadas por una metodología robusta de múltiples etapas y una muestra estadística representativa y adecuada de la población juarense de 18 años en adelante. Este enfoque combina diversas técnicas estadísticas para garantizar la fiabilidad y la relevancia de los resultados obtenidos."),
+          
+          # Nueva sección sobre continuidad metodológica
+          div(
+            class = "callout callout-info",
+            h4("Continuidad metodológica en las encuestas 2023-2024"),
+            p("La metodología aplicada en las encuestas de 2023 y 2024 mantiene la misma estructura, técnicas de muestreo y selección de participantes. Esta consistencia metodológica es fundamental para asegurar la comparabilidad de los datos entre diferentes años, permitiendo análisis de tendencias y cambios en la percepción y participación ciudadana."),
+            p("Las variaciones entre ambos años están principalmente relacionadas con ajustes menores en algunas preguntas específicas para reflejar mejor el contexto actual, pero sin alterar la esencia y objetivos de la investigación.")
+          ),
           
           # Determinación del tamaño de la muestra
           h3("Determinación del tamaño de la muestra"),
@@ -313,7 +418,15 @@ methodologyUI <- function() {
           p("Hombres y mujeres mayores de edad con residencia en la vivienda seleccionada."),
           
           h3("Levantamiento de campo"),
-          p("El levantamiento de campo se llevó a cabo del 10 al 28 de febrero del 2025. Se aplicó cada cuestionario cara a cara en la vivienda del entrevistado.")
+          div(
+            id = "fechas_levantamiento",
+            p("El levantamiento de campo se realizó en los siguientes periodos:"),
+            tags$ul(
+              tags$li(tags$strong("Encuestas 2023:"), " del 6 al 26 de noviembre del 2023."),
+              tags$li(tags$strong("Encuestas 2024:"), " del 10 al 28 de febrero del 2025.")
+            ),
+            p("En todos los casos, se aplicó cada cuestionario cara a cara en la vivienda del entrevistado.")
+          )
         )
       )
     ),
@@ -333,17 +446,38 @@ methodologyUI <- function() {
             tags$li(tags$strong("Q[número]"), ": Respuestas a preguntas principales"),
             tags$li(tags$strong("Q[número].[subnúmero]"), ": Respuestas a subpreguntas o ítems dentro de una pregunta principal"),
             tags$li(tags$strong("DISTRICT"), ": Distrito electoral al que pertenece el encuestado"),
+            tags$li(tags$strong("GENDER"), ": Género del encuestado"),
+            tags$li(tags$strong("AGE_GROUP"), ": Grupo de edad del encuestado"),
             tags$li(tags$strong("TIMESTAMP"), ": Fecha y hora de la entrevista")
+          )
+        ),
+        
+        div(
+          class = "callout callout-warning mt-4",
+          h4("Diferencias entre conjuntos de datos 2023 y 2024"),
+          p("Al comparar datos entre 2023 y 2024, tenga en cuenta que:"),
+          tags$ul(
+            tags$li("Algunas preguntas específicas pueden haber sido modificadas o actualizadas."),
+            tags$li("La codificación de ciertas respuestas puede variar. Consulte el diccionario de datos para cada conjunto."),
+            tags$li("Los identificadores de preguntas (Q[número]) son consistentes en la mayoría de los casos, pero puede haber excepciones."),
+            tags$li("La estructura general de ambos conjuntos de datos es compatible para realizar análisis comparativos.")
           ),
-          p("Para más información sobre la estructura de los datos o el diccionario de variables, puede contactar al equipo de investigación.")
+          p("Para más información sobre la estructura de los datos o el diccionario de variables, puede consultar los diccionarios de datos disponibles para cada conjunto.")
         )
       )
     ),
     
     # Pie de página
     card(
-      p("Encuestas realizadas por Plan Estratégico de Juárez", class = "text-center text-muted"),
-      p("Última actualización: Marzo 2025", class = "text-center text-muted")
+      layout_columns(
+        col_widths = c(6, 6),
+        div(
+          p("Encuestas realizadas por Plan Estratégico de Juárez", class = "text-center text-muted")
+        ),
+        div(
+          p("Última actualización: Abril 2025", class = "text-center text-muted")
+        )
+      )
     )
   )
 }

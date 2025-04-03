@@ -1,0 +1,131 @@
+/* Base styling */
+:root {
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --accent-color: #ffd700;
+  --bg-color: #f8f9fa;
+  --text-color: #333;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Navigation styling */
+.navbar {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+/* Card styling */
+.card {
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: all 0.3s ease;
+  border: none;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  background-color: rgba(13, 110, 253, 0.05);
+  border-bottom: 1px solid rgba(13, 110, 253, 0.1);
+  font-weight: 500;
+}
+
+/* Navigation card styles */
+.nav-card {
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  height: 100%;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.nav-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.nav-card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: var(--primary-color);
+}
+
+.nav-card-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: var(--text-color);
+}
+
+/* Dashboard header styling */
+.dashboard-header {
+  margin-top: 20px;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* Dashboard footer */
+.dashboard-footer {
+  margin-top: 50px;
+  padding: 20px 0;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+/* Info boxes */
+.info-box {
+  padding: 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 15px;
+  background-color: white;
+  box-shadow: var(--box-shadow);
+}
+
+/* Back button styling */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px 16px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--primary-color);
+  transition: all 0.2s;
+}
+
+.back-link:hover {
+  background-color: #e9ecef;
+  text-decoration: none;
+}
+
+.back-link i {
+  margin-right: 8px;
+}
+/* Navbar styling override */
+.navbar.bg-primary {
+  background-color: #0d6efd !important;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Add more space between timeline and nav items */
+.navbar > .container-fluid {
+  justify-content: flex-start;
+}

@@ -1,44 +1,50 @@
-#' @export
+# Enhanced theme_config with a more cohesive color palette
 theme_config <- list(
   # Base colors
   colors = list(
-    primary = "#1f77b4",
-    secondary = "#E74C3C",
-    neutral = "#95A5A6",
-    highlight = "#3498DB",
-    background = "#FFFFFF",
-    text = "#2C3E50"
+    primary = "#0D6EFD",       # Primary blue
+    secondary = "#6C757D",     # Secondary gray
+    success = "#2A9D8F",       # Green for positive values
+    warning = "#E9C46A",       # Yellow for warnings
+    danger = "#E76F51",        # Red for negative or alerts
+    info = "#4CC9F0",          # Light blue for information
+    light = "#F8F9FA",         # Light background
+    dark = "#212529",          # Dark text
+    background = "#FFFFFF",    # White background
+    text = "#212529"           # Dark text
   ),
   
-  # Categorical palettes
+ 
+  # Categorical palettes - coordinated colors
   palettes = list(
-    district = c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-                 "#8c564b", "#e377c2", "#bcbd22", "#17becf"),
+    district = c("#0D6EFD", "#4361EE", "#3A0CA3", "#7209B7", "#F72585",
+                 "#4CC9F0", "#4895EF", "#560BAD", "#B5179E", "#F15BB5"),
     gender = c("#FF69B4", "#4169E1"),
     age_group = c("#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854"),
-    sequential = colorRampPalette(c("#FFFFFF", "#2C3E50"))(9),
-    diverging = colorRampPalette(c("#E74C3C", "#FFFFFF", "#3498DB"))(11)
+    sequential = colorRampPalette(c("#F8F9FA", "#212529"))(9),
+    diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#0D6EFD"))(11)
   ),
   
-  # Typography
+  # Enhanced typography
   typography = list(
-    font_family = "Arial",
+    font_family = "'Roboto', 'Segoe UI', Arial, sans-serif",
     sizes = list(
-      title = 16,
-      subtitle = 14,
+      title = 22,
+      subtitle = 18,
       axis = 12,
-      text = 10
+      text = 14
     )
   ),
   
-  # Layout
+  # Enhanced layout
   layout = list(
     margin = list(l = 50, r = 20, t = 50, b = 50),
     padding = list(
-      small = 5,
-      medium = 10,
-      large = 20
-    )
+      small = 8,
+      medium = 16,
+      large = 24
+    ),
+    border_radius = "0.375rem"
   )
 )
 
@@ -63,38 +69,59 @@ apply_plotly_theme <- function(p, title = "", xlab = "", ylab = "", custom_theme
         )
       ),
       xaxis = list(
-        title = xlab,
-        titlefont = list(
-          family = active_theme$typography$font_family,
-          size = active_theme$typography$sizes$axis,
-          color = active_theme$colors$text
+        title = list(
+          text = xlab,
+          font = list(
+            family = active_theme$typography$font_family,
+            size = active_theme$typography$sizes$axis,
+            color = active_theme$colors$text
+          ),
+          standoff = 15
         ),
         tickfont = list(
           family = active_theme$typography$font_family,
           size = active_theme$typography$sizes$text
         ),
-        gridcolor = active_theme$colors$neutral,
-        showgrid = TRUE
+        gridcolor = "rgba(0, 0, 0, 0.05)",
+        showgrid = TRUE,
+        zeroline = FALSE
       ),
       yaxis = list(
-        title = ylab,
-        titlefont = list(
-          family = active_theme$typography$font_family,
-          size = active_theme$typography$sizes$axis,
-          color = active_theme$colors$text
+        title = list(
+          text = ylab,
+          font = list(
+            family = active_theme$typography$font_family,
+            size = active_theme$typography$sizes$axis,
+            color = active_theme$colors$text
+          ),
+          standoff = 15
         ),
         tickfont = list(
           family = active_theme$typography$font_family,
           size = active_theme$typography$sizes$text
         ),
-        gridcolor = active_theme$colors$neutral,
-        showgrid = TRUE
+        gridcolor = "rgba(0, 0, 0, 0.05)",
+        showgrid = TRUE,
+        zeroline = FALSE
       ),
       paper_bgcolor = active_theme$colors$background,
       plot_bgcolor = active_theme$colors$background,
-      margin = active_theme$layout$margin
+      margin = list(l = 60, r = 30, t = 60, b = 60),
+      hoverlabel = list(
+        bgcolor = "#FFF",
+        bordercolor = active_theme$colors$primary,
+        font = list(
+          family = active_theme$typography$font_family,
+          size = active_theme$typography$sizes$text,
+          color = active_theme$colors$text
+        )
+      ),
+      autosize = TRUE
     ) %>%
-    config(displayModeBar = FALSE)
+    config(
+      displayModeBar = FALSE,
+      responsive = TRUE
+    )
 }
 
 
@@ -279,4 +306,30 @@ apply_custom_theme <- function(p, custom_theme, title = "", xlab = "", ylab = ""
       margin = custom_theme$layout$margin
     ) %>%
     config(displayModeBar = FALSE)
+}
+
+apply_leaflet_theme <- function(map, title = NULL, custom_theme = NULL) {
+  # Use provided custom theme or fall back to default theme_config
+  active_theme <- if (!is.null(custom_theme)) custom_theme else theme_config
+  
+  # Add title if provided
+  if (!is.null(title)) {
+    map <- map %>% 
+      addControl(
+        html = paste0('<div style="padding: 6px 8px; background: white; 
+                      box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 5px; 
+                      font-weight: bold; font-size: 14px;">', title, '</div>'),
+        position = "topright"
+      )
+  }
+  
+  # Add consistent styling to the map
+  map %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    # Add fullscreen option
+    addFullscreenControl() %>%
+    # Add scale bar
+    addScaleBar(position = "bottomleft") %>%
+    # Set view to Ciudad Juárez (approximate)
+    setView(lng = -106.4245, lat = 31.6904, zoom = 11)
 }

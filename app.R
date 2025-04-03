@@ -137,22 +137,27 @@ create_dashboard_footer <- function() {
 
 # Define UI using page_navbar
 ui <- page_navbar(
+  shinyjs::useShinyjs(),
+
   # Title with proper positioning for timeline slider
   title = div(
-    class = "navbar-title-container d-flex align-items-center",
-    span("Dashboard AEJ", class = "me-5"),
+    class = "d-flex align-items-center flex-grow-1 navbar-brand-container",
+    span("Dashboard AEJ", class = "navbar-brand me-auto"),
     div(
-      class = "year-timeline d-flex align-items-center ms15",
-      div(class = "year-connector"),
+      class = "timeline-container d-none d-md-flex", # Hide on small screens
       div(
-        class = "year-dot", id = "dot2023",
-        div(class = "year-label", "2023"),
-        onclick = "selectTimelineYear('2023')"
-      ),
-      div(
-        class = "year-dot active", id = "dot2024",
-        div(class = "year-label", "2024"),
-        onclick = "selectTimelineYear('2024')"
+        class = "year-timeline",
+        div(class = "year-connector"),
+        div(
+          class = "year-dot", id = "dot2023",
+          div(class = "year-label", "2023"),
+          onclick = "selectTimelineYear('2023')"
+        ),
+        div(
+          class = "year-dot active", id = "dot2024",
+          div(class = "year-label", "2024"),
+          onclick = "selectTimelineYear('2024')"
+        )
       )
     )
   ),
@@ -177,7 +182,7 @@ ui <- page_navbar(
         display: flex;
         align-items: center;
         padding: 0;
-        min-width: 350px; /* Ensure enough space */
+        min-width: 300px; /* Ensure enough space */
       }
       /* Timeline Slider */
       .year-timeline {
@@ -265,17 +270,23 @@ ui <- page_navbar(
     
     # Timeline slider JavaScript
     tags$script(HTML("
-      function selectTimelineYear(year) {
-        $('.year-dot').removeClass('active');
-        $('#dot' + year).addClass('active');
-        Shiny.setInputValue('surveyYear', year);
-      }
+    function selectTimelineYear(year) {
+      $('.year-dot').removeClass('active');
+      $('#dot' + year).addClass('active');
       
-      $(document).ready(function() {
-        // Initialize with the default selected year
-        selectTimelineYear('2024');
-      });
-    "))
+      // Also update mobile buttons
+      $('.mobile-year-selector button').removeClass('active');
+      $('#year' + year).addClass('active');
+      
+      // Set the input value
+      Shiny.setInputValue('surveyYear', year);
+    }
+    
+    $(document).ready(function() {
+      // Initialize with the default selected year
+      selectTimelineYear('2024');
+    });
+  "))
   ),
   
   # Main overview tab
@@ -284,7 +295,14 @@ ui <- page_navbar(
     icon = icon("home"),
     value = "overview",
     create_dashboard_header("Dashboard General", "Vista general del estado de Ciudad Juárez según las encuestas más recientes."),
-
+    conditionalPanel(
+      condition = "$(window).width() < 768",
+      div(
+        class = "mobile-year-selector",
+        actionButton("year2023", "2023", class = "btn-outline-primary"),
+        actionButton("year2024", "2024", class = "btn-outline-primary active")
+      )
+    ),
     # Dashboard overview content
     div(
  
@@ -609,9 +627,10 @@ ui <- page_navbar(
 
 # Define server
 server <- function(input, output, session) {
-  selectedYear <- reactiveVal("2024")
-  selectedYear <- reactive({
-    input$surveyYear
+  selectedYear <- reactiveVal("2024")  # Initialize with default value
+
+  observeEvent(input$surveyYear, {
+    selectedYear(input$surveyYear)
   })
   session$userData$selectedYear <- selectedYear
 
@@ -619,7 +638,40 @@ server <- function(input, output, session) {
     nav_value <- input$nav_target
     updateNavbarPage(session, "navbar", selected = nav_value)
   })
+  observeEvent(input$year2023, {
+    selectedYear("2023")
+    # Update desktop timeline dots via JS
+    session$sendCustomMessage(type = "updateTimeline", message = "2023")
+  })
   
+  observeEvent(input$year2024, {
+    selectedYear("2024")
+    # Update desktop timeline dots via JS
+    session$sendCustomMessage(type = "updateTimeline", message = "2024") 
+  })
+  
+  # Add this observer to update button classes based on selected year
+  observe({
+    req(selectedYear())
+    if (selectedYear() == "2023") {
+      shinyjs::removeClass("year2024", "active")
+      shinyjs::addClass("year2023", "active")
+    } else {
+      shinyjs::removeClass("year2023", "active")
+      shinyjs::addClass("year2024", "active")
+    }
+  })
+  
+  # Make sure the mobile buttons also update the timeline
+  observeEvent(input$year2023, {
+    # Both update the timeline dots and the input value
+    runjs("selectTimelineYear('2023')")
+    # No need to call selectedYear("2023") as the JS function will set the input value
+  })
+  
+  observeEvent(input$year2024, {
+    runjs("selectTimelineYear('2024')")
+  })
   # Initialize servers based on the current tab
   observe({
     req(input$navbar)

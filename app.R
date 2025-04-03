@@ -241,6 +241,16 @@ ui <- page_navbar(
         margin-left: 20px;
       }
       /* Responsive adjustments */
+      @media (max-width: 991px) {
+        .navbar-title-container {
+          width: auto;
+          margin-right: 20px;
+        }
+        .year-timeline {
+          margin-left: 15px;
+        }
+      }
+      
       @media (max-width: 768px) {
         .navbar-title-container {
           flex-direction: column;

@@ -285,3 +285,74 @@ body {
     margin-bottom: 5px;
   }
 }
+
+
+/* Ensure proper navbar height and alignment */
+.navbar {
+  min-height: 56px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Improved title container alignment */
+.navbar-title-container {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0;
+}
+
+/* Ensure navbar brand is vertically centered */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-right: 1rem;
+  padding: 0;
+}
+
+/* Center the dropdown vertically */
+.year-selector {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Make dropdown button align perfectly */
+.year-dropdown-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px; /* Fixed height */
+  padding: 0 1rem;
+  margin: 0;
+  background-color: rgba(255, 255, 255, 0.25);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  min-width: 90px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Make sure nav links are vertically centered too */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 1rem;
+}
+
+/* Ensure consistent alignment at all screen sizes */
+@media (max-width: 992px) {
+  .navbar {
+    padding: 0.5rem 1rem;
+  }
+}

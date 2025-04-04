@@ -135,12 +135,15 @@ create_dashboard_footer <- function() {
 
 
 
-# Define UI using page_navbar
 ui <- page_navbar(
-  # Title with properly styled dropdown
+  # Title with properly aligned dropdown
   title = div(
     class = "navbar-title-container",
-    span("Dashboard AEJ", class = "me-3"),
+    # Use a div with display:flex for better alignment
+    div(
+      class = "navbar-brand-container",
+      span("Dashboard AEJ", class = "navbar-brand")
+    ),
     # Custom styled dropdown
     div(
       class = "year-selector",
@@ -167,136 +170,84 @@ ui <- page_navbar(
   bg = "#0d6efd", 
   inverse = TRUE,
   
-  # Custom CSS for styling
+  # Add these additional styles to fix alignment
   header = tags$head(
-    # Add link to external CSS file
+    # Your existing links
     tags$link(rel = "stylesheet", href = "styles.css"),
     tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
     tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"),
     
-    # Updated CSS for year selector dropdown
+    # Add these additional alignment styles
     tags$style(HTML("
-      /* Navbar styling */
+      /* Navbar and title container */
       .navbar {
-        background-color: #0d6efd !important;
-        padding: 0.5rem 1rem;
+        min-height: 56px;
+        display: flex;
+        align-items: center;
       }
       
       .navbar-title-container {
         display: flex;
         align-items: center;
+        height: 100%;
         padding: 0;
       }
       
-      /* Year dropdown styling */
-      .year-dropdown-btn {
-        background-color: rgba(255, 255, 255, 0.25);
-        border: none;
-        border-radius: 20px;
-        color: white;
-        font-weight: bold;
-        padding: 0.375rem 1rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      .navbar-brand-container {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        min-width: 90px;
+        height: 100%;
       }
       
-      .year-dropdown-btn:hover, .year-dropdown-btn:focus {
-        background-color: rgba(255, 255, 255, 0.35);
-        color: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      .navbar-brand {
+        margin: 0;
+        padding: 0;
+        font-weight: bold;
+        line-height: 1.5;
       }
       
-      .year-selector .dropdown-menu {
-        background-color: #0d6efd;
-        border-radius: 15px;
-        margin-top: 5px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        border: none;
-        min-width: 5rem;
-        padding: 0.5rem 0;
+      /* Year dropdown vertical alignment */
+      .year-selector {
+        margin-left: 1rem;
+        display: flex;
+        align-items: center;
+        height: 100%;
       }
       
-      .year-selector .dropdown-item {
-        color: white;
-        font-weight: 500;
-        text-align: center;
-        padding: 0.5rem 1rem;
-      }
-      
-      .year-selector .dropdown-item:hover, .year-selector .dropdown-item:focus {
-        background-color: rgba(255, 255, 255, 0.15);
-      }
-      
-      /* Make sure navbar elements don't overflow */
-      .container-fluid {
-        padding-left: 1rem;
-        padding-right: 1rem;
-      }
-      
-      /* Ensure hamburger menu is visible */
-      .navbar-toggler {
-        display: block !important;
-        margin-left: auto;
-        z-index: 1050;
-        padding: 0.375rem 0.5rem;
-      }
-      
-      /* Responsive behavior */
-      @media (max-width: 992px) {
-        .navbar-collapse {
-          position: absolute;
-          top: 56px;
-          left: 0;
-          right: 0;
-          background-color: #0d6efd;
-          padding: 1rem;
-          z-index: 1040;
-        }
-      }
-      
-      @media (max-width: 576px) {
-        .navbar {
-          padding-left: 0.5rem;
-          padding-right: 0.5rem;
-        }
-        
-        .navbar-title-container {
-          width: auto;
-        }
-        
-        .navbar-brand {
-          font-size: 1rem;
-          margin-right: 0.5rem;
-        }
-        
-        .year-dropdown-btn {
-          padding: 0.25rem 0.75rem;
-          min-width: 80px;
-          font-size: 0.9rem;
-        }
-        
-        /* Ensure no horizontal overflow */
-        body {
-          overflow-x: hidden;
-        }
+      .year-dropdown-btn {
+        height: 38px;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
       }
     ")),
-    
-    # Add JavaScript to update dropdown text
     tags$script(HTML("
-      $(document).ready(function() {
-        // Update dropdown button text based on selected year
-        Shiny.addCustomMessageHandler('updateYearDropdown', function(year) {
-          $('#yearDropdown').text(year);
-        });
-        
-        // Initialize dropdown to 2024
-        $('#yearDropdown').text('2024');
+  $(document).ready(function() {
+    // Update dropdown button text when year changes
+    Shiny.addCustomMessageHandler('updateYearDropdown', function(year) {
+      $('#yearDropdown').text(year);
+      
+      // Also visually update which dropdown item appears selected
+      $('.year-selector .dropdown-item').removeClass('active');
+      $('.year-selector .dropdown-item').each(function() {
+        if ($(this).text() === year) {
+          $(this).addClass('active');
+        }
       });
-    "))
+    });
+    
+    // Initialize dropdown to 2024
+    $('#yearDropdown').text('2024');
+    
+    // Make sure clicking dropdown items properly triggers the Shiny input
+    $('.year-selector .dropdown-item').on('click', function(e) {
+      e.preventDefault();
+      var year = $(this).text();
+      Shiny.setInputValue('surveyYear', year);
+      $('#yearDropdown').text(year);
+    });
+  });
+"))
   ),
   
   # Main overview tab
@@ -627,22 +578,42 @@ ui <- page_navbar(
   ),
 )
 
-# Define server
 server <- function(input, output, session) {
-# Create a reactive value for the selected year
-selectedYear <- reactive({
-  input$surveyYear
-})
-
-# Store the selected year in session$userData for access by other modules
-observe({
-  session$userData$selectedYear <- selectedYear()
-})
-
+ # Use reactiveVal with default value of "2024"
+ selectedYearVal <- reactiveVal("2024")
+  
+ # Create a reactive expression that reads from the reactiveVal
+ selectedYear <- reactive({
+   selectedYearVal()
+ })
+ 
+ # Update the reactiveVal when user selects a year
+ observeEvent(input$surveyYear, {
+   if (!is.null(input$surveyYear)) {
+     selectedYearVal(input$surveyYear)
+     # Update dropdown button text
+     session$sendCustomMessage("updateYearDropdown", input$surveyYear)
+   }
+ }, ignoreInit = FALSE)
+ 
+ # Store the reactive expression in session$userData for module access
+ session$userData$selectedYear <- selectedYear
+ 
+ # Set initial dropdown text on load
+ # This ensures the dropdown shows 2024 even before any user interaction
+ session$sendCustomMessage("updateYearDropdown", "2024")
+  
+  # Handle navigation between tabs
   observeEvent(input$nav_target, {
     nav_value <- input$nav_target
     updateNavbarPage(session, "navbar", selected = nav_value)
+  })
   
+  # Initialize servers based on the current tab
+  observe({
+    req(input$navbar)
+    # Get the current tab value
+    current_tab <- input$navbar
     
     # Initialize the appropriate server module
     if (current_tab == "wellness") {
@@ -689,7 +660,7 @@ observe({
       civicServer(input, output, session)
     } else if (current_tab == "community") {
       communityServer(input, output, session)
-    }else if (current_tab == "methodology") {
+    } else if (current_tab == "methodology") {
       methodologyServer(input, output, session)
     }
   })

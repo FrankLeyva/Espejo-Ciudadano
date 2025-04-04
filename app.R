@@ -137,26 +137,28 @@ create_dashboard_footer <- function() {
 
 # Define UI using page_navbar
 ui <- page_navbar(
-  shinyjs::useShinyjs(),
-
-  # Title with proper positioning for timeline slider
+  # Title with properly styled dropdown
   title = div(
-    class = "d-flex align-items-center flex-grow-1 navbar-brand-container",
-    span("Dashboard AEJ", class = "navbar-brand me-auto"),
+    class = "navbar-title-container",
+    span("Dashboard AEJ", class = "me-3"),
+    # Custom styled dropdown
     div(
-      class = "timeline-container d-none d-md-flex", # Hide on small screens
+      class = "year-selector",
       div(
-        class = "year-timeline",
-        div(class = "year-connector"),
-        div(
-          class = "year-dot", id = "dot2023",
-          div(class = "year-label", "2023"),
-          onclick = "selectTimelineYear('2023')"
+        class = "dropdown",
+        tags$button(
+          class = "btn dropdown-toggle year-dropdown-btn",
+          type = "button",
+          id = "yearDropdown",
+          `data-bs-toggle` = "dropdown",
+          `aria-expanded` = "false",
+          "2024"
         ),
-        div(
-          class = "year-dot active", id = "dot2024",
-          div(class = "year-label", "2024"),
-          onclick = "selectTimelineYear('2024')"
+        tags$ul(
+          class = "dropdown-menu",
+          `aria-labelledby` = "yearDropdown",
+          tags$li(tags$a(class = "dropdown-item", href = "#", onclick = "Shiny.setInputValue('surveyYear', '2023')", "2023")),
+          tags$li(tags$a(class = "dropdown-item", href = "#", onclick = "Shiny.setInputValue('surveyYear', '2024')", "2024"))
         )
       )
     )
@@ -164,129 +166,137 @@ ui <- page_navbar(
   id = "navbar",
   bg = "#0d6efd", 
   inverse = TRUE,
-  # Custom CSS for styling - Update this part
+  
+  # Custom CSS for styling
   header = tags$head(
     # Add link to external CSS file
     tags$link(rel = "stylesheet", href = "styles.css"),
     tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
     tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"),
     
-    # Updated Timeline Slider CSS
+    # Updated CSS for year selector dropdown
     tags$style(HTML("
       /* Navbar styling */
       .navbar {
         background-color: #0d6efd !important;
+        padding: 0.5rem 1rem;
       }
       
       .navbar-title-container {
         display: flex;
         align-items: center;
         padding: 0;
-        min-width: 300px; /* Ensure enough space */
       }
-      /* Timeline Slider */
-      .year-timeline {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        background: linear-gradient(to right, #7b68ee, #0d6efd);
+      
+      /* Year dropdown styling */
+      .year-dropdown-btn {
+        background-color: rgba(255, 255, 255, 0.25);
+        border: none;
         border-radius: 20px;
-        padding: 6px 15px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        width: 150px;
-        margin-left: 15px;
-      }
-      .year-dot {
-        position: relative;
-        width: 24px;
-        height: 24px;
-        margin: 0 10px;
-        cursor: pointer;
-        z-index: 2;
-      }
-      .year-dot::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 14px;
-        height: 14px;
-        background-color: white;
-        border-radius: 50%;
-        transition: all 0.3s;
-      }
-      .year-dot.active::before {
-        width: 20px;
-        height: 20px;
-        background-color: #ffd700;
-        box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-      }
-      .year-label {
-        position: absolute;
-        top: -22px;
-        left: 50%;
-        transform: translateX(-50%);
         color: white;
         font-weight: bold;
-        font-size: 13px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        padding: 0.375rem 1rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 90px;
       }
-      .year-connector {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background-color: rgba(255,255,255,0.5);
-        transform: translateY(-50%);
-        z-index: 1;
+      
+      .year-dropdown-btn:hover, .year-dropdown-btn:focus {
+        background-color: rgba(255, 255, 255, 0.35);
+        color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       }
-      .navbar-nav {
-        margin-left: 20px;
+      
+      .year-selector .dropdown-menu {
+        background-color: #0d6efd;
+        border-radius: 15px;
+        margin-top: 5px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        border: none;
+        min-width: 5rem;
+        padding: 0.5rem 0;
       }
-      /* Responsive adjustments */
-      @media (max-width: 991px) {
-        .navbar-title-container {
-          width: auto;
-          margin-right: 20px;
-        }
-        .year-timeline {
-          margin-left: 15px;
+      
+      .year-selector .dropdown-item {
+        color: white;
+        font-weight: 500;
+        text-align: center;
+        padding: 0.5rem 1rem;
+      }
+      
+      .year-selector .dropdown-item:hover, .year-selector .dropdown-item:focus {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+      
+      /* Make sure navbar elements don't overflow */
+      .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      
+      /* Ensure hamburger menu is visible */
+      .navbar-toggler {
+        display: block !important;
+        margin-left: auto;
+        z-index: 1050;
+        padding: 0.375rem 0.5rem;
+      }
+      
+      /* Responsive behavior */
+      @media (max-width: 992px) {
+        .navbar-collapse {
+          position: absolute;
+          top: 56px;
+          left: 0;
+          right: 0;
+          background-color: #0d6efd;
+          padding: 1rem;
+          z-index: 1040;
         }
       }
       
-      @media (max-width: 768px) {
-        .navbar-title-container {
-          flex-direction: column;
-          align-items: flex-start;
+      @media (max-width: 576px) {
+        .navbar {
+          padding-left: 0.5rem;
+          padding-right: 0.5rem;
         }
-        .year-timeline {
-          margin-left: 0;
-          margin-top: 8px;
+        
+        .navbar-title-container {
+          width: auto;
+        }
+        
+        .navbar-brand {
+          font-size: 1rem;
+          margin-right: 0.5rem;
+        }
+        
+        .year-dropdown-btn {
+          padding: 0.25rem 0.75rem;
+          min-width: 80px;
+          font-size: 0.9rem;
+        }
+        
+        /* Ensure no horizontal overflow */
+        body {
+          overflow-x: hidden;
         }
       }
     ")),
     
-    # Timeline slider JavaScript
+    # Add JavaScript to update dropdown text
     tags$script(HTML("
-    function selectTimelineYear(year) {
-      $('.year-dot').removeClass('active');
-      $('#dot' + year).addClass('active');
-      
-      // Also update mobile buttons
-      $('.mobile-year-selector button').removeClass('active');
-      $('#year' + year).addClass('active');
-      
-      // Set the input value
-      Shiny.setInputValue('surveyYear', year);
-    }
-    
-    $(document).ready(function() {
-      // Initialize with the default selected year
-      selectTimelineYear('2024');
-    });
-  "))
+      $(document).ready(function() {
+        // Update dropdown button text based on selected year
+        Shiny.addCustomMessageHandler('updateYearDropdown', function(year) {
+          $('#yearDropdown').text(year);
+        });
+        
+        // Initialize dropdown to 2024
+        $('#yearDropdown').text('2024');
+      });
+    "))
   ),
   
   # Main overview tab
@@ -295,14 +305,6 @@ ui <- page_navbar(
     icon = icon("home"),
     value = "overview",
     create_dashboard_header("Dashboard General", "Vista general del estado de Ciudad Juárez según las encuestas más recientes."),
-    conditionalPanel(
-      condition = "$(window).width() < 768",
-      div(
-        class = "mobile-year-selector",
-        actionButton("year2023", "2023", class = "btn-outline-primary"),
-        actionButton("year2024", "2024", class = "btn-outline-primary active")
-      )
-    ),
     # Dashboard overview content
     div(
  
@@ -627,56 +629,20 @@ ui <- page_navbar(
 
 # Define server
 server <- function(input, output, session) {
-  selectedYear <- reactiveVal("2024")  # Initialize with default value
+# Create a reactive value for the selected year
+selectedYear <- reactive({
+  input$surveyYear
+})
 
-  observeEvent(input$surveyYear, {
-    selectedYear(input$surveyYear)
-  })
-  session$userData$selectedYear <- selectedYear
+# Store the selected year in session$userData for access by other modules
+observe({
+  session$userData$selectedYear <- selectedYear()
+})
 
   observeEvent(input$nav_target, {
     nav_value <- input$nav_target
     updateNavbarPage(session, "navbar", selected = nav_value)
-  })
-  observeEvent(input$year2023, {
-    selectedYear("2023")
-    # Update desktop timeline dots via JS
-    session$sendCustomMessage(type = "updateTimeline", message = "2023")
-  })
   
-  observeEvent(input$year2024, {
-    selectedYear("2024")
-    # Update desktop timeline dots via JS
-    session$sendCustomMessage(type = "updateTimeline", message = "2024") 
-  })
-  
-  # Add this observer to update button classes based on selected year
-  observe({
-    req(selectedYear())
-    if (selectedYear() == "2023") {
-      shinyjs::removeClass("year2024", "active")
-      shinyjs::addClass("year2023", "active")
-    } else {
-      shinyjs::removeClass("year2023", "active")
-      shinyjs::addClass("year2024", "active")
-    }
-  })
-  
-  # Make sure the mobile buttons also update the timeline
-  observeEvent(input$year2023, {
-    # Both update the timeline dots and the input value
-    runjs("selectTimelineYear('2023')")
-    # No need to call selectedYear("2023") as the JS function will set the input value
-  })
-  
-  observeEvent(input$year2024, {
-    runjs("selectTimelineYear('2024')")
-  })
-  # Initialize servers based on the current tab
-  observe({
-    req(input$navbar)
-    # Get the current tab value
-    current_tab <- input$navbar
     
     # Initialize the appropriate server module
     if (current_tab == "wellness") {

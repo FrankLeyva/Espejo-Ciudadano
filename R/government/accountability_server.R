@@ -8,7 +8,18 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
   })
   
   # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to gobierno theme if nothing provided
+      get_section_theme("gobierno")
+    }
+  })
   
   # Callout for Q122 - Justice perception
   output$justice_perception <- renderText({
@@ -53,8 +64,8 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     x_labels <- c("1" = "Nunca", "2" = "Poco", "3" = "Algo", "4" = "Mucho")
     
     # Get colors from theme
-    bar_color <- if (!is.null(current_theme()) && !is.null(current_theme()$colors$primary)) {
-      current_theme()$colors$primary
+    bar_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$primary)) {
+      active_theme()$colors$primary
     } else {
       "#1f77b4"  # Default blue
     }
@@ -74,7 +85,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
         title = "¿El gobierno municipal castiga a servidores públicos corruptos?",
         xlab = "",
         ylab = "Frecuencia",
-        custom_theme = current_theme()
+        custom_theme = active_theme()
       ) %>%
       layout(
         xaxis = list(
@@ -102,8 +113,8 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     df <- data.frame(Value = values)
     
     # Get colors from theme
-    bar_color <- if (!is.null(current_theme()) && !is.null(current_theme()$colors$secondary)) {
-      current_theme()$colors$secondary
+    bar_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$secondary)) {
+      active_theme()$colors$secondary
     } else {
       "#9467bd"  # Default purple
     }
@@ -123,7 +134,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
         title = "¿El gobierno estatal castiga a servidores públicos corruptos?",
         xlab = "",
         ylab = "Frecuencia",
-        custom_theme = current_theme()
+        custom_theme = active_theme()
       ) %>%
       layout(
         xaxis = list(
@@ -151,8 +162,8 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     df <- data.frame(Value = values)
     
     # Get colors from theme
-    bar_color <- if (!is.null(current_theme()) && !is.null(current_theme()$colors$highlight)) {
-      current_theme()$colors$highlight
+    bar_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$highlight)) {
+      active_theme()$colors$highlight
     } else {
       "#d62728"  # Default red
     }
@@ -172,7 +183,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
         title = "¿El gobierno federal castiga a servidores públicos corruptos?",
         xlab = "",
         ylab = "Frecuencia",
-        custom_theme = current_theme()
+        custom_theme = active_theme()
       ) %>%
       layout(
         xaxis = list(
@@ -230,11 +241,11 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
       layout(
         title = list(
           text = title,
-          font = if (!is.null(current_theme())) {
+          font = if (!is.null(active_theme())) {
             list(
-              family = current_theme()$typography$font_family,
-              size = current_theme()$typography$sizes$title,
-              color = current_theme()$colors$text
+              family = active_theme()$typography$font_family,
+              size = active_theme()$typography$sizes$title,
+              color = active_theme()$colors$text
             )
           } else {
             list(

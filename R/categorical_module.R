@@ -251,93 +251,149 @@ create_category_bars <- function(data, max_categories = 15, title = "Distribuci�
            layout(title = paste("Error en la visualización:", e$message)))
   })
 }
-
 # Create pie chart (improved version with theme support)
-create_category_pie <- function(data, max_categories = 8, custom_theme = NULL) {
-  tryCatch({
-    # Input validation
-    if (is.null(data) || nrow(data) == 0 || !("value" %in% names(data))) {
-      return(plotly_empty() %>% 
-             layout(title = "No hay datos suficientes para visualizar"))
-    }
-    
-    # Calculate frequency table
-    freq_table <- table(data$value)
-    if (length(freq_table) == 0) {
-      return(plotly_empty() %>% 
-             layout(title = "No hay categorías para visualizar"))
-    }
-    
-    freq_data <- data.frame(
-      Category = names(freq_table),
-      Frequency = as.vector(freq_table),
-      Percentage = round(100 * as.vector(freq_table) / sum(freq_table), 2)
-    )
-    freq_data <- freq_data[order(-freq_data$Frequency), ]
-    
-    # Check if pie chart is appropriate (not too many categories)
-    if (nrow(freq_data) > max_categories) {
-      # Keep top categories and group others
-      top_categories <- freq_data[1:max_categories, ]
-      other_sum <- sum(freq_data$Frequency[(max_categories+1):nrow(freq_data)])
-      other_percent <- sum(freq_data$Percentage[(max_categories+1):nrow(freq_data)])
-      
-      freq_data <- rbind(
-        top_categories,
-        data.frame(
-          Category = "Otras categorías",
-          Frequency = other_sum,
-          Percentage = other_percent
-        )
-      )
-    }
-    
-    # Create custom colors if theme is provided
-    colors <- if (!is.null(custom_theme)) {
-      colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(nrow(freq_data))
-    } else {
-      colorRampPalette(c(theme_config$colors$primary, theme_config$colors$highlight))(nrow(freq_data))
-    }
-    
-    # Create pie chart with custom colors
-    plot_ly(
-      data = freq_data,
-      labels = ~Category,
-      values = ~Frequency,
-      type = "pie",
-      textinfo = "label+percent",
-      insidetextorientation = "radial",
-      marker = list(
-        colors = colors,
-        line = list(color = '#FFFFFF', width = 1)
-      ),
-      hoverinfo = "text",
-      text = ~paste0(Category, ": ", Frequency, " respuestas")
-    ) %>%
-      layout(
-        title = list(
-          text = "Distribución de Categorías",
-          font = if (!is.null(custom_theme)) {
-            list(
-              family = custom_theme$typography$font_family,
-              size = custom_theme$typography$sizes$title,
-              color = custom_theme$colors$text
-            )
-          } else {
-            list(
-              family = theme_config$typography$font_family,
-              size = theme_config$typography$sizes$title,
-              color = theme_config$colors$text
-            )
-          }
-        ),
-        showlegend = FALSE
-      )
-  }, error = function(e) {
-    warning(paste("Error in create_category_pie:", e$message))
+create_category_pie <- function(data, 
+  max_categories = 8, 
+  custom_theme = NULL,
+  highlight_max = TRUE,
+  palette = NULL,
+  hide_ns_nc = TRUE,
+  inverse = FALSE) {  # Added parameter for negative phrasing
+  
+  # Input validation
+  if (is.null(data) || nrow(data) == 0 || !("value" %in% names(data))) {
     return(plotly_empty() %>% 
-           layout(title = paste("Error en la visualización:", e$message)))
-  })
+           layout(title = "No hay datos suficientes para visualizar"))
+  }
+  
+  # Calculate frequency table
+  freq_table <- table(data$value)
+  if (length(freq_table) == 0) {
+    return(plotly_empty() %>% 
+           layout(title = "No hay categorías para visualizar"))
+  }
+  
+  freq_data <- data.frame(
+    Category = names(freq_table),
+    Frequency = as.vector(freq_table),
+    Percentage = round(100 * as.vector(freq_table) / sum(freq_table), 2)
+  )
+  freq_data <- freq_data[order(-freq_data$Frequency), ]
+  
+  # Filter out NS/NC categories if hide_ns_nc is TRUE
+  if (hide_ns_nc) {
+    # Common NS/NC category names in Spanish
+    ns_nc_patterns <- c("NS/NC", "No sabe", "No responde", "No contesta", "No hay", "No existe")
+    
+    # Find and remove any categories matching these patterns
+    for (pattern in ns_nc_patterns) {
+      matches <- grepl(pattern, freq_data$Category, ignore.case = TRUE)
+      if (any(matches) && sum(freq_data$Frequency[matches]) == 0) {
+        # Only remove if the frequency is 0
+        freq_data <- freq_data[!matches, ]
+      }
+    }
+    
+    # Check if we have data left after filtering
+    if (nrow(freq_data) == 0) {
+      return(plotly_empty() %>% 
+             layout(title = "No hay categorías para visualizar después de filtrar NS/NC"))
+    }
+    
+    # Recalculate percentages after filtering
+    freq_data$Percentage <- round(100 * freq_data$Frequency / sum(freq_data$Frequency), 2)
+  }
+  
+  # Check if pie chart is appropriate (not too many categories)
+  if (nrow(freq_data) > max_categories) {
+    # Keep top categories and group others
+    top_categories <- freq_data[1:max_categories, ]
+    other_sum <- sum(freq_data$Frequency[(max_categories+1):nrow(freq_data)])
+    other_percent <- sum(freq_data$Percentage[(max_categories+1):nrow(freq_data)])
+    
+    freq_data <- rbind(
+      top_categories,
+      data.frame(
+        Category = "Otras categorías",
+        Frequency = other_sum,
+        Percentage = other_percent
+      )
+    )
+  }
+  
+  # Determine active theme
+  active_theme <- if (!is.null(custom_theme)) custom_theme else theme_config
+  
+  # Get colors based on specified palette or default gradient
+  if (!is.null(palette) && palette %in% names(active_theme$palettes)) {
+    # Use specified palette from theme
+    palette_colors <- active_theme$palettes[[palette]]
+    if (length(palette_colors) < nrow(freq_data)) {
+      # Generate more colors if needed
+      colors <- colorRampPalette(palette_colors)(nrow(freq_data))
+    } else {
+      # Use colors from palette
+      colors <- palette_colors[1:nrow(freq_data)]
+    }
+  } else if (!is.null(palette) && palette == "categorical") {
+    # Use a special categorical palette that ensures distinct colors
+    categorical_colors <- c(
+      "#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F",
+      "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#BAB0AC"
+    )
+    # Generate more colors if needed
+    if (length(categorical_colors) < nrow(freq_data)) {
+      colors <- colorRampPalette(categorical_colors)(nrow(freq_data))
+    } else {
+      colors <- categorical_colors[1:nrow(freq_data)]
+    }
+  } else {
+    # Default gradient from primary to highlight
+    colors <- colorRampPalette(c(active_theme$colors$primary, active_theme$colors$highlight))(nrow(freq_data))
+  }
+  
+  # If inverse is TRUE, reverse the color order to match negative phrasing
+  if (inverse) {
+    colors <- rev(colors)
+  }
+  
+  # If highlight_max is TRUE, make the first slice (highest count) stand out
+  if (highlight_max && nrow(freq_data) > 0) {
+    if (inverse) {
+      # For negative questions, highlight the lowest category (now first due to reordering)
+      colors[nrow(freq_data)] <- active_theme$colors$accent
+    } else {
+      # For positive questions, highlight the highest category
+      colors[1] <- active_theme$colors$accent
+    }
+  }
+  
+  # Create pie chart
+  plot_ly(
+    data = freq_data,
+    labels = ~Category,
+    values = ~Frequency,
+    type = "pie",
+    textinfo = "label+percent",
+    insidetextorientation = "radial",
+    marker = list(
+      colors = colors,
+      line = list(color = "#FFFFFF", width = 1)
+    ),
+    hoverinfo = "text",
+    text = ~paste0(Frequency, " Respuestas")
+  ) %>%
+    layout(
+      title = list(
+        text = "Distribución de Categorías",
+        font = list(
+          family = active_theme$typography$font_family,
+          size = active_theme$typography$sizes$title,
+          color = active_theme$colors$text
+        )
+      ),
+      showlegend = FALSE
+    )
 }
 
 # Create heatmap for district distribution with theme support

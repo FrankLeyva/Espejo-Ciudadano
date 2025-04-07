@@ -17,8 +17,19 @@ participationServer <- function(input, output, session,current_theme = NULL) {
     })
   })
   
-  # Store current theme
-  current_theme <- reactiveVal(theme_config)
+  # Use the current theme
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to participacion theme if nothing provided
+      get_section_theme("participacion")
+    }
+  })
   
   # Social Movement Support Percentage
   output$social_movement_support <- renderText({
@@ -113,7 +124,7 @@ participationServer <- function(input, output, session,current_theme = NULL) {
       plot_data$Percentage <- round(100 * plot_data$Count / sum(plot_data$Count), 1)
       
       # Create color gradient based on interest level
-      colors <- colorRampPalette(c("#E1F5FE", "#01579B"))(5)
+      colors <- colorRampPalette(c("#FFAB91", "#E76F51"))(5)
       
       # Create pie chart
       plot_ly(
@@ -130,7 +141,7 @@ participationServer <- function(input, output, session,current_theme = NULL) {
       ) %>%
         layout(
           title = "Nivel de interés en participación política municipal",
-          showlegend = TRUE,
+          showlegend = FALSE,
           legend = list(
             orientation = "h",
             xanchor = "center",

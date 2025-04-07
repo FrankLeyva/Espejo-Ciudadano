@@ -16,9 +16,19 @@ representationServer <- function(input, output, session,current_theme = NULL) {
     })
   })
   
-  # Use the current theme
-  current_theme <- reactiveVal(theme_config)
-  
+   # Use the current theme
+   active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to gobierno theme if nothing provided
+      get_section_theme("gobierno")
+    }
+  })
   # KNOWLEDGE MAPS
   
   # Helper function to create district maps for knowledge questions
@@ -48,7 +58,7 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       question_id = "Q5",
       title = "Conocimiento del nombre del Regidor(a)",
       geo_data = geo_data(),
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -60,7 +70,7 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       question_id = "Q7",
       title = "Conocimiento del nombre del Síndico(a)",
       geo_data = geo_data(),
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
     # Q8: Map of knowledge of Diputado Local
@@ -71,7 +81,7 @@ representationServer <- function(input, output, session,current_theme = NULL) {
         question_id = "Q8",
         title = "Conocimiento del nombre del Diputado(a) Local y/o Estatal",
         geo_data = geo_data(),
-        custom_theme = current_theme()
+        custom_theme = active_theme()
       )
     })
   # Q9: Map of knowledge of Diputado
@@ -82,7 +92,7 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       question_id = "Q10",
       title = "Conocimiento del nombre del Diputado(a) Federal",
       geo_data = geo_data(),
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -253,7 +263,7 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       question_prefix = "Q6", 
       count = 20, 
       labels = regidores_labels,
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -265,7 +275,7 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       question_prefix = "Q9", 
       count = 9,  # Only use 9 instead of 10 since Q8.10 is not a name
       labels = diputados_locales_labels,
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -277,7 +287,7 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       question_prefix = "Q11", 
       count = 4, 
       labels = diputados_federales_labels,
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   

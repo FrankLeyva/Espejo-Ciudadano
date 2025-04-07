@@ -8,19 +8,29 @@ mobilityServer <- function(input, output, session,current_theme = NULL) {
     load_survey_data(survey_id)
   })
   
-  # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to movilidad theme if nothing provided
+      get_section_theme("movilidad")
+    }
+  })
   
   # Create bicycle distribution pie chart
   output$bicycles_pie <- renderPlotly({
     req(survey_data())
-    create_bicycle_distribution(survey_data()$responses, current_theme())
+    create_bicycle_distribution(survey_data()$responses, active_theme())
   })
   
   # Create vehicle distribution pie chart
   output$vehicles_pie <- renderPlotly({
     req(survey_data())
-    create_vehicle_distribution(survey_data()$responses, current_theme())
+    create_vehicle_distribution(survey_data()$responses, active_theme())
   })
   
   # Create work transportation mode plot
@@ -29,7 +39,7 @@ mobilityServer <- function(input, output, session,current_theme = NULL) {
     create_transport_modes_plot(
       survey_data()$responses, 
       mode_type = "work", 
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -39,7 +49,7 @@ mobilityServer <- function(input, output, session,current_theme = NULL) {
     create_transport_modes_plot(
       survey_data()$responses, 
       mode_type = "general", 
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
 }

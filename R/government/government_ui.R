@@ -57,7 +57,7 @@ governmentUI <- function() {
     h3(class = "section-header", "Dashboards específicos"),
     
     layout_columns(
-      col_widths = c(2.4,2.4,2.4,2.4,2.4),
+      col_widths = c(2,2,2,2,2),
       
       # Inequality Dashboard Card
       div(
@@ -145,7 +145,7 @@ governmentUI <- function() {
         tabsetPanel(
           tabPanel("Regidor/a", plotlyOutput("officials_knowledge_regidor_plot", height = "400px")),
           tabPanel("Síndico/a", plotlyOutput("officials_knowledge_sindico_plot", height = "400px")),
-          tabPanel("Diputado/a Local y/o Estatal", plotlyOutput("officials_knowledge_diputadol_plot", height = "400px")),
+          tabPanel("Diputado/a Local y/o Estatal", plotlyOutput("officials_knowledge_dipupadol_plot", height = "400px")),
           tabPanel("Diputado/a Federal", plotlyOutput("officials_knowledge_diputadof_plot", height = "400px"))
         )
       ),

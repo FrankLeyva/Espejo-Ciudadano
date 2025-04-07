@@ -19,8 +19,18 @@ transportationServer <- function(input, output, session,current_theme = NULL) {
     })
   })
   
-  # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to movilidad theme if nothing provided
+      get_section_theme("movilidad")
+    }
+  })
   
   # Prepare data for bus satisfaction map (Q75)
   output$bus_satisfaction_map <- renderLeaflet({
@@ -38,7 +48,7 @@ transportationServer <- function(input, output, session,current_theme = NULL) {
       geo_data = geo_data(),
       use_gradient = F,
       color_scale = "Blues",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -58,7 +68,7 @@ transportationServer <- function(input, output, session,current_theme = NULL) {
       geo_data = geo_data(),
       use_gradient = F,
       color_scale = "Blues",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -68,7 +78,7 @@ transportationServer <- function(input, output, session,current_theme = NULL) {
     create_transport_issues_plot(
       survey_data()$responses, 
       issue_type = "bus", 
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -78,7 +88,7 @@ transportationServer <- function(input, output, session,current_theme = NULL) {
     create_transport_issues_plot(
       survey_data()$responses, 
       issue_type = "juarez_bus", 
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
 }

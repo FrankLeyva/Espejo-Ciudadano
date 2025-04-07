@@ -54,7 +54,7 @@ culturalUI <- function() {
         title = "Actividades dentro del hogar",
         value = textOutput("home_activities_pct"),
         showcase = bsicons::bs_icon("house-fill"),
-        theme = value_box_theme(bg = "#2A9D8F", fg = "white")
+        theme = value_box_theme(bg = "#006D77", fg = "white")
       ),
       
       # Exercise activities
@@ -62,7 +62,7 @@ culturalUI <- function() {
         title = "Ejercicio o actividad física",
         value = textOutput("exercise_activities_pct"),
         showcase = bsicons::bs_icon("bicycle"),
-        theme = value_box_theme(bg = "#E9C46A", fg = "white")
+        theme = value_box_theme(bg = "#83C5BE", fg = "white")
       ),
       
       # Park/nature activities
@@ -70,7 +70,7 @@ culturalUI <- function() {
         title = "Contacto con la naturaleza",
         value = textOutput("nature_activities_pct"),
         showcase = bsicons::bs_icon("tree-fill"),
-        theme = value_box_theme(bg = "#6969B3", fg = "white")
+        theme = value_box_theme(bg = "#006D77", fg = "white")
       )
     ),
     

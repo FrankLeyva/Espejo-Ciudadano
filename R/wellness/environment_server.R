@@ -20,8 +20,18 @@ environmentServer <- function(input, output, session,current_theme = NULL) {
     })
   })
   
-  # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to bienestar theme if nothing provided
+      get_section_theme("bienestar")
+    }
+  })
   
   # Air quality map
   output$air_quality_map <- renderLeaflet({
@@ -38,7 +48,7 @@ environmentServer <- function(input, output, session,current_theme = NULL) {
       geo_data = geo_data(),
       use_gradient = F,
       color_scale = "Greens",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -57,7 +67,7 @@ environmentServer <- function(input, output, session,current_theme = NULL) {
       geo_data = geo_data(),
       use_gradient = F,
       color_scale = "Greens",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -76,7 +86,7 @@ environmentServer <- function(input, output, session,current_theme = NULL) {
       geo_data = geo_data(),
       use_gradient = F,
       color_scale = "Greens",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -95,7 +105,7 @@ environmentServer <- function(input, output, session,current_theme = NULL) {
       geo_data = geo_data(),
       use_gradient = F,
       color_scale = "Blues",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -104,8 +114,11 @@ environmentServer <- function(input, output, session,current_theme = NULL) {
     req(survey_data())
     create_env_problems_plot(
       survey_data()$responses,
-      custom_theme = current_theme()
-    )
+      custom_theme = active_theme()
+    ) %>% 
+      apply_plotly_theme(
+        title = ""
+      )
   })
 
 }

@@ -7,8 +7,19 @@ communityServer <- function(input, output, session,current_theme = NULL) {
     load_survey_data(survey_id)
   })
   
-  # Store current theme
-  current_theme <- reactiveVal(theme_config)
+  # Use the current theme
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to participacion theme if nothing provided
+      get_section_theme("participacion")
+    }
+  })
   
   # Organization participation plot (Q132.1-Q132.11)
   output$organizations_plot <- renderPlotly({
@@ -62,14 +73,14 @@ communityServer <- function(input, output, session,current_theme = NULL) {
       plot_data <- plot_data[order(-plot_data$Percentage), ]
       
       # Get colors from theme
-      primary_color <- if (!is.null(current_theme()$colors$primary)) {
-        current_theme()$colors$primary
+      primary_color <- if (!is.null(active_theme()$colors$primary)) {
+        active_theme()$colors$primary
       } else {
         "#0d6efd"  # Default blue
       }
       
-      highlight_color <- if (!is.null(current_theme()$colors$highlight)) {
-        current_theme()$colors$highlight
+      highlight_color <- if (!is.null(active_theme()$colors$highlight)) {
+        active_theme()$colors$highlight
       } else {
         "#28a745"  # Default green
       }
@@ -108,8 +119,8 @@ communityServer <- function(input, output, session,current_theme = NULL) {
           ),
           margin = list(l = 200, r = 20, t = 40, b = 30),
           font = list(
-            family = if (!is.null(current_theme()$typography$font_family)) current_theme()$typography$font_family else "Arial",
-            size = if (!is.null(current_theme()$typography$sizes$text)) current_theme()$typography$sizes$text else 12
+            family = if (!is.null(active_theme()$typography$font_family)) active_theme()$typography$font_family else "Arial",
+            size = if (!is.null(active_theme()$typography$sizes$text)) active_theme()$typography$sizes$text else 12
           )
         ) %>%
         config(displayModeBar = FALSE)
@@ -175,14 +186,14 @@ communityServer <- function(input, output, session,current_theme = NULL) {
       plot_data <- plot_data[order(-plot_data$Percentage), ]
       
       # Get colors from theme
-      primary_color <- if (!is.null(current_theme()$colors$primary)) {
-        current_theme()$colors$primary
+      primary_color <- if (!is.null(active_theme()$colors$primary)) {
+        active_theme()$colors$primary
       } else {
         "#0d6efd"  # Default blue
       }
       
-      highlight_color <- if (!is.null(current_theme()$colors$highlight)) {
-        current_theme()$colors$highlight
+      highlight_color <- if (!is.null(active_theme()$colors$highlight)) {
+        active_theme()$colors$highlight
       } else {
         "#28a745"  # Default green
       }
@@ -221,8 +232,8 @@ communityServer <- function(input, output, session,current_theme = NULL) {
           ),
           margin = list(l = 250, r = 20, t = 40, b = 30),
           font = list(
-            family = if (!is.null(current_theme()$typography$font_family)) current_theme()$typography$font_family else "Arial",
-            size = if (!is.null(current_theme()$typography$sizes$text)) current_theme()$typography$sizes$text else 12
+            family = if (!is.null(active_theme()$typography$font_family)) active_theme()$typography$font_family else "Arial",
+            size = if (!is.null(active_theme()$typography$sizes$text)) active_theme()$typography$sizes$text else 12
           )
         ) %>%
         config(displayModeBar = FALSE)

@@ -20,8 +20,18 @@ economyServer <- function(input, output, session,current_theme = NULL) {
     })
   })
   
-  # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to bienestar theme if nothing provided
+      get_section_theme("bienestar")
+    }
+  })
   
   # Process Q4 data for economic improvement map
   economic_improvement_data <- reactive({
@@ -47,7 +57,7 @@ output$economic_improvement_map <- renderLeaflet({
     highlight_extremes = TRUE,
     use_gradient = F,
     color_scale = "Blues",
-    custom_theme = current_theme()
+    custom_theme = active_theme()
   )
 })
   
@@ -71,8 +81,11 @@ output$economic_improvement_map <- renderLeaflet({
     create_category_pie(
       income_situation_data(),
       max_categories = 4,  # Exclude NS/NC
-      custom_theme = current_theme()
-    )
+      custom_theme = active_theme(),
+            highlight_max = F,
+            palette= 'sequential',
+            inverse =T
+    ) 
   })
   
   # Calculate income sufficiency percentage (options 1 and 2)

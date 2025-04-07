@@ -54,8 +54,9 @@ theme_config <- list(
       secondary = "#83C5BE",
       accent = "#006D77",
       palettes = list(
-        sequential = colorRampPalette(c("#F8F9FA", "#006D77"))(9),
-        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#006D77"))(11)
+        sequential = c("#B2D8D8", "#88C1C1", "#5EAAAA", "#349393", "#007C7C"),
+        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#006D77"))(11),
+        categorical = c("#006D77", "#83C5BE", "#EDF6F9", "#FFDDD2", "#E29578", "#006466")
       )
     ),
     movilidad = list(
@@ -64,7 +65,8 @@ theme_config <- list(
       accent = "#2A9D8F",
       palettes = list(
         sequential = colorRampPalette(c("#F8F9FA", "#2A9D8F"))(9),
-        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#2A9D8F"))(11)
+        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#2A9D8F"))(11),
+        categorical= c("#2A9D8F", "#70D6BC", "#B5E2D8", "#F6BD60", "#F7EDE2", "#F5CAC3")
       )
     ),
     gobierno = list(
@@ -73,7 +75,8 @@ theme_config <- list(
       accent = "#6969B3",
       palettes = list(
         sequential = colorRampPalette(c("#F8F9FA", "#6969B3"))(9),
-        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#6969B3"))(11)
+        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#6969B3"))(11),
+        categorical = c("#6969B3", "#A06CD5", "#B7C0EE", "#FDA4BA", "#FEE7EC", "#8E94F2")
       )
     ),
     infraestructura = list(
@@ -82,7 +85,8 @@ theme_config <- list(
       accent = "#F4A261",
       palettes = list(
         sequential = colorRampPalette(c("#F8F9FA", "#F4A261"))(9),
-        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#F4A261"))(11)
+        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#F4A261"))(11),
+        categorical = c("#F4A261", "#F8BC8B", "#FDCFA4", "#B98B73", "#AACDBE", "#738580")
       )
     ),
     participacion = list(
@@ -91,7 +95,8 @@ theme_config <- list(
       accent = "#E76F51",
       palettes = list(
         sequential = colorRampPalette(c("#F8F9FA", "#E76F51"))(9),
-        diverging = colorRampPalette(c("#6969B3", "#F8F9FA", "#E76F51"))(11)
+        diverging = colorRampPalette(c("#6969B3", "#F8F9FA", "#E76F51"))(11),
+        categorical =c("#E76F51", "#FFA987", "#F9DCC4", "#C8D5B9", "#8FC0A9", "#68B0AB")
       )
     )
   )
@@ -205,8 +210,13 @@ apply_plotly_theme <- function(p, title = "", xlab = "", ylab = "", custom_theme
       autosize = TRUE
     ) %>%
     config(
-      displayModeBar = FALSE,
-      responsive = TRUE
+        modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+                                   "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                                   "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
+        modeBarButtonsToAdd = c("resetScale2d", "toImage"),
+        displaylogo=FALSE,
+        locale = "es",
+        responsive = TRUE
     )
 }
 
@@ -456,7 +466,15 @@ apply_custom_theme <- function(p, custom_theme, title = "", xlab = "", ylab = ""
       plot_bgcolor = custom_theme$colors$background,
       margin = custom_theme$layout$margin
     ) %>%
-    config(displayModeBar = FALSE)
+      config(
+        modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+                                   "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                                   "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
+        modeBarButtonsToAdd = c("resetScale2d", "toImage"),
+        displaylogo=FALSE,
+        locale = "es",
+        responsive = TRUE
+    )
 }
 
 # Enhanced function for leaflet maps with theme support

@@ -20,8 +20,18 @@ identityServer <- function(input, output, session,current_theme = NULL) {
     })
   })
   
-  # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to bienestar theme if nothing provided
+      get_section_theme("bienestar")
+    }
+  })
 
   output$monuments_bar <- renderPlotly({
     req(survey_data())
@@ -78,13 +88,28 @@ identityServer <- function(input, output, session,current_theme = NULL) {
     
     # Sort by count
     freq_df <- freq_df[order(-freq_df$count), ]
-    
     # Limit to top 15
     freq_df <- head(freq_df, 15)
-    
-    # Get color from theme
-    bar_color <- current_theme()$colors$primary
-    
+    freq_df$rank <- 1:15
+
+  # Create a color vector - highlight top 3, use primary color for others
+  # Get colors from the active theme
+  primary_color <- active_theme()$colors$primary
+  highlight_color <- active_theme()$colors$secondary
+    # If highlight color is not defined, fall back to a secondary color
+  if (is.null(highlight_color)) {
+    # Try to get another distinctive color from the theme
+    if (!is.null(active_theme()$colors$secondary)) {
+      highlight_color <- active_theme()$colors$secondary
+    } else if (!is.null(active_theme()$colors$success)) {
+      highlight_color <- active_theme()$colors$success
+    } else {
+      # Fall back to a brighter version of primary if nothing else available
+      highlight_color <- colorRampPalette(c(primary_color, "#FFFFFF"))(3)[2]
+    }
+  }
+      # Create color vector - highlight top 3
+  bar_colors <- ifelse(freq_df$rank <= 3, highlight_color, primary_color)
     # Create horizontal bar chart
     plot_ly(
       data = freq_df,
@@ -92,17 +117,22 @@ identityServer <- function(input, output, session,current_theme = NULL) {
       x = ~percentage,  # Changed to percentage for the x-axis
       type = "bar",
       orientation = 'h',
-      marker = list(color = bar_color),
+      marker = list(
+        color = bar_colors,
+        line = list(
+          color = active_theme()$colors$neutral,
+          width = 1
+        )
+      ),
       text = ~paste0(percentage, "%"),  # Display percentage on bars
       textposition = "auto",
       hoverinfo = "text",
-      hovertext = ~paste0(monument, ": ", count, " menciones (", percentage, "%)")
+      hovertext = ~paste0(count, " menciones")
     ) %>%
       apply_plotly_theme(
         title = "Lugares emblemáticos de Ciudad Juárez",
         xlab = "Porcentaje de menciones (%)",  # Updated axis label
         ylab = "",
-        custom_theme = current_theme()
       ) %>% 
       layout(
         yaxis = list(
@@ -139,8 +169,11 @@ identityServer <- function(input, output, session,current_theme = NULL) {
     create_category_pie(
       pride_data,
       max_categories = 4,
-      custom_theme = current_theme()
-    )
+      custom_theme = active_theme(),
+      highlight_max = F,
+      palette = 'sequential',
+      inverse=T
+    ) %>% apply_plotly_theme(title='')
   })
   
   # Process Q64.2 data for neighborhood connection map
@@ -179,7 +212,7 @@ identityServer <- function(input, output, session,current_theme = NULL) {
       highlight_extremes = TRUE,
       use_gradient = F,
       color_scale = "Blues",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -195,7 +228,7 @@ identityServer <- function(input, output, session,current_theme = NULL) {
       highlight_extremes = TRUE,
       use_gradient = F,
       color_scale = "Blues",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   

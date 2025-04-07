@@ -296,19 +296,29 @@ get_numeric_values <- function(data) {
 
 
 # Visualization functions - Updated to accept custom_theme
-create_interval_histogram <- function(data, bins = 30, title = "Distribución", custom_theme = NULL) {
+create_interval_histogram <- function(data, bins = 30, title = "Distribución", 
+                                     custom_theme = NULL, palette = "primary") {
   # Check if we have labels
   has_labels <- attr(data, "has_labels")
   value_labels <- attr(data, "value_labels")
   
-  # Use colors from custom theme if provided
-  bar_color <- ifelse(!is.null(custom_theme), 
-                    custom_theme$colors$primary, 
-                    theme_config$colors$primary)
+  # Determine which theme to use
+  active_theme <- if (!is.null(custom_theme)) custom_theme else theme_config
   
-  line_color <- ifelse(!is.null(custom_theme), 
-                     custom_theme$colors$neutral, 
-                     theme_config$colors$neutral)
+  # Get colors based on palette parameter
+  if (palette == "primary") {
+    bar_color <- active_theme$colors$primary
+  } else if (palette == "secondary") {
+    bar_color <- active_theme$colors$secondary
+  } else if (palette %in% names(active_theme$palettes)) {
+    # Use first color from the named palette
+    bar_color <- active_theme$palettes[[palette]][1]
+  } else {
+    # Default to primary
+    bar_color <- active_theme$colors$primary
+  }
+  
+  line_color <- active_theme$colors$neutral
   
   # Create base plot
   plot <- plot_ly(
@@ -328,7 +338,7 @@ create_interval_histogram <- function(data, bins = 30, title = "Distribución", 
       title = title,
       xlab = "Valor",
       ylab = "Frecuencia",
-      custom_theme = custom_theme
+      custom_theme = active_theme
     )
   
   # Customize x-axis with labels if available
@@ -360,470 +370,568 @@ create_interval_histogram <- function(data, bins = 30, title = "Distribución", 
   return(plot)
 }
 
-# Modified function to handle the coercion error and accept custom_theme
 create_interval_district_map <- function(data, geo_data, selected_responses = NULL, highlight_extremes = TRUE, 
-  use_gradient = FALSE, color_scale = "Blues", custom_theme = active_theme()) {
-# Check if we have data
-if (is.null(data) || nrow(data) == 0 || is.null(geo_data)) {
-return(plotly_empty() %>% 
-layout(title = "No hay datos suficientes para visualizar"))
-}
+  use_gradient = FALSE, color_scale = "Blues", custom_theme = NULL) {
+  # Check if we have data
+  if (is.null(data) || nrow(data) == 0 || is.null(geo_data)) {
+    return(plotly_empty() %>% 
+    layout(title = "No hay datos suficientes para visualizar"))
+  }
 
-# Create label lookup
-labels_lookup <- create_label_lookup(data)
+  # Create label lookup
+  labels_lookup <- create_label_lookup(data)
 
-# Get district palette from custom theme if provided
-district_palette <- if (!is.null(custom_theme)) {
-custom_theme$palettes$district
-} else {
-theme_config$palettes$district
-}
+  # Get district palette from custom theme if provided
+  district_palette <- if (!is.null(custom_theme)) {
+    custom_theme$palettes$district
+  } else {
+    theme_config$palettes$district
+  }
+  
+  # Get diverging palette from custom theme if provided for highlighting
+  diverging_palette <- if (!is.null(custom_theme) && !is.null(custom_theme$palettes$diverging)) {
+    custom_theme$palettes$diverging
+  } else {
+    theme_config$palettes$diverging
+  }
+  
+  # Extract the high and low colors from the diverging palette
+  highest_color <- diverging_palette[length(diverging_palette)]  # Get last color (highest)
+  lowest_color <- diverging_palette[1]  # Get first color (lowest)
+  
   # Determine the theoretical scale range for the data
   # First try to get it from value_labels
   theoretical_min <- 1
   theoretical_max <- 5  # Default fallback
 
-   # Try to determine from value labels
-   value_labels <- attr(data, "value_labels")
-   if (!is.null(value_labels)) {
-     # Get numeric values from the labels
-     label_values <- suppressWarnings(as.numeric(names(value_labels)))
-     label_values <- label_values[!is.na(label_values)]
-     
-     # Check if these might represent a scale
-     if (length(label_values) > 0) {
-       # Exclude NS/NC codes - typically these would be higher values outside the scale
-       # Common NS/NC codes include 88, 99, 999, etc.
-       possible_nc_codes <- label_values[label_values > 20]  # Arbitrary threshold
-       regular_values <- label_values[label_values <= 20]
-       
-       if (length(regular_values) > 0) {
-         theoretical_min <- min(regular_values)
-         theoretical_max <- max(regular_values)
-       }
-     }
-   }
-   
-   # If we couldn't determine from labels, try from the data
-   if (theoretical_min == theoretical_max) {
-     # Get actual data range
-     numeric_values <- get_numeric_values(data)
-     data_min <- min(numeric_values, na.rm = TRUE)
-     data_max <- max(numeric_values, na.rm = TRUE)
-     
-     # Try to infer common scales
-     if (data_max <= 5 && data_min >= 1) {
-       # Likely 1-5 scale
-       theoretical_min <- 1
-       theoretical_max <- 5
-     } else if (data_max <= 7 && data_min >= 1) {
-       # Likely 1-7 scale
-       theoretical_min <- 1
-       theoretical_max <- 7
-     } else if (data_max <= 10 && data_min >= 1) {
-       # Likely 1-10 scale
-       theoretical_min <- 1
-       theoretical_max <- 10
-     } else {
-       # Use actual range if we can't infer
-       theoretical_min <- data_min
-       theoretical_max <- data_max
-     }
-   }
-   
-   # Store the theoretical range for use in the gradient scale
-   full_scale_range <- c(theoretical_min, theoretical_max)
-# Calculate centroids for label placement (needed regardless of mode)
-geo_data$centroid <- sf::st_centroid(geo_data$geometry)
-centroids <- sf::st_coordinates(geo_data$centroid)
-geo_data$lng <- centroids[,1]
-geo_data$lat <- centroids[,2]
-
-# Handle case when no responses are selected - show mean values
-if (is.null(selected_responses) || length(selected_responses) == 0) {
-# Original behavior - use mean values
-district_stats <- data %>%
-mutate(numeric_value = get_numeric_values(.)) %>%
-group_by(district) %>%
-summarise(
-mean_value = mean(numeric_value, na.rm = TRUE),
-n = n(),
-.groups = 'drop'
-)
-
-# Get mode values for each district
-district_modes <- data %>%
-group_by(district) %>%
-summarise(
-mode_numeric = as.numeric(names(which.max(table(get_numeric_values(.))))),
-.groups = 'drop'
-) %>%
-# Add text labels for modes
-mutate(
-mode_label = sapply(mode_numeric, function(val) {
-if (as.character(val) %in% names(labels_lookup)) {
-return(labels_lookup[as.character(val)])
-} else {
-return(as.character(val))
-}
-})
-)
-
-# Join the mode values
-district_stats <- district_stats %>%
-left_join(district_modes, by = "district")
-
-# Convert district to numeric for proper matching
-district_stats$district_num <- as.numeric(as.character(district_stats$district))
-
-# PRE-CALCULATE all values needed for the map
-geo_data$fill_color <- "#CCCCCC"  # Default gray
-geo_data$hover_label <- ""
-
-# Calculate fill colors based on gradient or categorical
-if (use_gradient) {
-  # Create color palette based on the full theoretical scale
-  pal <- colorNumeric(palette = color_scale, domain = full_scale_range)
-  
-  # Apply to each district
-  for (i in 1:nrow(geo_data)) {
-    dist_num <- geo_data$No_Distrit[i]
-    match_idx <- which(district_stats$district_num == dist_num)
+  # Try to determine from value labels
+  value_labels <- attr(data, "value_labels")
+  if (!is.null(value_labels)) {
+    # Get numeric values from the labels
+    label_values <- suppressWarnings(as.numeric(names(value_labels)))
+    label_values <- label_values[!is.na(label_values)]
     
-    if (length(match_idx) > 0) {
-      mean_val <- district_stats$mean_value[match_idx]
-      if (!is.na(mean_val)) {
-        geo_data$fill_color[i] <- pal(mean_val)
+    # Check if these might represent a scale
+    if (length(label_values) > 0) {
+      # Exclude NS/NC codes - typically these would be higher values outside the scale
+      # Common NS/NC codes include 88, 99, 999, etc.
+      possible_nc_codes <- label_values[label_values > 20]  # Arbitrary threshold
+      regular_values <- label_values[label_values <= 20]
+      
+      if (length(regular_values) > 0) {
+        theoretical_min <- min(regular_values)
+        theoretical_max <- max(regular_values)
       }
     }
   }
-  
-  # Store the palette for legend
-  palette_function <- pal
-  palette_values <- full_scale_range  # Use theoretical range for legend
-  legend_title <- "Valor Promedio"
-} else {
-# Use categorical district colors
-for (i in 1:nrow(geo_data)) {
-dist_num <- geo_data$No_Distrit[i]
-# Convert to 1-based index for district palette (if districts are 2-10)
-district_index <- as.numeric(dist_num) - 1
-
-if (!is.na(district_index) && district_index >= 1 && district_index <= length(district_palette)) {
-geo_data$fill_color[i] <- district_palette[district_index]
-}
-}
-
-# No legend for categorical colors
-palette_function <- NULL
-}
-
-# Calculate hover labels
-for (i in 1:nrow(geo_data)) {
-dist_num <- geo_data$No_Distrit[i]
-match_idx <- which(district_stats$district_num == dist_num)
-
-if (length(match_idx) > 0) {
-geo_data$hover_label[i] <- sprintf(
-"Distrito: %s<br>Promedio: %.2f<br>Respuesta más común: %s<br>N: %d",
-dist_num,
-district_stats$mean_value[match_idx],
-district_stats$mode_label[match_idx],
-district_stats$n[match_idx]
-)
-} else {
-geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
-}
-}
-
-# Create the base map
-map <- leaflet(geo_data) %>%
-  addProviderTiles('CartoDB.Positron') %>%
-  addPolygons(
-    fillColor = ~fill_color,
-    fillOpacity = 0.7,
-    weight = 1,
-    color = "#666666",
-    dashArray = "3",
-    highlight = highlightOptions(
-      weight = 2,
-      color = "#000000",
-      dashArray = "",
-      fillOpacity = 0.9,
-      bringToFront = TRUE
-    ),
-    label = ~lapply(hover_label, HTML)
-  )
-
-# Add legend if using gradient
-if (use_gradient && !is.null(palette_function)) {
-  map <- map %>% addLegend(
-    position = "bottomright",
-    pal = palette_function,
-    values = palette_values,
-    title = legend_title,
-    opacity = 0.7
-  )
-}
-
-# Add popup labels showing average for each district
-for (i in 1:nrow(geo_data)) {
-  dist_num <- geo_data$No_Distrit[i]
-  match_idx <- which(district_stats$district_num == dist_num)
-  
-  if (length(match_idx) > 0) {
-    mean_value <- district_stats$mean_value[match_idx]
+   
+  # If we couldn't determine from labels, try from the data
+  if (theoretical_min == theoretical_max) {
+    # Get actual data range
+    numeric_values <- get_numeric_values(data)
+    data_min <- min(numeric_values, na.rm = TRUE)
+    data_max <- max(numeric_values, na.rm = TRUE)
     
-    # Only add label if mean is not NA
-    if (!is.na(mean_value)) {
-      # Get mode label for additional info
-      mode_label <- district_stats$mode_label[match_idx]
-      
-      # Create popup HTML
-      popup_html <- sprintf(
-        '<div style="text-align: center; font-weight: bold;">%.2f</div>',
-        mean_value
+    # Try to infer common scales
+    if (data_max <= 5 && data_min >= 1) {
+      # Likely 1-5 scale
+      theoretical_min <- 1
+      theoretical_max <- 5
+    } else if (data_max <= 7 && data_min >= 1) {
+      # Likely 1-7 scale
+      theoretical_min <- 1
+      theoretical_max <- 7
+    } else if (data_max <= 10 && data_min >= 1) {
+      # Likely 1-10 scale
+      theoretical_min <- 1
+      theoretical_max <- 10
+    } else {
+      # Use actual range if we can't infer
+      theoretical_min <- data_min
+      theoretical_max <- data_max
+    }
+  }
+   
+  # Store the theoretical range for use in the gradient scale
+  full_scale_range <- c(theoretical_min, theoretical_max)
+  
+  # Calculate centroids for label placement (needed regardless of mode)
+  geo_data$centroid <- sf::st_centroid(geo_data$geometry)
+  centroids <- sf::st_coordinates(geo_data$centroid)
+  geo_data$lng <- centroids[,1]
+  geo_data$lat <- centroids[,2]
+
+  # Handle case when no responses are selected - show mean values
+  if (is.null(selected_responses) || length(selected_responses) == 0) {
+    # Original behavior - use mean values
+    district_stats <- data %>%
+      mutate(numeric_value = get_numeric_values(.)) %>%
+      group_by(district) %>%
+      summarise(
+        mean_value = mean(numeric_value, na.rm = TRUE),
+        n = n(),
+        .groups = 'drop'
       )
+
+    # Get mode values for each district
+    district_modes <- data %>%
+      group_by(district) %>%
+      summarise(
+        mode_numeric = as.numeric(names(which.max(table(get_numeric_values(.))))),
+        .groups = 'drop'
+      ) %>%
+      # Add text labels for modes
+      mutate(
+        mode_label = sapply(mode_numeric, function(val) {
+          if (as.character(val) %in% names(labels_lookup)) {
+            return(labels_lookup[as.character(val)])
+          } else {
+            return(as.character(val))
+          }
+        })
+      )
+
+    # Join the mode values
+    district_stats <- district_stats %>%
+      left_join(district_modes, by = "district")
+
+    # FIX: Convert district to numeric for proper matching - ensure it's created correctly
+    district_stats$district_num <- as.numeric(as.character(district_stats$district))
+    
+    # Make sure district_num column exists and is valid
+    if (!("district_num" %in% names(district_stats)) || all(is.na(district_stats$district_num))) {
+      # Create a valid district_num column
+      district_stats$district_num <- as.numeric(as.character(district_stats$district))
+      # If still NA, use row numbers as fallback
+      if (all(is.na(district_stats$district_num))) {
+        warning("Could not convert district to numeric. Using row numbers as district identifier.")
+        district_stats$district_num <- 1:nrow(district_stats)
+      }
+    }
+
+    # Find district with highest and lowest values
+    highest_district <- district_stats %>% 
+      filter(!is.na(mean_value)) %>%  # Ensure we don't get NA values
+      arrange(desc(mean_value)) %>% 
+      slice(1)
       
-      # Add popup marker
-      map <- map %>% addLabelOnlyMarkers(
-        lng = geo_data$lng[i],
-        lat = geo_data$lat[i],
-        label = lapply(list(popup_html), HTML),
-        labelOptions = labelOptions(
-          noHide = TRUE,
-          direction = "center",
-          textOnly = TRUE,
-          style = list(
-            "background" = "rgba(255,255,255,0.8)",
-            "border" = "none",
-            "padding" = "3px 8px",
-            "border-radius" = "3px",
-            "font-size" = "14px"
+    lowest_district <- district_stats %>% 
+      filter(!is.na(mean_value)) %>%  # Ensure we don't get NA values
+      arrange(mean_value) %>% 
+      slice(1)
+
+    # PRE-CALCULATE all values needed for the map
+    geo_data$fill_color <- "#CCCCCC"  # Default gray
+    geo_data$hover_label <- ""
+    geo_data$label_text <- ""
+    geo_data$label_bg <- "#FFFFFF"
+    geo_data$label_color <- "#000000"
+    geo_data$is_extreme <- FALSE
+    geo_data$extreme_type <- ""  # Will be "highest" or "lowest"
+
+    # Calculate fill colors based on gradient or categorical
+    if (use_gradient) {
+      # Create color palette based on the full theoretical scale
+      pal <- colorNumeric(palette = color_scale, domain = full_scale_range)
+      
+      # Apply to each district
+      for (i in 1:nrow(geo_data)) {
+        dist_num <- geo_data$No_Distrit[i]
+        match_idx <- which(district_stats$district_num == dist_num)
+        
+        if (length(match_idx) > 0) {
+          mean_val <- district_stats$mean_value[match_idx]
+          if (!is.na(mean_val)) {
+            geo_data$fill_color[i] <- pal(mean_val)
+          }
+        }
+      }
+      
+      # Store the palette for legend
+      palette_function <- pal
+      palette_values <- full_scale_range  # Use theoretical range for legend
+      legend_title <- "Valor Promedio"
+    } else {
+      # Use categorical district colors
+      for (i in 1:nrow(geo_data)) {
+        dist_num <- geo_data$No_Distrit[i]
+        # Convert to 1-based index for district palette (if districts are 2-10)
+        district_index <- as.numeric(dist_num) - 1
+        
+        if (!is.na(district_index) && district_index >= 1 && district_index <= length(district_palette)) {
+          geo_data$fill_color[i] <- district_palette[district_index]
+        }
+      }
+      
+      # No legend for categorical colors
+      palette_function <- NULL
+    }
+
+    # Calculate hover labels and check for highest/lowest districts
+    for (i in 1:nrow(geo_data)) {
+      dist_num <- geo_data$No_Distrit[i]
+      match_idx <- which(district_stats$district_num == dist_num)
+      
+      if (length(match_idx) > 0) {
+        geo_data$hover_label[i] <- sprintf(
+          "Respuesta más común: %s",
+          district_stats$mode_label[match_idx]
+        )
+        
+        # Check if this is highest or lowest district
+        if (highlight_extremes) {
+          if (!is.null(highest_district) && !is.na(highest_district$district_num) && 
+              dist_num == highest_district$district_num) {
+            geo_data$is_extreme[i] <- TRUE
+            geo_data$extreme_type[i] <- "highest"
+            geo_data$label_bg[i] <- highest_color
+            geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+          } else if (!is.null(lowest_district) && !is.na(lowest_district$district_num) && 
+                    dist_num == lowest_district$district_num) {
+            geo_data$is_extreme[i] <- TRUE
+            geo_data$extreme_type[i] <- "lowest"
+            geo_data$label_bg[i] <- lowest_color
+            geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+          }
+        }
+      } else {
+        geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
+      }
+    }
+
+    # Create the base map
+    map <- leaflet(geo_data) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>% 
+      addPolygons(
+        fillColor = ~fill_color,
+        fillOpacity = 0.7,
+        weight = 1,
+        color = "#666666",
+        dashArray = "3",
+        highlight = highlightOptions(
+          weight = 2,
+          color = "#000000",
+          dashArray = "",
+          fillOpacity = 0.9,
+          bringToFront = TRUE
+        ),
+        label = ~lapply(hover_label, HTML)
+      )
+
+    # Add legend if using gradient
+    if (use_gradient && !is.null(palette_function)) {
+      map <- map %>% addLegend(
+        position = "bottomright",
+        pal = palette_function,
+        values = palette_values,
+        title = legend_title,
+        opacity = 0.7
+      )
+    }
+
+    # Add popup labels showing average for each district
+    for (i in 1:nrow(geo_data)) {
+      dist_num <- geo_data$No_Distrit[i]
+      match_idx <- which(district_stats$district_num == dist_num)
+      
+      if (length(match_idx) > 0) {
+        mean_value <- district_stats$mean_value[match_idx]
+        
+        # Only add label if mean is not NA
+        if (!is.na(mean_value)) {
+          # Get mode label for additional info
+          mode_label <- district_stats$mode_label[match_idx]
+          
+          # Create popup HTML
+          if (geo_data$is_extreme[i]) {
+            # Enhanced label for extreme values
+            extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
+                                   "Distrito más alto", 
+                                   "Distrito más bajo")
+            
+            popup_html <- sprintf(
+              '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center; min-width: 120px;">%s<br>Distrito %s: %.1f</div>',
+              geo_data$label_bg[i], geo_data$label_color[i], extreme_text, dist_num, mean_value
+            )
+          } else {
+            # Standard label
+            popup_html <- sprintf(
+              '<div style="text-align: center; font-weight: bold; background: white; padding: 3px 8px; border-radius: 3px;">Distrito %s:<br> %.1f</div>',
+              dist_num, mean_value
+            )
+          }
+          
+          # Add popup marker
+          map <- map %>% addLabelOnlyMarkers(
+            lng = geo_data$lng[i],
+            lat = geo_data$lat[i],
+            label = lapply(list(popup_html), HTML),
+            labelOptions = labelOptions(
+              noHide = TRUE,
+              direction = "center",
+              textOnly = TRUE
+            )
           )
-        )
-      )
+        }
+      }
     }
-  }
-}
-# Add overall average label
-overall_mean <- round(mean(district_stats$mean_value , na.rm = TRUE), 1)
-
-map <- map %>% addControl(
-html = sprintf(
-'<div style="background-color: #333333; color: white; padding: 5px; border-radius: 3px;"><strong>Porcentaje general: %s</strong></div>',
-  overall_mean
-),
-position = "topright"
-)
-
-return(map)
-} else {
-# Selected responses mode - calculate percentages
-selected_responses_numeric <- suppressWarnings(as.numeric(selected_responses))
-
-# Calculate district statistics using percentages of selected responses
-district_stats <- data %>%
-mutate(
-numeric_value = get_numeric_values(.)
-) %>%
-rowwise() %>%
-mutate(
-# Check if numeric_value matches any of the selected values
-is_selected = as.logical(sum(numeric_value == selected_responses_numeric, na.rm = TRUE))
-) %>%
-ungroup() %>%
-group_by(district) %>%
-summarise(
-total_responses = n(),
-selected_count = sum(is_selected, na.rm = TRUE),
-selected_percent = round(100 * sum(is_selected, na.rm = TRUE) / n(), 1),
-.groups = 'drop'
-)
-
-# Convert district to numeric for proper matching
-district_stats$district_num <- as.numeric(as.character(district_stats$district))
-
-# Find district with highest and lowest percentages if highlighting extremes
-highest_district <- lowest_district <- NULL
-if (highlight_extremes) {
-highest_district <- district_stats %>% arrange(desc(selected_percent)) %>% slice(1)
-lowest_district <- district_stats %>% arrange(selected_percent) %>% slice(1)
-}
-
-# PRE-CALCULATE all values needed for the map
-geo_data$fill_color <- "#CCCCCC"  # Default gray
-geo_data$hover_label <- ""
-geo_data$label_text <- ""
-geo_data$label_bg <- "#FFFFFF"
-geo_data$label_color <- "#000000"
-
-# Calculate fill colors based on gradient or categorical
-if (use_gradient) {
-# Create color palette based on percentages
-value_range <- range(district_stats$selected_percent, na.rm = TRUE)
-pal <- colorNumeric(palette = color_scale, domain = value_range)
-
-# Apply to each district
-for (i in 1:nrow(geo_data)) {
-dist_num <- geo_data$No_Distrit[i]
-match_idx <- which(district_stats$district_num == dist_num)
-
-if (length(match_idx) > 0) {
-percent <- district_stats$selected_percent[match_idx]
-if (!is.na(percent)) {
-geo_data$fill_color[i] <- pal(percent)
-}
-}
-}
-
-# Store the palette for legend
-palette_function <- pal
-palette_values <- value_range
-legend_title <- "Porcentaje"
-} else {
-# Use categorical district colors
-for (i in 1:nrow(geo_data)) {
-dist_num <- geo_data$No_Distrit[i]
-# Convert to 1-based index for district palette (if districts are 2-10)
-district_index <- as.numeric(dist_num) - 1
-
-if (!is.na(district_index) && district_index >= 1 && district_index <= length(district_palette)) {
-geo_data$fill_color[i] <- district_palette[district_index]
-}
-}
-
-# No legend for categorical colors
-palette_function <- NULL
-}
-
-# Create response labels for title
-response_labels <- sapply(selected_responses, function(val) {
-val_numeric <- suppressWarnings(as.numeric(val))
-if (!is.na(val_numeric) && as.character(val_numeric) %in% names(labels_lookup)) {
-return(labels_lookup[as.character(val_numeric)])
-} else if (grepl("=", val)) {
-# Extract from the format "1 = Label"
-return(trimws(sub(".*=", "", val)))
-} else {
-return(val)
-}
-})
-
-# Pre-calculate hover and popup labels
-for (i in 1:nrow(geo_data)) {
-dist_num <- geo_data$No_Distrit[i]
-match_idx <- which(district_stats$district_num == dist_num)
-
-if (length(match_idx) > 0) {
-percent <- district_stats$selected_percent[match_idx]
-
-geo_data$hover_label[i] <- sprintf(
-"Distrito: %s<br>Porcentaje: %s%%<br>Respuestas: %d/%d",
-dist_num,
-percent,
-district_stats$selected_count[match_idx],
-district_stats$total_responses[match_idx]
-)
-
-# Only add label if percent is not NA
-if (!is.na(percent)) {
-geo_data$label_text[i] <- sprintf("Distrito %s<br>%s%%", dist_num, percent)
-
-# Set background/text color based on if this is highest/lowest district
-if (highlight_extremes) {
-if (!is.null(highest_district) && 
-!is.na(highest_district$district_num) && 
-dist_num == highest_district$district_num) {
-geo_data$label_bg[i] <- "#87CEEB"  # Light blue for highest
-geo_data$label_color[i] <- "#000000"  # Black text
-} else if (!is.null(lowest_district) && 
-!is.na(lowest_district$district_num) && 
-dist_num == lowest_district$district_num) {
-geo_data$label_bg[i] <- "#012A4A"  # Dark blue for lowest
-geo_data$label_color[i] <- "#FFFFFF"  # White text
-}
-}
-}
-} else {
-geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
-}
-}
-
-# Create base map
-map <- leaflet(geo_data) %>%
-    addProviderTiles('CartoDB.Positron') %>% 
-addPolygons(
-fillColor = ~fill_color,
-fillOpacity = 0.7,
-weight = 1,
-color = "#666666",
-dashArray = "3",
-highlight = highlightOptions(
-weight = 2,
-color = "#000000",
-dashArray = "",
-fillOpacity = 0.9,
-bringToFront = TRUE
-),
-label = ~lapply(hover_label, HTML)
-)
-
-# Add legend if using gradient
-if (use_gradient && !is.null(palette_function)) {
-map <- map %>% addLegend(
-position = "bottomright",
-pal = palette_function,
-values = palette_values,
-title = legend_title,
-opacity = 0.7
-)
-}
-
-# Add district labels - only for rows with actual label_text
-for (i in 1:nrow(geo_data)) {
-  if (geo_data$label_text[i] != "") {
-    # Get percentage value
-    dist_num <- geo_data$No_Distrit[i]
-    match_idx <- which(district_stats$district_num == dist_num)
     
-    if (length(match_idx) > 0) {
-      percent <- district_stats$selected_percent[match_idx]
-      
-      # Create label HTML
-      label_html <- sprintf(
-        '<div style="background-color: %s; color: %s; padding: 5px; border-radius: 3px; font-weight: bold;">%s%%</div>',
-        geo_data$label_bg[i], geo_data$label_color[i], percent
+    # Add overall average label
+    overall_mean <- round(mean(district_stats$mean_value, na.rm = TRUE), 1)
+    
+    map <- map %>% addControl(
+      html = sprintf(
+        '<div style="background-color: #333333; color: white; padding: 5px; border-radius: 3px;"><strong>Promedio general: %.1f</strong></div>',
+        overall_mean
+      ),
+      position = "topright"
+    )
+    
+
+
+    return(map)
+  } else {
+    # Selected responses mode - calculate percentages
+    selected_responses_numeric <- suppressWarnings(as.numeric(selected_responses))
+
+    # Calculate district statistics using percentages of selected responses
+    district_stats <- data %>%
+      mutate(
+        numeric_value = get_numeric_values(.)
+      ) %>%
+      rowwise() %>%
+      mutate(
+        # Check if numeric_value matches any of the selected values
+        is_selected = as.logical(sum(numeric_value == selected_responses_numeric, na.rm = TRUE))
+      ) %>%
+      ungroup() %>%
+      group_by(district) %>%
+      summarise(
+        total_responses = n(),
+        selected_count = sum(is_selected, na.rm = TRUE),
+        selected_percent = round(100 * sum(is_selected, na.rm = TRUE) / n(), 1),
+        .groups = 'drop'
       )
+
+    # FIX: Convert district to numeric for proper matching - ensure it's created correctly
+    district_stats$district_num <- as.numeric(as.character(district_stats$district))
+    
+    # Make sure district_num column exists and is valid
+    if (!("district_num" %in% names(district_stats)) || all(is.na(district_stats$district_num))) {
+      # Create a valid district_num column
+      district_stats$district_num <- as.numeric(as.character(district_stats$district))
+      # If still NA, use row numbers as fallback
+      if (all(is.na(district_stats$district_num))) {
+        warning("Could not convert district to numeric. Using row numbers as district identifier.")
+        district_stats$district_num <- 1:nrow(district_stats)
+      }
+    }
+
+    # Find district with highest and lowest percentages if highlighting extremes
+    highest_district <- lowest_district <- NULL
+    if (highlight_extremes) {
+      highest_district <- district_stats %>% 
+        filter(!is.na(selected_percent)) %>%  # Ensure we don't get NA values
+        arrange(desc(selected_percent)) %>% 
+        slice(1)
+        
+      lowest_district <- district_stats %>% 
+        filter(!is.na(selected_percent)) %>%  # Ensure we don't get NA values
+        arrange(selected_percent) %>% 
+        slice(1)
+    }
+
+    # PRE-CALCULATE all values needed for the map
+    geo_data$fill_color <- "#CCCCCC"  # Default gray
+    geo_data$hover_label <- ""
+    geo_data$label_text <- ""
+    geo_data$label_bg <- "#FFFFFF"
+    geo_data$label_color <- "#000000"
+    geo_data$is_extreme <- FALSE
+    geo_data$extreme_type <- ""  # Will be "highest" or "lowest"
+
+    # Calculate fill colors based on gradient or categorical
+    if (use_gradient) {
+      # Create color palette based on percentages
+      value_range <- range(district_stats$selected_percent, na.rm = TRUE)
+      pal <- colorNumeric(palette = color_scale, domain = value_range)
       
-      # Add label
-      map <- map %>% addLabelOnlyMarkers(
-        lng = geo_data$lng[i],
-        lat = geo_data$lat[i],
-        label = lapply(list(label_html), HTML),
-        labelOptions = labelOptions(
-          noHide = TRUE,
-          direction = "center",
-          textOnly = TRUE
+      # Apply to each district
+      for (i in 1:nrow(geo_data)) {
+        dist_num <- geo_data$No_Distrit[i]
+        match_idx <- which(district_stats$district_num == dist_num)
+        
+        if (length(match_idx) > 0) {
+          percent <- district_stats$selected_percent[match_idx]
+          if (!is.na(percent)) {
+            geo_data$fill_color[i] <- pal(percent)
+          }
+        }
+      }
+      
+      # Store the palette for legend
+      palette_function <- pal
+      palette_values <- value_range
+      legend_title <- "Porcentaje"
+    } else {
+      # Use categorical district colors
+      for (i in 1:nrow(geo_data)) {
+        dist_num <- geo_data$No_Distrit[i]
+        # Convert to 1-based index for district palette (if districts are 2-10)
+        district_index <- as.numeric(dist_num) - 1
+        
+        if (!is.na(district_index) && district_index >= 1 && district_index <= length(district_palette)) {
+          geo_data$fill_color[i] <- district_palette[district_index]
+        }
+      }
+      
+      # No legend for categorical colors
+      palette_function <- NULL
+    }
+
+    # Create response labels for title
+    response_labels <- sapply(selected_responses, function(val) {
+      val_numeric <- suppressWarnings(as.numeric(val))
+      if (!is.na(val_numeric) && as.character(val_numeric) %in% names(labels_lookup)) {
+        return(labels_lookup[as.character(val_numeric)])
+      } else if (grepl("=", val)) {
+        # Extract from the format "1 = Label"
+        return(trimws(sub(".*=", "", val)))
+      } else {
+        return(val)
+      }
+    })
+
+    # Pre-calculate hover and popup labels
+    for (i in 1:nrow(geo_data)) {
+      dist_num <- geo_data$No_Distrit[i]
+      match_idx <- which(district_stats$district_num == dist_num)
+      
+      if (length(match_idx) > 0) {
+        percent <- district_stats$selected_percent[match_idx]
+        
+        geo_data$hover_label[i] <- sprintf(
+          "Respuestas: %d/%d",
+          district_stats$selected_count[match_idx],
+          district_stats$total_responses[match_idx]
         )
+        
+        # Only add label if percent is not NA
+        if (!is.na(percent)) {
+          geo_data$label_text[i] <- sprintf("Distrito %s<br>%s%%", dist_num, percent)
+          
+          # Set background/text color based on if this is highest/lowest district
+          if (highlight_extremes) {
+            if (!is.null(highest_district) && 
+                !is.na(highest_district$district_num) && 
+                dist_num == highest_district$district_num) {
+              geo_data$is_extreme[i] <- TRUE
+              geo_data$extreme_type[i] <- "highest"
+              geo_data$label_bg[i] <- highest_color
+              geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+            } else if (!is.null(lowest_district) && 
+                      !is.na(lowest_district$district_num) && 
+                      dist_num == lowest_district$district_num) {
+              geo_data$is_extreme[i] <- TRUE
+              geo_data$extreme_type[i] <- "lowest"
+              geo_data$label_bg[i] <- lowest_color
+              geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+            }
+          }
+        }
+      } else {
+        geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
+      }
+    }
+
+    # Create base map
+    map <- leaflet(geo_data) %>% 
+      addProviderTiles(providers$CartoDB.Positron) %>% 
+      addPolygons(
+        fillColor = ~fill_color,
+        fillOpacity = 0.7,
+        weight = 1,
+        color = "#666666",
+        dashArray = "3",
+        highlight = highlightOptions(
+          weight = 2,
+          color = "#000000",
+          dashArray = "",
+          fillOpacity = 0.9,
+          bringToFront = TRUE
+        ),
+        label = ~lapply(hover_label, HTML)
+      )
+
+    # Add legend if using gradient
+    if (use_gradient && !is.null(palette_function)) {
+      map <- map %>% addLegend(
+        position = "bottomright",
+        pal = palette_function,
+        values = palette_values,
+        title = legend_title,
+        opacity = 0.7
       )
     }
+
+    # Add district labels with enhanced styling
+    for (i in 1:nrow(geo_data)) {
+      if (geo_data$label_text[i] != "") {
+        # Get percentage value
+        dist_num <- geo_data$No_Distrit[i]
+        match_idx <- which(district_stats$district_num == dist_num)
+        
+        if (length(match_idx) > 0) {
+          percent <- district_stats$selected_percent[match_idx]
+          
+          # Create label HTML with enhanced styling for extremes
+          if (geo_data$is_extreme[i]) {
+            extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
+                                  "Distrito más alto", 
+                                  "Distrito más bajo")
+            
+            label_html <- sprintf(
+              '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %s%%</div>',
+              geo_data$label_bg[i], geo_data$label_color[i], extreme_text, dist_num, percent
+            )
+          } else {
+            # Standard label
+            label_html <- sprintf(
+              '<div style="background-color: white; color: black; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s:<br> %s%%</div>',
+              dist_num, percent
+            )
+          }
+          
+          # Add label
+          map <- map %>% addLabelOnlyMarkers(
+            lng = geo_data$lng[i],
+            lat = geo_data$lat[i],
+            label = lapply(list(label_html), HTML),
+            labelOptions = labelOptions(
+              noHide = TRUE,
+              direction = "center",
+              textOnly = TRUE
+            )
+          )
+        }
+      }
+    }
+
+    # Add overall average label
+    overall_percent <- round(mean(district_stats$selected_percent, na.rm = TRUE), 1)
+    
+    map <- map %>% addControl(
+      html = sprintf(
+        '<div style="background-color: #333333; color: white; padding: 5px; border-radius: 3px;"><strong>Porcentaje general: %s%%</strong></div>',
+        overall_percent
+      ),
+      position = "topright"
+    )
+    
+
+
+    return(map)
   }
-}
-
-# Add overall average label
-overall_percent <- round(mean(district_stats$selected_percent, na.rm = TRUE), 1)
-
-map <- map %>% addControl(
-html = sprintf(
-'<div style="background-color: #333333; color: white; padding: 5px; border-radius: 3px;"><strong>Porcentaje general: %s%%</strong></div>',
-overall_percent
-),
-position = "topright"
-)
-
-return(map)
-}
 }
 
 create_interval_ridge_plot <- function(data, title = NULL, custom_theme = NULL) {
@@ -1220,88 +1328,101 @@ create_interval_bars <- function(data, orientation = "v", custom_theme = NULL) {
       )
   }
 }
-create_interval_pie <- function(data, max_categories = 12, custom_theme = active_theme()) {
-  # Check if we have valid data
-  if (nrow(data) == 0) {
-    return(plotly_empty() %>% 
-             layout(title = "No hay datos válidos para visualizar"))
-  }
-  
-  # Get value counts and labels
-  value_counts <- table(data$value_num)  # Use numeric values for consistency
-  value_labels <- attr(data, "value_labels")
-  has_labels <- attr(data, "has_labels")
-  
-  # Too many categories warning
-  if (length(value_counts) > max_categories) {
-    return(plotly_empty() %>% 
-             layout(title = paste0("Demasiadas categorías (", length(value_counts), 
-                                  ") para un gráfico circular. Se recomienda usar un histograma.")))
-  }
-  
-  # Create data frame for plotting
-  plot_data <- data.frame(
-    Value = as.numeric(names(value_counts)),
-    Count = as.numeric(value_counts)
-  )
-  
-  # Add labels if available
-  if (has_labels && !is.null(value_labels)) {
-    plot_data$Category <- sapply(plot_data$Value, function(val) {
-      val_str <- as.character(val)
-      if (val_str %in% names(value_labels)) {
-        return(value_labels[val_str])
-      } else {
-        return(val_str)  # Use original value if no label
-      }
-    })
-  } else {
-    plot_data$Category <- as.character(plot_data$Value)
-  }
-  
-  # Calculate percentages
-  plot_data$Percentage <- round(100 * plot_data$Count / sum(plot_data$Count), 1)
-  
-  # Sort by count for better visualization
-  plot_data <- plot_data[order(-plot_data$Count), ]
-  
-  # Get colors from custom theme if provided
-  pie_colors <- if (!is.null(custom_theme)) {
-    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(nrow(plot_data))
-  } else {
-    colorRampPalette(c(theme_config$colors$primary, theme_config$colors$highlight))(nrow(plot_data))
-  }
-  
-  # Create pie chart
-  plot_ly(
-    labels = ~plot_data$Category,
-    values = ~plot_data$Count,
-    type = "pie",
-    marker = list(
-      colors = pie_colors
-    ),
-    textinfo = "label+percent",
-    hoverinfo = "text",
-    text = ~paste0(plot_data$Category, ": ", plot_data$Count, " (", plot_data$Percentage, "%)")
-  ) %>%
-    layout(
-      title = list(
-        text = "Distribución de Respuestas",
-        font = if (!is.null(custom_theme)) {
-          list(
-            family = custom_theme$typography$font_family,
-            size = custom_theme$typography$sizes$title,
-            color = custom_theme$colors$text
-          )
-        } else {
-          list(
-            family = theme_config$typography$font_family,
-            size = theme_config$typography$sizes$title,
-            color = theme_config$colors$text
-          )
-        }
-      )
-    )
+create_interval_pie <- function(data, max_categories = 12, custom_theme = NULL, 
+  highlight_max = TRUE, palette = NULL) {
+# Check if we have valid data
+if (nrow(data) == 0) {
+return(plotly_empty() %>% 
+layout(title = "No hay datos válidos para visualizar"))
+}
+
+# Get value counts and labels
+value_counts <- table(data$value_num)  # Use numeric values for consistency
+value_labels <- attr(data, "value_labels")
+has_labels <- attr(data, "has_labels")
+
+# Too many categories warning
+if (length(value_counts) > max_categories) {
+return(plotly_empty() %>% 
+layout(title = paste0("Demasiadas categorías (", length(value_counts), 
+     ") para un gráfico circular. Se recomienda usar un histograma.")))
+}
+
+# Create data frame for plotting
+plot_data <- data.frame(
+Value = as.numeric(names(value_counts)),
+Count = as.numeric(value_counts)
+)
+
+# Add labels if available
+if (has_labels && !is.null(value_labels)) {
+plot_data$Category <- sapply(plot_data$Value, function(val) {
+val_str <- as.character(val)
+if (val_str %in% names(value_labels)) {
+return(value_labels[val_str])
+} else {
+return(val_str)  # Use original value if no label
+}
+})
+} else {
+plot_data$Category <- as.character(plot_data$Value)
+}
+
+# Calculate percentages
+plot_data$Percentage <- round(100 * plot_data$Count / sum(plot_data$Count), 1)
+
+# Sort by count for better visualization
+plot_data <- plot_data[order(-plot_data$Count), ]
+
+# Determine active theme
+active_theme <- if (!is.null(custom_theme)) custom_theme else theme_config
+
+# Get colors based on specified palette or default to a gradient
+if (!is.null(palette) && palette %in% names(active_theme$palettes)) {
+# Use the specified palette from the theme
+palette_colors <- active_theme$palettes[[palette]]
+if (length(palette_colors) < nrow(plot_data)) {
+# If not enough colors, generate additional ones
+pie_colors <- colorRampPalette(palette_colors)(nrow(plot_data))
+} else {
+# Use the existing palette colors
+pie_colors <- palette_colors[1:nrow(plot_data)]
+}
+} else {
+# Create a gradient from primary to highlight color
+pie_colors <- colorRampPalette(c(active_theme$colors$primary, active_theme$colors$highlight))(nrow(plot_data))
+}
+
+# If highlight_max is TRUE, make the first slice (highest count) stand out
+if (highlight_max && nrow(plot_data) > 0) {
+# Use the accent or highlight color for the most common category
+pie_colors[1] <- active_theme$colors$accent
+}
+
+# Create pie chart
+plot_ly(
+labels = ~plot_data$Category,
+values = ~plot_data$Count,
+type = "pie",
+marker = list(
+colors = pie_colors,
+line = list(color = '#FFFFFF', width = 1)
+),
+textinfo = "label+percent",
+hoverinfo = "text",
+text = ~paste0(plot_data$Category, ": ", plot_data$Count, " (", plot_data$Percentage, "%)")
+) %>%
+layout(
+title = list(
+text = "Distribución de Respuestas",
+font = list(
+family = active_theme$typography$font_family,
+size = active_theme$typography$sizes$title,
+color = active_theme$colors$text
+)
+),
+showlegend = FALSE
+)
 }
 # UI Definition
 intervalUI <- function(id) {

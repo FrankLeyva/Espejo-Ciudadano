@@ -18,10 +18,19 @@ inequalityServer <- function(input, output, session,current_theme = NULL) {
       NULL
     })
   })
-  
   # Use the current theme
-  current_theme <- reactiveVal(theme_config)
-  
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to gobierno theme if nothing provided
+      get_section_theme("gobierno")
+    }
+  })
   # Map for Q84 - Rights Violation (using binary module functions)
   output$rights_violation_map <- renderLeaflet({
     req(survey_data(), geo_data())
@@ -39,7 +48,7 @@ inequalityServer <- function(input, output, session,current_theme = NULL) {
       geo_data(),
       highlight_extremes = TRUE,
       focus_on_true = TRUE,
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -62,7 +71,7 @@ inequalityServer <- function(input, output, session,current_theme = NULL) {
       highlight_extremes = TRUE,
       use_gradient = F,
       color_scale = "RdBu",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -110,14 +119,14 @@ inequalityServer <- function(input, output, session,current_theme = NULL) {
     bar_data <- bar_data[order(-bar_data$Count), ]
     
     # Get primary color from theme
-    primary_color <- if (!is.null(current_theme()) && !is.null(current_theme()$colors$primary)) {
-      current_theme()$colors$primary
+    primary_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$primary)) {
+      active_theme()$colors$primary
     } else {
       "#1f77b4"  # Default blue
     }
     
-    highlight_color <- if (!is.null(current_theme()) && !is.null(current_theme()$colors$highlight)) {
-      current_theme()$colors$highlight
+    highlight_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$highlight)) {
+      active_theme()$colors$highlight
     } else {
       "#9467bd"  # Default purple
     }
@@ -147,7 +156,7 @@ inequalityServer <- function(input, output, session,current_theme = NULL) {
         title = "Instituciones que contribuyen a reducir la desigualdad",
         xlab = "Frecuencia",
         ylab = "",
-        custom_theme = current_theme()
+        custom_theme = active_theme()
       )
   })
 }

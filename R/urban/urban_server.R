@@ -9,8 +9,19 @@ urbanServer <- function(input, output, session,current_theme = NULL) {
      load_survey_data(survey_id)
    })
   
-  # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+   active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to movilidad theme if nothing provided
+      get_section_theme("movilidad")
+    }
+  })
+  
   
   # Public transport usage for work (Q72.9 - Binary)
   output$public_transport_work <- renderText({
@@ -69,7 +80,7 @@ urbanServer <- function(input, output, session,current_theme = NULL) {
   # Environmental quality plot
   output$env_quality_plot <- renderPlotly({
     req(survey_data())
-    create_env_quality_plot(survey_data()$responses, custom_theme = current_theme())
+    create_env_quality_plot(survey_data()$responses, custom_theme = active_theme())
   })
 
 }

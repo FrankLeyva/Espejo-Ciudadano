@@ -76,7 +76,7 @@ urbanUI <- function() {
         title = "Uso de Transporte Público (Trabajo)",
         value = textOutput("public_transport_work"),
         showcase = bsicons::bs_icon("bus-front"),
-        theme = value_box_theme(bg = "#3498db", fg = "white")
+        theme = value_box_theme(bg = "#2A9D8F", fg = "white")
       ),
       
       # Private vehicle usage
@@ -84,7 +84,7 @@ urbanUI <- function() {
         title = "Uso de Vehículo Particular (General)",
         value = textOutput("private_vehicle_usage"),
         showcase = bsicons::bs_icon("car-front"),
-        theme = value_box_theme(bg = "#f39c12", fg = "white")
+        theme = value_box_theme(bg = "#80CBC4", fg = "white")
       ),
       
       # Bus satisfaction
@@ -92,7 +92,7 @@ urbanUI <- function() {
         title = "Satisfacción con Camión/Rutera",
         value = textOutput("bus_satisfaction"),
         showcase = bsicons::bs_icon("star-half"),
-        theme = value_box_theme(bg = "#2ecc71", fg = "white")
+        theme = value_box_theme(bg = "#2A9D8F", fg = "white")
       ),
       
       # Juarez Bus satisfaction
@@ -100,7 +100,7 @@ urbanUI <- function() {
         title = "Satisfacción con Juárez Bus",
         value = textOutput("juarez_bus_satisfaction"),
         showcase = bsicons::bs_icon("star-half"),
-        theme = value_box_theme(bg = "#9b59b6", fg = "white")
+        theme = value_box_theme(bg = "#80CBC4", fg = "white")
       )
     ),
     

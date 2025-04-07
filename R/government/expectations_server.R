@@ -17,8 +17,18 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
   })
   
   # Use the current theme
-  current_theme <- reactiveVal(theme_config)
-  
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to gobierno theme if nothing provided
+      get_section_theme("gobierno")
+    }
+  })
   # Municipal Expectations Map (Q18)
   output$municipal_expectations_map <- renderLeaflet({
     req(survey_data(), geo_data())
@@ -38,7 +48,7 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
       highlight_extremes = TRUE,
       use_gradient = F,
       color_scale = "Blues",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -61,7 +71,7 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
       highlight_extremes = TRUE,
       use_gradient = F,
       color_scale = "Purples",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -84,7 +94,7 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
       highlight_extremes = TRUE,
       use_gradient = F,
       color_scale = "Reds",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -178,7 +188,7 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
         title = "Percepción de los tres niveles de gobierno",
         xlab = "",
         ylab = "Promedio (1-4)",
-        custom_theme = current_theme()
+        custom_theme = active_theme()
       ) %>%
       layout(
         barmode = "group",

@@ -19,7 +19,7 @@ wellnessUI <- function() {
     
     # Navigation cards section
     layout_columns(
-      col_widths = c(4, 4, 4),
+      col_widths = c(3, 3, 3,3),
       
       # Economy card
       div(
@@ -95,10 +95,18 @@ wellnessUI <- function() {
         )
       ),
       
-      # Migration intention map
       card(
         card_header(
-          "Frecuencia con que piensa en irse de la ciudad",
+          div(
+            class = "d-flex justify-content-between align-items-center",
+            h4("Frecuencia con que piensa en irse de la ciudad", class = "m-0"),
+            downloadButton(
+              "download_migration_map", 
+              "", 
+              icon = icon("download"), 
+              class = "btn-sm"
+            )
+          ),
           class = "bg-light"
         ),
         leafletOutput("migration_intention_map", height = "450px"),

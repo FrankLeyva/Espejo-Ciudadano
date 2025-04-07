@@ -7,8 +7,18 @@ trustServer <- function(input, output, session,current_theme = NULL) {
   })
   
   # Use the current theme
-  current_theme <- reactiveVal(theme_config)
-  
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to gobierno theme if nothing provided
+      get_section_theme("gobierno")
+    }
+  })
   # Helper function to calculate trust percentages
   calculate_trust_percentage <- function(data, question_ids, labels = NULL) {
     # Initialize vectors to store results

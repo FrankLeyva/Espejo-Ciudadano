@@ -18,30 +18,41 @@ infrastructureServer <- function(input, output, session,current_theme = NULL) {
   })
   
   # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to infraestructura theme if nothing provided
+      get_section_theme("infraestructura")
+    }
+  })
   
   # Education Plot
   output$education_plot <- renderLeaflet({
     req(survey_data())
-    create_education_overview(survey_data()$responses, current_theme())
+    create_education_overview(survey_data()$responses, active_theme())
   })
   
   # Healthcare Plot
   output$healthcare_plot <- renderPlotly({
     req(survey_data())
-    create_healthcare_overview(survey_data()$responses, current_theme())
+    create_healthcare_overview(survey_data()$responses, active_theme())
   })
   
   # Utilities Plot
   output$utilities_plot <- renderPlotly({
     req(survey_data())
-    create_utilities_overview(survey_data()$responses, current_theme())
+    create_utilities_overview(survey_data()$responses, active_theme())
   })
   
   # Housing Map
   output$housing_map <- renderLeaflet({
     req(survey_data(), geo_data())
-    create_housing_overview(survey_data()$responses, geo_data(), current_theme())
+    create_housing_overview(survey_data()$responses, geo_data(), active_theme())
   })
  
 }

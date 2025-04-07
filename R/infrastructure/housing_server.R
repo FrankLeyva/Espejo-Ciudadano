@@ -18,8 +18,19 @@ housingServer <- function(input, output, session,current_theme = NULL) {
     })
   })
   
-  # Almacenar tema actual
-  current_theme <- reactiveVal(theme_config)
+  # Use the current theme
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to infraestructura theme if nothing provided
+      get_section_theme("infraestructura")
+    }
+  })
 
   # Funciones auxiliares para preparar datos
   prepare_housing_data <- function(question_id) {
@@ -73,8 +84,8 @@ housingServer <- function(input, output, session,current_theme = NULL) {
     overall_mean <- round(mean(district_stats$mean_value, na.rm = TRUE), 1)
     
     # Colores de distrito - usar colores del tema si están disponibles
-    district_colors <- if (!is.null(current_theme()$palettes$district)) {
-      current_theme()$palettes$district
+    district_colors <- if (!is.null(active_theme()$palettes$district)) {
+      active_theme()$palettes$district
     } else {
       c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
        "#8c564b", "#e377c2", "#bcbd22", "#17becf")

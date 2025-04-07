@@ -18,6 +18,8 @@ library(colourpicker)
 library(RColorBrewer)
 library(viridisLite)
 library(bsicons)
+library(webshot)
+library(htmlwidgets)
 
 # Source all necessary files
 # Technical modules

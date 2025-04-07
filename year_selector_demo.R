@@ -4,132 +4,21 @@ library(plotly)
 library(leaflet)
 library(dplyr)
 
-# Sample data for visualizations
-set.seed(123)
-district_data <- data.frame(
-  district = as.factor(1:10),
-  satisfaction = round(runif(10, 6.5, 9.2), 1),
-  population = round(runif(10, 80000, 200000)),
-  service_access = round(runif(10, 30, 95)),
-  housing_quality = round(runif(10, 5.5, 8.5), 1),
-  participation = round(runif(10, 15, 65))
-)
-
-service_data <- data.frame(
-  service = c("Agua", "Electricidad", "Internet", "Parques", "Calles", "Transporte"),
-  rating = c(7.2, 8.1, 6.5, 5.9, 5.2, 6.8),
-  change = c(0.3, -0.2, 0.5, 0.1, -0.3, 0.0)
-)
-
-participation_data <- data.frame(
-  type = c("Vota en elecciones", "Participa en juntas", "Asiste a eventos comunitarios", 
-           "Forma parte de comités", "Realiza reportes ciudadanos"),
-  percentage = c(68, 32, 45, 18, 29)
-)
-
-# Section color themes
-section_themes <- list(
-  bienestar = list(
-    primary = "#006D77",
-    secondary = "#83C5BE",
-    accent = "#006D77"
-  ),
-  movilidad = list(
-    primary = "#2A9D8F",
-    secondary = "#80CBC4",
-    accent = "#2A9D8F"
-  ),
-  gobierno = list(
-    primary = "#6969B3",
-    secondary = "#B39DDB",
-    accent = "#6969B3"
-  ),
-  infraestructura = list(
-    primary = "#F4A261",
-    secondary = "#FFCC80",
-    accent = "#F4A261"
-  ),
-  participacion = list(
-    primary = "#E76F51",
-    secondary = "#FFAB91",
-    accent = "#E76F51"
-  )
-)
-
-# District colors (stays consistent across all sections)
-district_colors <- c("#88BDBC", "#6E9887", "#BECC92", "#FDD692", 
-                     "#F1BB87", "#F28A80", "#D1A5C6", "#9CADCE", 
-                     "#B6C5D1", "#D3D9E0")
-
-# Helper function for section-specific styling
-apply_section_style <- function(element_id, section) {
-  theme_color <- section_themes[[section]]$primary
-  return(tags$script(sprintf("
-    document.getElementById('%s').style.backgroundColor = '%s';
-  ", element_id, theme_color)))
-}
-
 # Custom CSS for styling
 custom_css <- '
-/* Base Styles */
 body {
   font-family: "Montserrat", "Segoe UI", sans-serif;
   background-color: #F8F9FA;
   color: #333333;
+  padding: 20px;
 }
 
-/* Header Styling */
-.app-header {
-  background-color: #333333;
-  color: white;
-  padding: 15px 20px;
-  margin-bottom: 24px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.app-logo {
-  font-weight: 700;
-  font-size: 24px;
-  letter-spacing: 0.5px;
-}
-
-.app-subtitle {
-  font-weight: 400;
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-/* Section indicator */
-.section-indicator {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.section-color {
-  width: 8px;
-  height: 30px;
-  margin-right: 10px;
-  border-radius: 4px;
-}
-
-.section-name {
-  font-size: 22px;
-  font-weight: 600;
-  color: #333333;
-}
-
-/* Card Styling */
 .dashboard-card {
   background-color: #FFFFFF;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   padding: 20px;
   margin-bottom: 24px;
-  border: none;
 }
 
 .card-header {
@@ -140,7 +29,6 @@ body {
   padding-bottom: 12px;
   border-bottom: 1px solid #E9ECEF;
   margin-bottom: 16px;
-  background-color: transparent;
 }
 
 .card-header::before {
@@ -148,119 +36,67 @@ body {
   display: inline-block;
   width: 4px;
   height: 18px;
+  background-color: #006D77;
   margin-right: 8px;
   vertical-align: text-top;
 }
 
-/* Navigation Styling */
-.nav-pills .nav-link.active {
-  color: white;
-  border-radius: 6px;
+h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333333;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333333;
+}
+
+.section-divider {
+  height: 1px;
+  background-color: #E9ECEF;
+  margin: 24px 0;
+}
+
+.comparison-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.comparison-item {
+  flex: 1;
+  min-width: 300px;
+  margin-right: 24px;
+  margin-bottom: 24px;
+}
+
+.palette-row {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.color-box {
+  width: 50px;
+  height: 50px;
+  margin-right: 5px;
+  border-radius: 4px;
+  border: 1px solid #E9ECEF;
+}
+
+.palette-label {
+  font-size: 14px;
+  margin-bottom: 5px;
   font-weight: 500;
 }
 
-.nav-pills .nav-link {
-  color: #495057;
-  padding: 8px 16px;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.nav-pills .nav-link:hover:not(.active) {
-  background-color: #E9ECEF;
-}
-
-/* Value Box Styling */
-.value-box-container {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  padding: 20px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-}
-
-.value-box-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-  color: white;
-  font-size: 24px;
-}
-
-.value-box-content {
-  flex-grow: 1;
-}
-
-.value-box-title {
-  font-size: 14px;
-  color: #6C757D;
-  margin-bottom: 4px;
-}
-
-.value-box-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: #333333;
-}
-
-/* Table Styling */
-.table {
-  width: 100%;
-  margin-bottom: 1rem;
-  color: #333333;
-  border-collapse: collapse;
-}
-
-.table th {
-  padding: 12px 8px;
-  vertical-align: bottom;
+pre {
   background-color: #F8F9FA;
-  border-bottom: 2px solid #E9ECEF;
-  font-weight: 600;
-  text-align: left;
-}
-
-.table td {
-  padding: 12px 8px;
-  vertical-align: top;
-  border-top: 1px solid #E9ECEF;
-}
-
-.table tbody tr:hover {
-  background-color: rgba(0, 109, 119, 0.05);
-}
-
-/* Section tabs */
-.section-tabs {
-  margin-bottom: 20px;
-  border-bottom: 1px solid #dee2e6;
-  display: flex;
-}
-
-.section-tab {
-  padding: 10px 20px;
-  margin-right: 5px;
-  border-radius: 6px 6px 0 0;
-  cursor: pointer;
-  border: 1px solid #dee2e6;
-  border-bottom: none;
-  background-color: #f8f9fa;
-}
-
-.section-tab.active {
-  background-color: white;
-  font-weight: 600;
-}
-
-/* Visualization containers */
-.visualization-container {
-  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: "Consolas", monospace;
 }
 '
 
@@ -269,304 +105,262 @@ ui <- page_fluid(
   tags$head(
     tags$link(rel = "stylesheet", 
               href = "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"),
-    tags$style(custom_css),
-    tags$script(src = "https://kit.fontawesome.com/a076d05399.js")
+    tags$style(custom_css)
   ),
   
-  # Header
-  div(class = "app-header",
-      div(class = "app-logo", "Dashboard Ciudad Juárez"),
-      div(class = "app-subtitle", "Plan Estratégico de Juárez | 2024")
+  h2("Estrategias de Color para Visualizaciones"),
+  
+  p("Esta guía muestra estrategias de color optimizadas para diferentes tipos de visualizaciones, manteniendo la coherencia visual sin ser repetitivo."),
+  
+  div(class = "dashboard-card",
+      div(class = "card-header", "Paletas Sequenciales Mejoradas para Fondos Claros"),
+      
+      p("Las paletas sequenciales estándar pueden tener problemas de visibilidad contra fondos blancos, especialmente para gráficos circulares. Estas versiones ajustadas mantienen la coherencia temática pero con mejor visibilidad:"),
+      
+      layout_columns(
+        col_widths = c(6, 6),
+        div(
+          h3("Problema: Demasiado Claro"),
+          plotlyOutput("problem_sequential"),
+          div(class = "palette-row", style = "margin-top: 10px",
+              div(class = "color-box", style = "background-color: #E6EEEF"),
+              div(class = "color-box", style = "background-color: #ADCCD0"),
+              div(class = "color-box", style = "background-color: #74AAB0"),
+              div(class = "color-box", style = "background-color: #3A8C94"),
+              div(class = "color-box", style = "background-color: #006D77")
+          ),
+          p("Los colores más claros se pierden contra el fondo blanco")
+        ),
+        div(
+          h3("Solución: Rango Ajustado"),
+          plotlyOutput("improved_sequential"),
+          div(class = "palette-row", style = "margin-top: 10px",
+              div(class = "color-box", style = "background-color: #B2D8D8"),
+              div(class = "color-box", style = "background-color: #88C1C1"),
+              div(class = "color-box", style = "background-color: #5EAAAA"),
+              div(class = "color-box", style = "background-color: #349393"),
+              div(class = "color-box", style = "background-color: #007C7C")
+          ),
+          p("Mismo tema de color pero comenzando desde un tono medio")
+        )
+      )
   ),
   
-  # Section tabs
-  div(class = "section-tabs",
-      div(class = "section-tab", 
-          id = "tab-general", 
-          style = "border-top: 3px solid #333333;",
-          onclick = "switchTab('general')",
-          "Panorama General"),
-      div(class = "section-tab active", 
-          id = "tab-bienestar", 
-          style = "border-top: 3px solid #006D77;",
-          onclick = "switchTab('bienestar')",
-          "Bienestar"),
-      div(class = "section-tab", 
-          id = "tab-movilidad", 
-          style = "border-top: 3px solid #2A9D8F;",
-          onclick = "switchTab('movilidad')",
-          "Movilidad"),
-      div(class = "section-tab", 
-          id = "tab-gobierno", 
-          style = "border-top: 3px solid #6969B3;",
-          onclick = "switchTab('gobierno')",
-          "Gobierno"),
-      div(class = "section-tab", 
-          id = "tab-infra", 
-          style = "border-top: 3px solid #F4A261;",
-          onclick = "switchTab('infraestructura')",
-          "Infraestructura"),
-      div(class = "section-tab", 
-          id = "tab-part", 
-          style = "border-top: 3px solid #E76F51;",
-          onclick = "switchTab('participacion')",
-          "Participación")
+  div(class = "dashboard-card",
+      div(class = "card-header", "Comparación de Estrategias para Gráficos Circulares"),
+      
+      p("Los gráficos circulares requieren colores claramente distinguibles, pero que todavía muestren una relación temática:"),
+      
+      layout_columns(
+        col_widths = c(6, 6),
+        div(
+          h3("Problema: Secuencial Puro"),
+          plotlyOutput("problem_pie"),
+          p("Difícil distinguir entre categorías adyacentes")
+        ),
+        div(
+          h3("Solución: Colores Análogos"),
+          plotlyOutput("improved_pie"),
+          p("Mantiene cohesión temática pero con mayor diferenciación")
+        )
+      )
   ),
-  tags$script("
-    function switchTab(section) {
-      // Remove active class from all tabs
-      document.querySelectorAll('.section-tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
+  
+  div(class = "dashboard-card",
+      div(class = "card-header", "Estrategia para Múltiples Visualizaciones"),
       
-      // Add active class to clicked tab
-      document.getElementById('tab-' + section).classList.add('active');
+      p("Al tener múltiples visualizaciones en el mismo panel, usar estas estrategias de color:"),
       
-      // Update section indicator color
-      document.querySelector('.section-color').style.backgroundColor = 
-        section === 'general' ? '#333333' : 
-        section === 'bienestar' ? '#006D77' : 
-        section === 'movilidad' ? '#2A9D8F' : 
-        section === 'gobierno' ? '#6969B3' : 
-        section === 'infraestructura' ? '#F4A261' : '#E76F51';
-        
-      // Update card headers
-      document.querySelectorAll('.card-header').forEach(header => {
-        header.style.setProperty('--accent-color', 
-          section === 'general' ? '#333333' : 
-          section === 'bienestar' ? '#006D77' : 
-          section === 'movilidad' ? '#2A9D8F' : 
-          section === 'gobierno' ? '#6969B3' : 
-          section === 'infraestructura' ? '#F4A261' : '#E76F51');
-      });
+      h3("1. Consistencia por Tipo de Entidad"),
+      p("Los distritos siempre usan la misma paleta de colores en todas las visualizaciones:"),
       
-      // This is just a demo, in a real app you would change content here
+      layout_columns(
+        col_widths = c(6, 6),
+        div(
+          plotlyOutput("district_bars")
+        ),
+        div(
+          plotlyOutput("district_pie")
+        )
+      ),
+      
+      div(class = "section-divider"),
+      
+      h3("2. Diferentes Esquemas para Diferentes Tipos de Datos"),
+      p("Los tipos de servicios, tendencias y métricas usan paletas distintas pero coordinadas:"),
+      
+      layout_columns(
+        col_widths = c(4, 4, 4),
+        div(
+          plotlyOutput("services_chart"),
+          p("Servicios - Paleta Categórica")
+        ),
+        div(
+          plotlyOutput("trend_chart"),
+          p("Tendencias - Paleta Divergente")
+        ),
+        div(
+          plotlyOutput("metrics_chart"),
+          p("Métricas - Paleta Secuencial Ajustada")
+        )
+      )
+  ),
+  
+  div(class = "dashboard-card",
+      div(class = "card-header", "Implementación en el Código"),
+      
+      h3("Paletas Recomendadas por Tipo de Visualización"),
+      
+      tags$pre(
+'# Colores de distrito (consistentes entre visualizaciones)
+district_colors <- c("#88BDBC", "#6E9887", "#BECC92", "#FDD692", 
+                     "#F1BB87", "#F28A80", "#D1A5C6", "#9CADCE", 
+                     "#B6C5D1", "#D3D9E0")
+
+# Paleta secuencial para métricas (rango ajustado para todos los fondos)
+bienestar_sequential <- c("#B2D8D8", "#88C1C1", "#5EAAAA", "#349393", "#007C7C")
+movilidad_sequential <- c("#B7E4D7", "#8FD1BD", "#67BEA2", "#3EAB88", "#16976D")
+gobierno_sequential <- c("#BFB8E8", "#9D94D8", "#7A6FC9", "#584BB9", "#3526A9")
+infraestructura_sequential <- c("#FFDBB5", "#FFC48A", "#FFAC5F", "#FF9534", "#FF7E09")
+participacion_sequential <- c("#FFB8A8", "#FF957D", "#FF7253", "#FF5028", "#FE2E00")
+
+# Paleta para datos divergentes
+diverging_palette <- colorRampPalette(c("#E76F51", "#FFFFFF", "#006D77"))(7)
+
+# Uso consistente en funciones de visualización
+create_bar_chart <- function(data, color_type = "sequential", section = "bienestar") {
+  # Elegir paleta según el contexto
+  if (color_type == "categorical") {
+    # Para categorías distintas como servicios
+    colors <- district_colors[1:nrow(data)]
+  } else if (color_type == "sequential") {
+    # Para intensidad o niveles
+    if (section == "bienestar") {
+      colors <- bienestar_sequential
+    } else if (section == "movilidad") {
+      colors <- movilidad_sequential
+    } else {
+      colors <- bienestar_sequential  # Default
     }
-  "),
+  } else if (color_type == "diverging") {
+    # Para tendencias positivas/negativas
+    colors <- diverging_palette
+  }
   
-  # Section indicator (currently showing "Bienestar")
-  div(class = "section-indicator",
-      div(class = "section-color", id = "section-color-indicator", 
-          style = "background-color: #006D77;"),
-      div(class = "section-name", "Bienestar")
-  ),
-  
-  # Main content
-  layout_columns(
-    col_widths = c(4, 8),
-    
-    # Left column with key metrics
-    div(
-      # Value boxes
-      div(class = "value-box-container",
-          div(class = "value-box-icon", id = "population-icon", 
-              style = "background-color: #006D77;", 
-              bsicons::bs_icon("people")),
-          div(class = "value-box-content",
-              div(class = "value-box-title", "Satisfacción promedio"),
-              div(class = "value-box-value", "7.8/10")
-          )
-      ),
-      
-      div(class = "value-box-container",
-          div(class = "value-box-icon", id = "trend-icon",
-              style = "background-color: #83C5BE;", 
-              bsicons::bs_icon("graph-up")),
-          div(class = "value-box-content",
-              div(class = "value-box-title", "Tendencia anual"),
-              div(class = "value-box-value", "+0.3")
-          )
-      ),
-      
-      div(class = "value-box-container",
-          div(class = "value-box-icon", id = "district-icon", 
-              style = "background-color: #006D77;", 
-              bsicons::bs_icon("geo-alt")),
-          div(class = "value-box-content",
-              div(class = "value-box-title", "Distrito con mejor calificación"),
-              div(class = "value-box-value", "Distrito 4 (9.1)")
-          )
-      ),
-      
-      # District table
-      div(class = "dashboard-card",
-          div(class = "card-header", style = "--accent-color: #006D77;", 
-              "Distritos con mayor satisfacción"),
-          tags$table(class = "table",
-                    tags$thead(
-                      tags$tr(
-                        tags$th("Distrito"),
-                        tags$th("Calificación"),
-                        tags$th("Variación")
-                      )
-                    ),
-                    tags$tbody(
-                      tags$tr(
-                        tags$td("Distrito 4"),
-                        tags$td("9.1"),
-                        tags$td(tags$span(style = "color: #28a745", "+0.3"))
-                      ),
-                      tags$tr(
-                        tags$td("Distrito 9"),
-                        tags$td("8.7"),
-                        tags$td(tags$span(style = "color: #28a745", "+0.1"))
-                      ),
-                      tags$tr(
-                        tags$td("Distrito 2"),
-                        tags$td("8.5"),
-                        tags$td(tags$span(style = "color: #dc3545", "-0.2"))
-                      ),
-                      tags$tr(
-                        tags$td("Distrito 8"),
-                        tags$td("8.4"),
-                        tags$td(tags$span(style = "color: #6c757d", "0.0"))
-                      )
-                    )
-          )
-      )
-    ),
-    
-    # Right column with visualizations
-    div(
-      # City map visualization
-      div(class = "dashboard-card",
-          div(class = "card-header", style = "--accent-color: #006D77;", 
-              "Satisfacción por distrito"),
-          leafletOutput("district_map", height = "350px")
-      ),
-      
-      # Services bar chart
-      div(class = "dashboard-card",
-          div(class = "card-header", style = "--accent-color: #006D77;", 
-              "Calificación de servicios públicos"),
-          plotlyOutput("services_chart", height = "300px")
-      )
+  # Crear gráfico con la paleta elegida
+  plot_ly(
+    data = data,
+    type = "bar",
+    marker = list(
+      color = colors
     )
-  ),
-  
-  # Comparison of different visualization styles
-  div(class = "dashboard-card", 
-      div(class = "card-header", style = "--accent-color: #006D77;",
-          "Ejemplos de visualizaciones con diferentes esquemas de color"),
-      
-      p("Un buen diseño de tablero mantiene la coherencia en los colores cuando representan", 
-        strong("los mismos tipos de datos"), "pero varía los esquemas según el", 
-        strong("tipo de visualización"), "y", strong("función del color"), ":"),
-      
-      layout_columns(
-        col_widths = c(6, 6),
-        div(
-          h5("Esquema categórico", style = "margin-bottom: 10px; font-weight: 600; color: #333;"),
-          p("Colores distintos para categorías diferentes (como distritos o tipos de servicios)"),
-          div(class = "visualization-container", plotlyOutput("categorical_example", height = "200px"))
-        ),
-        div(
-          h5("Esquema secuencial", style = "margin-bottom: 10px; font-weight: 600; color: #333;"),
-          p("Variaciones de un color para mostrar intensidad (como satisfacción o participación)"),
-          div(class = "visualization-container", plotlyOutput("sequential_example", height = "200px"))
-        )
-      ),
-      
-      layout_columns(
-        col_widths = c(6, 6),
-        div(
-          h5("Esquema divergente", style = "margin-bottom: 10px; font-weight: 600; color: #333;"),
-          p("Dos colores opuestos para valores positivos y negativos (como aumentos y disminuciones)"),
-          div(class = "visualization-container", plotlyOutput("diverging_example", height = "200px"))
-        ),
-        div(
-          h5("Aplicación consistente", style = "margin-bottom: 10px; font-weight: 600; color: #333;"),
-          p("Mismos distritos = mismos colores, en todos los tableros y tipos de gráficos"),
-          div(class = "visualization-container", plotlyOutput("consistency_example", height = "200px"))
-        )
+  )
+}'
       )
-  ),
-  
-  # CSS to apply section color to card headers
-  tags$style("
-    .card-header::before {
-      background-color: var(--accent-color, #006D77);
-    }
-  ")
+  )
 )
 
 # Server
 server <- function(input, output, session) {
   
-  # District map
-  output$district_map <- renderLeaflet({
-    # Demo map with simulated district polygons
-    leaflet() %>%
-      addTiles() %>%
-      setView(lng = -106.42, lat = 31.67, zoom = 10) %>%
-      addCircleMarkers(
-        lng = -106.42 + rnorm(10, 0, 0.05),
-        lat = 31.67 + rnorm(10, 0, 0.05),
-        radius = 15,
-        color = "white",
-        weight = 1.5,
-        opacity = 1,
-        fillOpacity = 0.8,
-        fillColor = district_colors,  # Consistent district colors
-        label = lapply(1:10, function(i) {
-          HTML(sprintf(
-            '<div style="background-color: white; color: #333; padding: 8px 12px; border-radius: 6px; font-weight: 600; 
-            text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); font-family: Montserrat, sans-serif;">
-            <span style="font-size: 14px;">Distrito %s</span><br>
-            <span style="font-size: 18px;">%.1f</span></div>',
-            i, district_data$satisfaction[i]
-          ))
-        })
-      )
-  })
-  
-  # Services bar chart - using section-specific primary color
-  output$services_chart <- renderPlotly({
+  # Problem sequential example
+  output$problem_sequential <- renderPlotly({
+    df <- data.frame(
+      categoria = c("Cat1", "Cat2", "Cat3", "Cat4", "Cat5"),
+      valor = c(25, 35, 15, 10, 15)
+    )
+    
     plot_ly(
-      data = service_data,
-      x = ~rating,
-      y = ~reorder(service, rating),
-      type = "bar",
-      orientation = "h",
+      labels = ~df$categoria,
+      values = ~df$valor,
+      type = "pie",
       marker = list(
-        color = "#006D77"  # Section-specific color (Bienestar)
+        colors = c("#E6EEEF", "#ADCCD0", "#74AAB0", "#3A8C94", "#006D77")
       ),
-      text = ~paste0(rating, "/10"),
-      textposition = "auto"
+      textinfo = "label+percent"
     ) %>%
       layout(
-        title = FALSE,
-        xaxis = list(
-          title = "Calificación (1-10)",
-          range = c(0, 10),
-          zeroline = TRUE,
-          showgrid = TRUE,
-          gridcolor = "#E9ECEF"
-        ),
-        yaxis = list(
-          title = "",
-          zeroline = FALSE,
-          showgrid = FALSE
-        ),
-        margin = list(l = 100, r = 20, t = 20, b = 40),
-        font = list(family = "Montserrat")
+        showlegend = FALSE
       )
   })
   
-  # Categorical example (using distinct colors for categories)
-  output$categorical_example <- renderPlotly({
+  # Improved sequential example
+  output$improved_sequential <- renderPlotly({
     df <- data.frame(
-      categoria = c("Agua", "Electricidad", "Gas", "Internet", "Transporte"),
-      porcentaje = c(92, 98, 76, 82, 65)
+      categoria = c("Cat1", "Cat2", "Cat3", "Cat4", "Cat5"),
+      valor = c(25, 35, 15, 10, 15)
+    )
+    
+    plot_ly(
+      labels = ~df$categoria,
+      values = ~df$valor,
+      type = "pie",
+      marker = list(
+        colors = c("#B2D8D8", "#88C1C1", "#5EAAAA", "#349393", "#007C7C")
+      ),
+      textinfo = "label+percent"
+    ) %>%
+      layout(
+        showlegend = FALSE
+      )
+  })
+  
+  # Problem pie chart
+  output$problem_pie <- renderPlotly({
+    df <- data.frame(
+      categoria = c("Servicio 1", "Servicio 2", "Servicio 3", "Servicio 4", "Servicio 5", "Servicio 6"),
+      valor = c(22, 18, 12, 15, 19, 14)
+    )
+    
+    plot_ly(
+      labels = ~df$categoria,
+      values = ~df$valor,
+      type = "pie",
+      marker = list(
+        colors = colorRampPalette(c("#E6EEEF", "#006D77"))(6)
+      ),
+      textinfo = "label+percent"
+    ) %>%
+      layout(
+        showlegend = FALSE
+      )
+  })
+  
+  # Improved pie chart
+  output$improved_pie <- renderPlotly({
+    df <- data.frame(
+      categoria = c("Servicio 1", "Servicio 2", "Servicio 3", "Servicio 4", "Servicio 5", "Servicio 6"),
+      valor = c(22, 18, 12, 15, 19, 14)
+    )
+    
+    plot_ly(
+      labels = ~df$categoria,
+      values = ~df$valor,
+      type = "pie",
+      marker = list(
+        colors = c("#006D77", "#1A8A98", "#339999", "#4DB1AE", "#66C2AD", "#7FCCBF")
+      ),
+      textinfo = "label+percent"
+    ) %>%
+      layout(
+        showlegend = FALSE
+      )
+  })
+  
+  # District bars
+  output$district_bars <- renderPlotly({
+    df <- data.frame(
+      distrito = paste("Distrito", 1:5),
+      valor = c(85, 67, 92, 71, 78)
     )
     
     plot_ly(
       data = df,
-      x = ~categoria,
-      y = ~porcentaje,
+      x = ~distrito,
+      y = ~valor,
       type = "bar",
       marker = list(
-        color = c("#006D77", "#2A9D8F", "#6969B3", "#F4A261", "#E76F51")
+        color = c("#88BDBC", "#6E9887", "#BECC92", "#FDD692", "#F1BB87")
       )
     ) %>%
       layout(
@@ -577,69 +371,97 @@ server <- function(input, output, session) {
       )
   })
   
-  # Sequential example (using shades of one color)
-  output$sequential_example <- renderPlotly({
+  # District pie
+  output$district_pie <- renderPlotly({
     df <- data.frame(
-      distrito = factor(1:5),
-      satisfaccion = c(8.2, 7.5, 6.8, 8.9, 7.1)
+      distrito = paste("Distrito", 1:5),
+      valor = c(85, 67, 92, 71, 78)
     )
     
     plot_ly(
-      data = df,
-      x = ~distrito,
-      y = ~satisfaccion,
-      type = "bar",
+      labels = ~df$distrito,
+      values = ~df$valor,
+      type = "pie",
       marker = list(
-        color = c("#006D77", "#3A8C94", "#74AAB0", "#ADCCD0", "#E6EEEF"),
-        line = list(color = "#FFFFFF", width = 1)
-      )
+        colors = c("#88BDBC", "#6E9887", "#BECC92", "#FDD692", "#F1BB87")
+      ),
+      textinfo = "label+percent"
     ) %>%
       layout(
-        title = FALSE,
-        xaxis = list(title = "Distrito"),
-        yaxis = list(title = "", range = c(0, 10)),
         showlegend = FALSE
       )
   })
   
-  # Diverging example (using two contrasting colors)
-  output$diverging_example <- renderPlotly({
+  # Services chart (categorical)
+  output$services_chart <- renderPlotly({
     df <- data.frame(
-      servicio = c("Agua", "Electricidad", "Internet", "Parques", "Calles", "Transporte"),
-      cambio = c(1.2, -0.8, 0.5, -1.3, 2.1, -0.4)
+      servicio = c("Agua", "Luz", "Gas", "Internet"),
+      valor = c(65, 82, 71, 55)
     )
     
     plot_ly(
       data = df,
       x = ~servicio,
-      y = ~cambio,
+      y = ~valor,
       type = "bar",
       marker = list(
-        color = ~ifelse(cambio >= 0, "#006D77", "#E76F51")
+        color = c("#006D77", "#2A9D8F", "#6969B3", "#F4A261")
       )
     ) %>%
       layout(
         title = FALSE,
         xaxis = list(title = ""),
-        yaxis = list(title = "Cambio", zeroline = TRUE),
+        yaxis = list(title = "", range = c(0, 100)),
         showlegend = FALSE
       )
   })
   
-  # Consistency example (same districts = same colors in different visualizations)
-  output$consistency_example <- renderPlotly({
-    # Using the same district colors in a different visualization type
-    plot_ly() %>%
-      add_pie(
-        labels = ~paste("Distrito", 1:5),
-        values = ~district_data$participation[1:5],
-        marker = list(
-          colors = district_colors[1:5]
-        ),
-        textinfo = "label+percent"
-      ) %>%
+  # Trend chart (diverging)
+  output$trend_chart <- renderPlotly({
+    df <- data.frame(
+      año = c("2020", "2021", "2022", "2023", "2024"),
+      cambio = c(-0.8, -0.3, 0.2, 0.7, 1.5)
+    )
+    
+    plot_ly(
+      data = df,
+      x = ~año,
+      y = ~cambio,
+      type = "bar",
+      marker = list(
+        color = ~ifelse(cambio >= 0, "#006D77", "#E76F51"),
+        opacity = ~abs(cambio)/max(abs(cambio))
+      )
+    ) %>%
       layout(
         title = FALSE,
+        xaxis = list(title = ""),
+        yaxis = list(title = ""),
+        showlegend = FALSE
+      )
+  })
+  
+  # Metrics chart (sequential)
+  output$metrics_chart <- renderPlotly({
+    df <- data.frame(
+      metrica = c("Salud", "Vivienda", "Educación", "Empleo", "Servicios"),
+      valor = c(7.5, 6.8, 8.1, 5.9, 7.2)
+    )
+    
+    plot_ly(
+      data = df,
+      x = ~metrica,
+      y = ~valor,
+      type = "bar",
+      marker = list(
+        color = c("#B2D8D8", "#88C1C1", "#5EAAAA", "#349393", "#007C7C"),
+        line = list(color = "#FFFFFF", width = 1)
+      )
+    ) %>%
+      layout(
+        title = FALSE,
+        xaxis = list(title = ""),
+        yaxis = list(title = "", range = c(0, 10)),
         showlegend = FALSE
       )
   })

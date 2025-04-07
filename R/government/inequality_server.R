@@ -1,5 +1,5 @@
 # Server function for Inequality Dashboard
-inequalityServer <- function(input, output, session) {
+inequalityServer <- function(input, output, session,current_theme = NULL) {
   # Get the selected year from userData
   selectedYear <- session$userData$selectedYear
   

@@ -1,5 +1,5 @@
 # Función del servidor para el Dashboard de Servicios Públicos
-publicServicesServer <- function(input, output, session) {
+publicServicesServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
   # Load survey data with dynamic year

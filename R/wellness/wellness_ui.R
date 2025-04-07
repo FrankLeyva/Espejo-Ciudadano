@@ -1,6 +1,7 @@
 
 wellnessUI <- function() {
-  
+  bienestar_theme <- get_section_theme("bienestar")
+
   page_fluid(
     useShinyjs(),
     
@@ -8,8 +9,10 @@ wellnessUI <- function() {
     layout_columns(
       fill = FALSE,
       card(
+        style = paste0("border-top: 4px solid ", bienestar_theme$colors$primary, ";"),
         card_header(
-          h2("Bienestar", class = "text-center")
+          h2("Bienestar", class = "text-center", 
+             style = paste0("color: ", bienestar_theme$colors$primary, ";"))
         )
       )
     ),

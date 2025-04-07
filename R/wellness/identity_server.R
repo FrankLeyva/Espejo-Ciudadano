@@ -1,6 +1,6 @@
 # identity_server.R
 
-identityServer <- function(input, output, session) {
+identityServer <- function(input, output, session,current_theme = NULL) {
   # Get the selected year from userData
   selectedYear <- session$userData$selectedYear
   

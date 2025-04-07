@@ -1,5 +1,5 @@
 # government_server.R
-governmentServer <- function(input, output, session) {
+governmentServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
 
   # Load survey data with dynamic year

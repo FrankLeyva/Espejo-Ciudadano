@@ -1,4 +1,4 @@
-infrastructureServer <- function(input, output, session) {
+infrastructureServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
   # Load survey data with dynamic year

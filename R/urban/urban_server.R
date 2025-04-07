@@ -1,5 +1,5 @@
 # urbanServer.R
-urbanServer <- function(input, output, session) {
+urbanServer <- function(input, output, session,current_theme = NULL) {
    # Get the selected year from userData
    selectedYear <- session$userData$selectedYear
   

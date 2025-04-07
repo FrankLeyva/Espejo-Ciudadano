@@ -1,6 +1,6 @@
 # wellness_server.R
 
-wellnessServer <- function(input, output, session) {
+wellnessServer <- function(input, output, session, current_theme = NULL) {
   # Get the selected year from userData
   selectedYear <- session$userData$selectedYear
   
@@ -21,7 +21,18 @@ wellnessServer <- function(input, output, session) {
   })
   
   # Use the current theme
-  current_theme <- reactiveVal(theme_config)
+  active_theme <- reactive({
+    if (is.function(current_theme)) {
+      # If current_theme is a reactive function, call it to get the value
+      current_theme()
+    } else if (!is.null(current_theme)) {
+      # If it's a direct value, use it
+      current_theme
+    } else {
+      # Default to bienestar theme if nothing provided
+      get_section_theme("bienestar")
+    }
+  })
   
   # Process Q4 data for economic situation pie chart
   economic_situation_data <- reactive({
@@ -41,7 +52,7 @@ wellnessServer <- function(input, output, session) {
     create_category_pie(
       economic_situation_data(),
       max_categories = 5,
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -67,7 +78,7 @@ wellnessServer <- function(input, output, session) {
       highlight_extremes = TRUE,
       use_gradient = F,
       color_scale = "Blues",
-      custom_theme = current_theme()
+      custom_theme = active_theme()
     )
   })
   
@@ -118,12 +129,8 @@ wellnessServer <- function(input, output, session) {
       percentage = percentages[order(percentages, decreasing = TRUE)]
     )
     
-    # Get color from theme
-    bar_color <- if (!is.null(current_theme())) {
-      current_theme()$colors$primary
-    } else {
-      "#1f77b4"
-    }
+    # Get color from active theme
+    bar_color <- active_theme()$colors$primary
     
     # Create horizontal bar chart
     plot_ly(

@@ -1,6 +1,6 @@
 # cultural_server.R
 
-culturalServer <- function(input, output, session) {
+culturalServer <- function(input, output, session,current_theme = NULL) {
   # Load survey data
   # Get the selected year from userData
   selectedYear <- session$userData$selectedYear

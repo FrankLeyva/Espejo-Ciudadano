@@ -141,7 +141,7 @@ calculate_gender_district_stats <- function(data) {
 }
 
 # Visualization functions - modified to accept custom_theme
-create_histogram <- function(data, bins = 30, title = NULL, custom_theme = NULL) {
+create_histogram <- function(data, bins = 30, title = NULL, custom_theme = active_theme()) {
   # Check for empty data
   if(nrow(data) == 0) {
     return(plotly_empty() %>% 
@@ -184,7 +184,7 @@ create_histogram <- function(data, bins = 30, title = NULL, custom_theme = NULL)
     )
 }
 
-create_district_map <- function(data, geo_data, custom_theme = NULL) {
+create_district_map <- function(data, geo_data, custom_theme = active_theme()) {
   # Check inputs
   if(is.null(data) || nrow(data) == 0 || is.null(geo_data)) {
     return(leaflet() %>% 
@@ -236,7 +236,7 @@ create_district_map <- function(data, geo_data, custom_theme = NULL) {
     )
 }
 
-create_ridge_plot <- function(data, title = NULL, custom_theme = NULL) {
+create_ridge_plot <- function(data, title = NULL, custom_theme = active_theme()) {
   # Check for empty data
   if(nrow(data) == 0) {
     return(ggplot() + 

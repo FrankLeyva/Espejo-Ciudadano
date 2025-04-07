@@ -1,5 +1,5 @@
 # Función del servidor para el Dashboard de Participación Cívica
-civicServer <- function(input, output, session) {
+civicServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
   survey_data <- reactive({

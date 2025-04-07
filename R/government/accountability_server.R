@@ -1,5 +1,5 @@
 # Server function for Accountability Dashboard
-accountabilityServer <- function(input, output, session) {
+accountabilityServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
   survey_data <- reactive({

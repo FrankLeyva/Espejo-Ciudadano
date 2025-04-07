@@ -362,7 +362,7 @@ create_interval_histogram <- function(data, bins = 30, title = "Distribución", 
 
 # Modified function to handle the coercion error and accept custom_theme
 create_interval_district_map <- function(data, geo_data, selected_responses = NULL, highlight_extremes = TRUE, 
-  use_gradient = FALSE, color_scale = "Blues", custom_theme = NULL) {
+  use_gradient = FALSE, color_scale = "Blues", custom_theme = active_theme()) {
 # Check if we have data
 if (is.null(data) || nrow(data) == 0 || is.null(geo_data)) {
 return(plotly_empty() %>% 
@@ -538,7 +538,7 @@ geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
 
 # Create the base map
 map <- leaflet(geo_data) %>%
-  addTiles() %>% 
+  addProviderTiles('CartoDB.Positron') %>%
   addPolygons(
     fillColor = ~fill_color,
     fillOpacity = 0.7,
@@ -752,7 +752,7 @@ geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
 
 # Create base map
 map <- leaflet(geo_data) %>%
-addTiles() %>% 
+    addProviderTiles('CartoDB.Positron') %>% 
 addPolygons(
 fillColor = ~fill_color,
 fillOpacity = 0.7,
@@ -1220,7 +1220,7 @@ create_interval_bars <- function(data, orientation = "v", custom_theme = NULL) {
       )
   }
 }
-create_interval_pie <- function(data, max_categories = 12, custom_theme = NULL) {
+create_interval_pie <- function(data, max_categories = 12, custom_theme = active_theme()) {
   # Check if we have valid data
   if (nrow(data) == 0) {
     return(plotly_empty() %>% 
@@ -1458,7 +1458,7 @@ conditionalPanel(
 # Server Definition - Updated to accept and use custom theme
 intervalServer <- function(id, data, metadata, selected_question, geo_data, current_theme = NULL) {
   moduleServer(id, function(input, output, session) {
-    # Get the active theme (custom or default)
+    # Create a reactive for the active theme
     active_theme <- reactive({
       if (is.function(current_theme)) {
         # If current_theme is a reactive function, call it to get the value

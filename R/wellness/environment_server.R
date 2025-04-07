@@ -1,5 +1,5 @@
 # environmentServer.R
-environmentServer <- function(input, output, session) {
+environmentServer <- function(input, output, session,current_theme = NULL) {
   # Load survey data
   # Get the selected year from userData
   selectedYear <- session$userData$selectedYear

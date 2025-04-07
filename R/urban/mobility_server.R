@@ -1,4 +1,4 @@
-mobilityServer <- function(input, output, session) {
+mobilityServer <- function(input, output, session,current_theme = NULL) {
   # Get the selected year from userData
   selectedYear <- session$userData$selectedYear
   

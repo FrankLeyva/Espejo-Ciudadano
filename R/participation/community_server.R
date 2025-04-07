@@ -1,5 +1,5 @@
 # Función del servidor para el Dashboard de Participación Comunitaria
-communityServer <- function(input, output, session) {
+communityServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
   survey_data <- reactive({

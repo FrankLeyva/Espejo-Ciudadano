@@ -1,5 +1,5 @@
 # Server function for Methodology and Data Download Dashboard
-methodologyServer <- function(input, output, session) {
+methodologyServer <- function(input, output, session,current_theme = NULL) {
   # Load utility functions for metadata
   source("R/utils.R")
   

@@ -1,4 +1,4 @@
-representationServer <- function(input, output, session) {
+representationServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
   survey_data <- reactive({

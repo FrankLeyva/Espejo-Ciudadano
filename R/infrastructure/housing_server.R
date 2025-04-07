@@ -1,5 +1,5 @@
  # Función del servidor para el Dashboard de Vivienda
-housingServer <- function(input, output, session) {
+housingServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
   # Load survey data with dynamic year

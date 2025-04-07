@@ -1,6 +1,6 @@
 # economy_server.R
 
-economyServer <- function(input, output, session) {
+economyServer <- function(input, output, session,current_theme = NULL) {
   # Get the selected year from userData
   selectedYear <- session$userData$selectedYear
   

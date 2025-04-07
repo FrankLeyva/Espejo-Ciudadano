@@ -579,6 +579,29 @@ ui <- page_navbar(
 )
 
 server <- function(input, output, session) {
+
+  current_theme <- reactive({
+    # Get the current tab value
+    current_tab <- input$navbar
+    
+    # Map tabs to sections
+    if (grepl("^wellness|^economic|^cultural|^identity|^environment", current_tab)) {
+      section <- "bienestar"
+    } else if (grepl("^urban|^mobility|^transportation", current_tab)) {
+      section <- "movilidad"
+    } else if (grepl("^government|^inequality|^accountability|^representation|^expectations|^trust", current_tab)) {
+      section <- "gobierno"
+    } else if (grepl("^infrastructure|^public_services|^education|^healthcare|^housing", current_tab)) {
+      section <- "infraestructura"
+    } else if (grepl("^participation|^civic|^community", current_tab)) {
+      section <- "participacion"
+    } else {
+      section <- NULL  # Default theme
+    }
+    
+    # Return the appropriate theme
+    get_section_theme(section)
+  })
  # Use reactiveVal with default value of "2024"
  selectedYearVal <- reactiveVal("2024")
   
@@ -617,51 +640,51 @@ server <- function(input, output, session) {
     
     # Initialize the appropriate server module
     if (current_tab == "wellness") {
-      wellnessServer(input, output, session)
+      wellnessServer(input, output, session, current_theme)
     } else if (current_tab == "economic") {
-      economyServer(input, output, session)
+      economyServer(input, output, session, current_theme)
     } else if (current_tab == "cultural") {
-      culturalServer(input, output, session)
+      culturalServer(input, output, session, current_theme)
     } else if (current_tab == "identity") {
-      identityServer(input, output, session)
+      identityServer(input, output, session, current_theme)
     } else if (current_tab == "urban") {
-      urbanServer(input, output, session)
+      urbanServer(input, output, session, current_theme)
     } else if (current_tab == "mobility") {
-      mobilityServer(input, output, session)
+      mobilityServer(input, output, session, current_theme)
     } else if (current_tab == "transportation") {
-      transportationServer(input, output, session)
+      transportationServer(input, output, session, current_theme)
     } else if (current_tab == "environment") {
-      environmentServer(input, output, session)
+      environmentServer(input, output, session, current_theme)
     } else if (current_tab == "government") {
-      governmentServer(input, output, session)
+      governmentServer(input, output, session, current_theme)
     } else if (current_tab == "inequality") {
-      inequalityServer(input, output, session)
+      inequalityServer(input, output, session, current_theme)
     } else if (current_tab == "accountability") {
-      accountabilityServer(input, output, session)
+      accountabilityServer(input, output, session, current_theme)
     } else if (current_tab == "representation") {
-      representationServer(input, output, session)
+      representationServer(input, output, session, current_theme)
     } else if (current_tab == "expectations") {
-      expectationsServer(input, output, session)
+      expectationsServer(input, output, session, current_theme)
     } else if (current_tab == "trust") {
-      trustServer(input, output, session)
+      trustServer(input, output, session, current_theme)
     } else if (current_tab == "infrastructure") {
-      infrastructureServer(input, output, session)
+      infrastructureServer(input, output, session, current_theme)
     } else if (current_tab == "public_services") {
-      publicServicesServer(input, output, session)
+      publicServicesServer(input, output, session, current_theme)
     } else if (current_tab == "education") {
-      educationServer(input, output, session)
+      educationServer(input, output, session, current_theme)
     } else if (current_tab == "healthcare") {
-      healthcareServer(input, output, session)
+      healthcareServer(input, output, session, current_theme)
     } else if (current_tab == "housing") {
-      housingServer(input, output, session)
+      housingServer(input, output, session, current_theme)
     } else if (current_tab == "participation") {
-      participationServer(input, output, session)
+      participationServer(input, output, session, current_theme)
     } else if (current_tab == "civic") {
-      civicServer(input, output, session)
+      civicServer(input, output, session, current_theme)
     } else if (current_tab == "community") {
-      communityServer(input, output, session)
+      communityServer(input, output, session, current_theme)
     } else if (current_tab == "methodology") {
-      methodologyServer(input, output, session)
+      methodologyServer(input, output, session, current_theme)
     }
   })
 }

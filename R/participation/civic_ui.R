@@ -73,27 +73,16 @@ civicUI <- function() {
     # Map section
     card(
       card_header("Interés en participar en política municipal por distrito"),
-      div(
-        class = "info-box info-box-info",
-        div(class = "info-box-icon", bsicons::bs_icon("info-circle")),
-        div(
-          class = "info-box-content",
-          div(class = "info-box-title", "Sobre esta visualización"),
-          div(class = "info-box-value", "El mapa muestra el porcentaje de personas que expresaron al menos algún interés (poco, regular, algo o mucho) en participar en la política municipal, interviniendo en decisiones o realizando acciones de interés público en beneficio de la ciudad.")
-        )
-      ),
       leafletOutput("interest_map", height = "500px")
     ),
     # Participation requirements
     card(
       card_header("¿Qué necesita para participar en asuntos públicos?"),
-      p("Factores que las personas consideran necesarios para participar:"),
       plotlyOutput("requirements_plot", height = "350px")
     ),
     # Participation mechanisms knowledge
     card(
       card_header("Conocimiento de mecanismos de participación ciudadana"),
-      p("Porcentaje de personas que conocen los siguientes mecanismos:"),
       plotlyOutput("mechanisms_plot", height = "450px")
     )
     

@@ -34,7 +34,7 @@ infrastructureServer <- function(input, output, session,current_theme = NULL) {
   # Education Plot
   output$education_plot <- renderLeaflet({
     req(survey_data())
-    create_education_overview(survey_data()$responses, active_theme())
+    create_education_overview(survey_data()$responses,geo_data(), active_theme())
   })
   
   # Healthcare Plot

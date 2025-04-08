@@ -94,16 +94,7 @@ housingUI <- function() {
         )
       )
     ),
-    
-    # Introducción
-    card(
-      div(
-        class = "housing-intro",
-        h4("Evaluación de Satisfacción con la Vivienda"),
-        p("En la encuesta de Percepción Ciudadana 2024, preguntamos a los ciudadanos sobre su nivel de satisfacción con diferentes aspectos de su vivienda en una escala del 1 al 10, donde 1 representa 'Nada satisfecho' y 10 representa 'Muy satisfecho'."),
-        p("Este dashboard permite explorar los resultados por distrito.")
-      )
-    ),
+
     
     # Pestañas para los diferentes aspectos de vivienda
     navset_tab(
@@ -114,17 +105,7 @@ housingUI <- function() {
         title = "Calidad de Materiales",
         icon = bsicons::bs_icon("bricks"),
         
-        card(
-          div(
-            class = "info-box info-box-info",
-            div(class = "info-box-icon", bsicons::bs_icon("bricks")),
-            div(
-              class = "info-box-content",
-              div(class = "info-box-title", "Calidad de Materiales"),
-              div(class = "info-box-value", "Esta sección muestra la satisfacción de los ciudadanos con la calidad de los materiales de construcción de sus viviendas, como paredes, techos, pisos, ventanas y puertas.")
-            )
-          )
-        ),
+
         
         card(
           card_header(
@@ -132,22 +113,6 @@ housingUI <- function() {
             class = "bg-light"
           ),
           leafletOutput("materials_map", height = "500px")
-        ),
-        
-        layout_columns(
-          col_widths = c(6, 6),
-          value_box(
-            title = "Promedio General",
-            value = textOutput("materials_avg"),
-            showcase = bsicons::bs_icon("bar-chart"),
-            theme = value_box_theme(bg = "#2A9D8F", fg = "white")
-          ),
-          value_box(
-            title = "Distrito con Mayor Satisfacción",
-            value = textOutput("materials_best_district"),
-            showcase = bsicons::bs_icon("trophy"),
-            theme = value_box_theme(bg = "#E9C46A", fg = "white")
-          )
         )
       ),
       
@@ -156,17 +121,6 @@ housingUI <- function() {
         title = "Tamaño y Espacios",
         icon = bsicons::bs_icon("layout-text-window"),
         
-        card(
-          div(
-            class = "info-box info-box-info",
-            div(class = "info-box-icon", bsicons::bs_icon("layout-text-window")),
-            div(
-              class = "info-box-content",
-              div(class = "info-box-title", "Tamaño y Espacios"),
-              div(class = "info-box-value", "Esta sección muestra la satisfacción de los ciudadanos con el tamaño y la distribución de espacios en sus viviendas, incluyendo el número de habitaciones y áreas comunes.")
-            )
-          )
-        ),
         
         card(
           card_header(
@@ -181,19 +135,7 @@ housingUI <- function() {
       nav_panel(
         title = "Ubicación y Accesibilidad",
         icon = bsicons::bs_icon("geo-alt"),
-        
-        card(
-          div(
-            class = "info-box info-box-info",
-            div(class = "info-box-icon", bsicons::bs_icon("geo-alt")),
-            div(
-              class = "info-box-content",
-              div(class = "info-box-title", "Ubicación y Accesibilidad"),
-              div(class = "info-box-value", "Esta sección muestra la satisfacción de los ciudadanos con la ubicación de sus viviendas y la accesibilidad a servicios básicos, transporte y lugares de interés.")
-            )
-          )
-        ),
-        
+      
         card(
           card_header(
             "Satisfacción con la Ubicación y Accesibilidad por Distrito",
@@ -214,12 +156,6 @@ housingUI <- function() {
             class = "bg-light"
           ),
           plotlyOutput("comparison_plot", height = "500px")
-        ),
-        
-        card(
-          card_header("Resumen de Resultados"),
-          p("Esta visualización muestra una comparación de los niveles de satisfacción promedio entre los tres aspectos evaluados: calidad de materiales, tamaño y espacios, y ubicación/accesibilidad. Los resultados están desglosados por distrito para facilitar la identificación de patrones y áreas de oportunidad."),
-          p("Un valor más alto (más cercano a 10) indica mayor satisfacción, mientras que un valor más bajo (más cercano a 1) indica menor satisfacción.")
         )
       )
     ),

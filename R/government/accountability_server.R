@@ -82,7 +82,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
       hoverinfo = "y+x"
     ) %>%
       apply_plotly_theme(
-        title = "¿El gobierno municipal castiga a servidores públicos corruptos?",
+        title = "",
         xlab = "",
         ylab = "Frecuencia",
         custom_theme = active_theme()
@@ -131,7 +131,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
       hoverinfo = "y+x"
     ) %>%
       apply_plotly_theme(
-        title = "¿El gobierno estatal castiga a servidores públicos corruptos?",
+        title = "",
         xlab = "",
         ylab = "Frecuencia",
         custom_theme = active_theme()
@@ -162,8 +162,8 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     df <- data.frame(Value = values)
     
     # Get colors from theme
-    bar_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$highlight)) {
-      active_theme()$colors$highlight
+    bar_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$secondary)) {
+      active_theme()$colors$secondary
     } else {
       "#d62728"  # Default red
     }
@@ -180,7 +180,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
       hoverinfo = "y+x"
     ) %>%
       apply_plotly_theme(
-        title = "¿El gobierno federal castiga a servidores públicos corruptos?",
+        title = "",
         xlab = "",
         ylab = "Frecuencia",
         custom_theme = active_theme()
@@ -222,7 +222,10 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     
     # Get colors for pie chart
     if (is.null(color_palette)) {
-      color_palette <- c("#4575b4", "#91bfdb", "#fc8d59", "#d73027")
+      color_palette <- c(
+        "#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F",
+        "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#BAB0AC"
+      )
     }
     
     # Create pie chart
@@ -240,7 +243,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     ) %>%
       layout(
         title = list(
-          text = title,
+          text = "",
           font = if (!is.null(active_theme())) {
             list(
               family = active_theme()$typography$font_family,
@@ -255,7 +258,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
             )
           }
         ),
-        showlegend = TRUE
+        showlegend = FALSE
       )
   }
   
@@ -268,7 +271,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     
     create_corruption_pie(
       values, 
-      "¿El gobierno municipal ha hecho actos de corrupción?"
+      ""
     )
   })
   
@@ -281,8 +284,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     
     create_corruption_pie(
       values, 
-      "¿El gobierno estatal ha hecho actos de corrupción?",
-      c("#614051", "#8a5c7e", "#b48bad", "#d8c2d7")  # Purple palette
+      ""
     )
   })
   
@@ -295,8 +297,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     
     create_corruption_pie(
       values, 
-      "¿El gobierno federal ha hecho actos de corrupción?",
-      c("#67000d", "#a50f15", "#cb181d", "#ef3b2c")  # Red palette
+      "" 
     )
   })
 }

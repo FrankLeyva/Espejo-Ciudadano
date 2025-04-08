@@ -77,12 +77,31 @@ trustServer <- function(input, output, session,current_theme = NULL) {
       return(plotly_empty() %>% layout(title = "No hay datos disponibles"))
     }
     
-    # Get primary color from theme
-    primary_color <- if (!is.null(custom_theme)) {
-      custom_theme$colors$primary
-    } else {
-      "#1f77b4"  # Default blue
-    }
+# Get colors from theme
+primary_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+highlight_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange
+}
+
+# Create single color vector for all bars initially
+colors <- rep(primary_color, nrow(data))
+
+# Handle ties for highlighting top N items
+# First, identify the top 3 unique values
+unique_top_values <- unique(data$Percentage)[1:min(3, length(unique(data$Percentage)))]
+
+# Find all rows that have those top values
+top_indices <- which(data$Percentage %in% unique_top_values)
+
+# Highlight all those rows
+colors[top_indices] <- highlight_color
     
     # Create horizontal bar chart
     plot_ly(
@@ -91,7 +110,7 @@ trustServer <- function(input, output, session,current_theme = NULL) {
       x = ~Percentage,
       type = "bar",
       orientation = "h",
-      marker = list(color = primary_color),
+      marker = list(color = colors),
       text = ~paste0(round(Percentage, 1), "%"),
       textposition = "auto",
       hoverinfo = "text",
@@ -118,6 +137,15 @@ trustServer <- function(input, output, session,current_theme = NULL) {
         categoryorder = 'total ascending'
       ),
       margin = list(l = 150, r = 30, t = 50, b = 50)  # More space for labels
+    ) %>% 
+      config(
+        modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+                                   "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                                   "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
+        modeBarButtonsToAdd = c("resetScale2d", "toImage"),
+        displaylogo=FALSE,
+        locale = "es",
+        responsive = TRUE
     )
   }
   
@@ -176,7 +204,7 @@ trustServer <- function(input, output, session,current_theme = NULL) {
     # Create bar chart
     create_trust_bar_chart(
       data = trust_data,
-      title = "Nivel de confianza en instituciones de elección popular",
+      title = "",
       custom_theme = current_theme()
     )
   })
@@ -198,7 +226,7 @@ trustServer <- function(input, output, session,current_theme = NULL) {
     # Create bar chart
     create_trust_bar_chart(
       data = trust_data,
-      title = "Nivel de confianza en instituciones públicas y medios de comunicación",
+      title = "",
       custom_theme = current_theme()
     )
   })
@@ -220,7 +248,7 @@ trustServer <- function(input, output, session,current_theme = NULL) {
     # Create bar chart
     create_trust_bar_chart(
       data = trust_data,
-      title = "Nivel de confianza en instituciones de seguridad pública",
+      title = "",
       custom_theme = current_theme()
     )
   })

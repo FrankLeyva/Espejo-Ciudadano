@@ -62,7 +62,7 @@ culturalUI <- function() {
         title = "Ejercicio o actividad física",
         value = textOutput("exercise_activities_pct"),
         showcase = bsicons::bs_icon("bicycle"),
-        theme = value_box_theme(bg = "#83C5BE", fg = "white")
+        theme = value_box_theme(bg = "#83C5BE", fg = "black")
       ),
       
       # Park/nature activities

@@ -73,29 +73,13 @@ communityUI <- function() {
     # Organization participation
     card(
       card_header("Participación en organizaciones"),
-      p("Porcentaje de personas que participan activamente en las siguientes organizaciones:"),
       plotlyOutput("organizations_plot", height = "450px")
     ),
     
     # Problem-solving activities
     card(
       card_header("Actividades para resolver problemas comunitarios"),
-      p("Porcentaje de personas que han participado en las siguientes actividades para resolver problemas que les afectan:"),
       plotlyOutput("activities_plot", height = "500px")
-    ),
-    
-    # Optional summary card
-    card(
-      card_header("Resumen de hallazgos clave"),
-      div(
-        class = "info-box info-box-info",
-        div(class = "info-box-icon", bsicons::bs_icon("lightbulb")),
-        div(
-          class = "info-box-content",
-          div(class = "info-box-title", "Participación comunitaria en Ciudad Juárez"),
-          div(class = "info-box-value", "Los datos mostrados en este dashboard reflejan las formas actuales de participación comunitaria en Ciudad Juárez, destacando tanto la afiliación a organizaciones formales como las acciones específicas que toman los ciudadanos para resolver problemas colectivos.")
-        )
-      )
     )
   )
 }

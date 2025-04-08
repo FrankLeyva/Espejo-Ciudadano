@@ -21,29 +21,13 @@ trustUI <- function() {
       )
     ),
     
-    # Description card
-    card(
-      card_body(
-        p(
-          class = "lead",
-          "Este dashboard muestra el nivel de confianza que los ciudadanos tienen en diferentes instituciones y figuras públicas.",
-          "Los datos provienen de la pregunta: ",
-          tags$strong("¿Cuánta confianza le inspiran las siguientes instituciones o personas?")
-        ),
-        p(
-          "La medición combina las respuestas de \"Algo de confianza\" y \"Mucha confianza\" para cada institución.",
-          "Los gráficos están ordenados de mayor a menor nivel de confianza."
-        )
-      )
-    ),
     
     # First bar plot: Institutions of popular election
     card(
       card_header(
         div(
           class = "d-flex justify-content-between align-items-center",
-          h4("Instituciones de Elección Popular", class = "m-0"),
-          span(class = "badge bg-primary", "Porcentaje de confianza")
+          h4("Instituciones de Elección Popular", class = "m-0")
         )
       ),
       card_body(
@@ -56,8 +40,7 @@ trustUI <- function() {
       card_header(
         div(
           class = "d-flex justify-content-between align-items-center",
-          h4("Instituciones Públicas y Medios de Comunicación", class = "m-0"),
-          span(class = "badge bg-primary", "Porcentaje de confianza")
+          h4("Instituciones Públicas y Medios de Comunicación", class = "m-0")
         )
       ),
       card_body(
@@ -70,8 +53,7 @@ trustUI <- function() {
       card_header(
         div(
           class = "d-flex justify-content-between align-items-center",
-          h4("Instituciones de Seguridad Pública", class = "m-0"),
-          span(class = "badge bg-primary", "Porcentaje de confianza")
+          h4("Instituciones de Seguridad Pública", class = "m-0")
         )
       ),
       card_body(

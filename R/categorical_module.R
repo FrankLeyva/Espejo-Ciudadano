@@ -251,14 +251,15 @@ create_category_bars <- function(data, max_categories = 15, title = "Distribuci�
            layout(title = paste("Error en la visualización:", e$message)))
   })
 }
-# Create pie chart (improved version with theme support)
 create_category_pie <- function(data, 
   max_categories = 8, 
   custom_theme = NULL,
-  highlight_max = TRUE,
+  highlight_max = FALSE,
   palette = NULL,
   hide_ns_nc = TRUE,
-  inverse = FALSE) {  # Added parameter for negative phrasing
+  inverse = FALSE,
+  truncate_labels = TRUE,
+  max_label_length = 20) {
   
   # Input validation
   if (is.null(data) || nrow(data) == 0 || !("value" %in% names(data))) {
@@ -289,7 +290,8 @@ create_category_pie <- function(data,
     for (pattern in ns_nc_patterns) {
       matches <- grepl(pattern, freq_data$Category, ignore.case = TRUE)
       if (any(matches) && sum(freq_data$Frequency[matches]) == 0) {
-        # Only remove if the frequency is 0
+        # Only remove if the frequency is 0 or these are actual NS/NC categories
+        # This prevents removing valid categories that might contain "No" in their name
         freq_data <- freq_data[!matches, ]
       }
     }
@@ -304,6 +306,54 @@ create_category_pie <- function(data,
     freq_data$Percentage <- round(100 * freq_data$Frequency / sum(freq_data$Frequency), 2)
   }
   
+  # Truncate long category labels if requested, ensuring they remain unique
+  if (truncate_labels) {
+    # Create a function to make truncated labels unique
+    make_unique_truncated_labels <- function(categories, max_length) {
+      # First, do standard truncation
+      truncated <- sapply(categories, function(cat) {
+        if (nchar(as.character(cat)) > max_length) {
+          paste0(substr(cat, 1, max_length - 3), "...")
+        } else {
+          as.character(cat)
+        }
+      })
+      
+      # Check for duplicates and fix them
+      unique_truncated <- truncated
+      for (i in 1:length(truncated)) {
+        # Count how many times this label appears in truncated list
+        dup_count <- sum(truncated == truncated[i])
+        if (dup_count > 1) {
+          # Find all positions with this truncated label
+          dup_positions <- which(truncated == truncated[i])
+          # Determine the position of the current item in the duplicates
+          dup_index <- which(dup_positions == i)
+          
+          # Get the full category
+          full_cat <- categories[i]
+          
+          # Create a unique truncated version
+          if (nchar(as.character(full_cat)) > max_length) {
+            # Try to use different truncation points for duplicates
+            end_chars <- min(nchar(full_cat), max_length - 6) # Leave room for "(N)..."
+            unique_truncated[i] <- paste0(substr(full_cat, 1, end_chars), " (", dup_index, ")...")
+          } else {
+            # If not truncated, just add a suffix
+            unique_truncated[i] <- paste0(full_cat, " (", dup_index, ")")
+          }
+        }
+      }
+      
+      return(unique_truncated)
+    }
+    
+    # Apply the unique truncation function
+    freq_data$DisplayCategory <- make_unique_truncated_labels(freq_data$Category, max_label_length)
+  } else {
+    freq_data$DisplayCategory <- freq_data$Category
+  }
+  
   # Check if pie chart is appropriate (not too many categories)
   if (nrow(freq_data) > max_categories) {
     # Keep top categories and group others
@@ -316,7 +366,8 @@ create_category_pie <- function(data,
       data.frame(
         Category = "Otras categorías",
         Frequency = other_sum,
-        Percentage = other_percent
+        Percentage = other_percent,
+        DisplayCategory = "Otras categorías"
       )
     )
   }
@@ -368,20 +419,28 @@ create_category_pie <- function(data,
     }
   }
   
+  # Create hover text with original full labels
+  hover_text <- sapply(1:nrow(freq_data), function(i) {
+    sprintf("%s: %d respuestas (%0.1f%%)", 
+            freq_data$Category[i], 
+            freq_data$Frequency[i], 
+            freq_data$Percentage[i])
+  })
+  
   # Create pie chart
   plot_ly(
     data = freq_data,
-    labels = ~Category,
+    labels = ~DisplayCategory,  # Use uniquely truncated display categories for labels
     values = ~Frequency,
     type = "pie",
-    textinfo = "label+percent",
+    textinfo = "label+percent",  # Show label and percentage on slices
     insidetextorientation = "radial",
     marker = list(
       colors = colors,
       line = list(color = "#FFFFFF", width = 1)
     ),
     hoverinfo = "text",
-    text = ~paste0(Frequency, " Respuestas")
+    text = hover_text  # Use hover text with full category names
   ) %>%
     layout(
       title = list(
@@ -392,7 +451,13 @@ create_category_pie <- function(data,
           color = active_theme$colors$text
         )
       ),
-      showlegend = FALSE
+      showlegend = FALSE,
+      # Added margin to give more space for labels
+      margin = list(l = 50, r = 50, b = 50, t = 80),
+      # Option to adjust text size for better readability
+      font = list(
+        size = 12
+      )
     )
 }
 

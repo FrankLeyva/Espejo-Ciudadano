@@ -299,7 +299,7 @@ housingServer <- function(input, output, session,current_theme = NULL) {
     plot_ly(all_data, x = ~district, y = ~mean_value, color = ~aspect,
            colors = aspect_colors, type = "bar") %>%
       layout(
-        title = "Comparación de Satisfacción por Distrito y Aspecto",
+        title = "",
         xaxis = list(title = "Distrito"),
         yaxis = list(title = "Nivel de Satisfacción (1-10)", range = c(0, 10)),
         barmode = "group",

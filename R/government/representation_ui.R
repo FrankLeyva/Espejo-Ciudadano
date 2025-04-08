@@ -36,7 +36,7 @@ representationUI <- function() {
                      div(style = "height: 500px;", leafletOutput("regidor_knowledge_map"))),
             tabPanel("Síndico(a)", 
                      div(style = "height: 500px;", leafletOutput("sindico_knowledge_map"))),
-            tabPanel("Diputado(a) Local Y/O Estatal", 
+            tabPanel("Diputado(a) Local y/o Estatal", 
                      div(style = "height: 500px;", leafletOutput("diputadol_knowledge_map"))),
             tabPanel("Diputado(a) Federal", 
                      div(style = "height: 500px;", leafletOutput("diputadof_knowledge_map")))
@@ -65,7 +65,7 @@ representationUI <- function() {
           title = "Regidores: Representación de Intereses Ciudadanos",
           value = textOutput("regidores_rating"),
           showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#2A9D8F", fg = "white")
+          theme = value_box_theme(bg = "#6969B3", fg = "white")
         ),
         
         # Value box 2: Síndico representation rating
@@ -73,7 +73,7 @@ representationUI <- function() {
           title = "Síndico(a): Representación de Intereses Ciudadanos",
           value = textOutput("sindico_rating"),
           showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#6969B3", fg = "white")
+          theme = value_box_theme(bg = "#B39DDB", fg = "black")
         ),
         
         # Value box 3: Local deputy representation rating
@@ -81,7 +81,7 @@ representationUI <- function() {
           title = "Diputado(a) Local: Representación de Intereses Ciudadanos",
           value = textOutput("diputado_local_rating"),
           showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#F4A261", fg = "white")
+          theme = value_box_theme(bg = "#6969B3", fg = "white")
         ),
         
         # Value box 4: Federal deputy representation rating
@@ -89,7 +89,7 @@ representationUI <- function() {
           title = "Diputado(a) Federal: Representación de Intereses Ciudadanos",
           value = textOutput("diputado_federal_rating"),
           showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#E86486", fg = "white")
+          theme = value_box_theme(bg = "#B39DDB", fg = "black")
         )
       )
     )

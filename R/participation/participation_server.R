@@ -75,7 +75,7 @@ participationServer <- function(input, output, session,current_theme = NULL) {
         # Select responses for "Importante" and "Poco importante" (1 and 2)
         selected_responses = c("1", "2"),
         highlight_extremes = TRUE,
-        use_gradient = TRUE,
+        use_gradient = F,
         color_scale = "Blues",
         custom_theme = current_theme()
       )
@@ -140,7 +140,7 @@ participationServer <- function(input, output, session,current_theme = NULL) {
         )
       ) %>%
         layout(
-          title = "Nivel de interés en participación política municipal",
+          title = "",
           showlegend = FALSE,
           legend = list(
             orientation = "h",

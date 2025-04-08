@@ -91,19 +91,6 @@ inequalityUI <- function() {
     card(
       card_header("Instituciones que contribuyen a reducir la desigualdad"),
       plotlyOutput("inequality_reduction_plot", height = "450px")
-    ),
-    
-    # Information box explaining inequality in Juárez
-    card(
-      div(
-        class = "info-box info-box-warning",
-        div(class = "info-box-icon", bsicons::bs_icon("info-circle")),
-        div(
-          class = "info-box-content",
-          div(class = "info-box-title", "Acerca de la desigualdad en Ciudad Juárez"),
-          div(class = "info-box-value", "La percepción de desigualdad es un indicador importante del bienestar social y la cohesión comunitaria. Los datos presentados muestran cómo los ciudadanos perciben la desigualdad en diferentes distritos y qué instituciones consideran más efectivas en reducirla.")
-        )
-      )
     )
   )
 }

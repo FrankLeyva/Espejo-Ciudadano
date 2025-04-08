@@ -57,7 +57,7 @@ governmentUI <- function() {
     h3(class = "section-header", "Dashboards específicos"),
     
     layout_columns(
-      col_widths = c(2,2,2,2,2),
+      col_widths = c(4,4,4),
       
       # Inequality Dashboard Card
       div(
@@ -67,7 +67,7 @@ governmentUI <- function() {
         card(
           card_body(
             div(class = "text-center nav-card-icon text-primary", 
-                bsicons::bs_icon("bar-chart")),
+                bsicons::bs_icon("slash-circle")),
             h4(class = "nav-card-title text-center", "Desigualdad"),
             p(class = "text-center", "Análisis de indicadores de desigualdad")
           )
@@ -99,8 +99,10 @@ governmentUI <- function() {
             p(class = "text-center", "Estadísticas sobre transparencia y rendición")
           )
         )
-      ),
-      
+      )
+    ),
+    layout_columns(
+      col_widths = c(-2,4,4,-2),
       # Political Representation Dashboard Card
       div(
         class = "nav-card",

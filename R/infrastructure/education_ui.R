@@ -92,33 +92,13 @@ educationUI <- function() {
       )
     ),
     
-    # Introducción
-    card(
-      div(
-        class = "info-box",
-        div(
-          h4("Datos de Educación"),
-          p("Esta sección presenta información sobre la distribución de estudiantes y la satisfacción con diferentes niveles educativos según la Encuesta de Percepción Ciudadana 2024."),
-          p("Los niveles de satisfacción se miden en una escala del 1 al 10, donde 1 representa 'Nada satisfecho' y 10 representa 'Muy satisfecho'.")
-        )
-      )
-    ),
     
     # Primera sección: Hogares con estudiantes (Q6)
     card(
       card_header(
         h4("Hogares con Estudiantes", class = "d-flex justify-content-between")
       ),
-      p("Porcentaje de hogares que tienen al menos un estudiante en algún nivel educativo (básico, medio superior o superior) por distrito."),
-      leafletOutput("students_map", height = "500px"),
-      div(
-        class = "d-flex justify-content-end mt-2",
-        div(
-          class = "average-indicator",
-          "Promedio general: ",
-          textOutput("students_avg", inline = TRUE)
-        )
-      )
+      leafletOutput("students_map", height = "500px")
     ),
     
     # Segunda sección: Satisfacción con niveles educativos (Q7, Q10, Q13)
@@ -144,15 +124,7 @@ educationUI <- function() {
               ),
               class = "bg-light"
             ),
-            leafletOutput("basic_education_map", height = "500px"),
-            div(
-              class = "d-flex justify-content-end mt-2",
-              div(
-                class = "average-indicator",
-                "Promedio general: ",
-                textOutput("basic_education_avg", inline = TRUE)
-              )
-            )
+            leafletOutput("basic_education_map", height = "500px")
           )
         ),
         
@@ -169,15 +141,7 @@ educationUI <- function() {
               ),
               class = "bg-light"
             ),
-            leafletOutput("highschool_education_map", height = "500px"),
-            div(
-              class = "d-flex justify-content-end mt-2",
-              div(
-                class = "average-indicator",
-                "Promedio general: ",
-                textOutput("highschool_education_avg", inline = TRUE)
-              )
-            )
+            leafletOutput("highschool_education_map", height = "500px")
           )
         ),
         
@@ -194,15 +158,7 @@ educationUI <- function() {
               ),
               class = "bg-light"
             ),
-            leafletOutput("college_education_map", height = "500px"),
-            div(
-              class = "d-flex justify-content-end mt-2",
-              div(
-                class = "average-indicator",
-                "Promedio general: ",
-                textOutput("college_education_avg", inline = TRUE)
-              )
-            )
+            leafletOutput("college_education_map", height = "500px")
           )
         ),
         
@@ -216,9 +172,7 @@ educationUI <- function() {
               "Comparación entre Niveles Educativos",
               class = "bg-light"
             ),
-            plotlyOutput("education_comparison_plot", height = "450px"),
-            p("Este gráfico muestra una comparación de la satisfacción promedio entre los distintos niveles educativos por distrito.")
-          )
+            plotlyOutput("education_comparison_plot", height = "450px")          )
         )
       )
     ),

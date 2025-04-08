@@ -72,19 +72,19 @@ output$economic_improvement_map <- renderLeaflet({
       metadata = survey_data()$metadata
     )
   })
-  
-  # Create Income Situation Pie Chart
+
   output$income_situation_pie <- renderPlotly({
     req(income_situation_data())
-    
-    # Use the categorical module's pie chart function
+
+    # Use the categorical module's pie chart function with debug enabled
     create_category_pie(
       income_situation_data(),
-      max_categories = 4,  # Exclude NS/NC
+      max_categories = 5,  
       custom_theme = active_theme(),
-            highlight_max = F,
-            palette= 'sequential',
-            inverse =T
+      highlight_max = FALSE,
+      palette = 'sequential',
+      inverse = TRUE,
+      truncate_labels = T
     ) %>% 
       layout(title="")
   })

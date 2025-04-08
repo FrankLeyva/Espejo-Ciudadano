@@ -118,19 +118,8 @@ mobilityUI <- function() {
           plotlyOutput("general_transport_plot", height = "550px")
         )
       )
-    ),
-    
-    # Additional info card
-    card(
-      div(
-        class = "info-box",
-        div(class = "info-box-icon", bsicons::bs_icon("info-circle-fill")),
-        div(
-          class = "info-box-content",
-          div(class = "info-box-title", "Sobre este Dashboard"),
-          div(class = "info-box-value", "Este dashboard muestra los patrones de movilidad urbana de los habitantes de Ciudad Juárez, incluyendo la distribución de vehículos personales y los medios de transporte utilizados para desplazamientos diarios.")
-        )
-      )
     )
+    
+    
   )
 }

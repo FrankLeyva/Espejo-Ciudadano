@@ -118,27 +118,31 @@ inequalityServer <- function(input, output, session,current_theme = NULL) {
     # Sort by count in descending order
     bar_data <- bar_data[order(-bar_data$Count), ]
     
-    # Get primary color from theme
-    primary_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$primary)) {
-      active_theme()$colors$primary
-    } else {
-      "#1f77b4"  # Default blue
-    }
-    
-    highlight_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$highlight)) {
-      active_theme()$colors$highlight
-    } else {
-      "#9467bd"  # Default purple
-    }
-    
-    # Create single color vector for all bars
-    colors <- rep(primary_color, nrow(bar_data))
-    
-    # Highlight top three with the highlight color
-    if(nrow(bar_data) >= 3) {
-      colors[1:3] <- highlight_color
-    }
-    
+# Get colors from theme
+primary_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+highlight_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange
+}
+
+# Create single color vector for all bars initially
+colors <- rep(primary_color, nrow(bar_data))
+
+# Handle ties for highlighting top N items
+# First, identify the top 3 unique values
+unique_top_values <- unique(bar_data$Percentage)[1:min(3, length(unique(bar_data$Percentage)))]
+
+# Find all rows that have those top values
+top_indices <- which(bar_data$Percentage %in% unique_top_values)
+
+# Highlight all those rows
+colors[top_indices] <- highlight_color
     # Create horizontal bar chart
     plot_ly(
       data = bar_data,
@@ -153,7 +157,7 @@ inequalityServer <- function(input, output, session,current_theme = NULL) {
       hoverinfo = "text"
     ) %>%
       apply_plotly_theme(
-        title = "Instituciones que contribuyen a reducir la desigualdad",
+        title = "",
         xlab = "Frecuencia",
         ylab = "",
         custom_theme = active_theme()

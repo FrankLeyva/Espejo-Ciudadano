@@ -72,26 +72,31 @@ communityServer <- function(input, output, session,current_theme = NULL) {
       # Sort by percentage descending
       plot_data <- plot_data[order(-plot_data$Percentage), ]
       
-      # Get colors from theme
-      primary_color <- if (!is.null(active_theme()$colors$primary)) {
-        active_theme()$colors$primary
-      } else {
-        "#0d6efd"  # Default blue
-      }
-      
-      highlight_color <- if (!is.null(active_theme()$colors$highlight)) {
-        active_theme()$colors$highlight
-      } else {
-        "#28a745"  # Default green
-      }
-      
-      # Highlight top three organizations
-      colors <- rep(primary_color, nrow(plot_data))
-      if(nrow(plot_data) >= 3) {
-        colors[1:3] <- highlight_color
-      } else {
-        colors[1:nrow(plot_data)] <- highlight_color
-      }
+ # Get colors from theme
+ primary_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+highlight_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange
+}
+
+# Create single color vector for all bars initially
+colors <- rep(primary_color, nrow(plot_data))
+
+# Handle ties for highlighting top N items
+# First, identify the top 3 unique values
+unique_top_values <- unique(plot_data$Percentage)[1:min(3, length(unique(plot_data$Percentage)))]
+
+# Find all rows that have those top values
+top_indices <- which(plot_data$Percentage %in% unique_top_values)
+
+# Highlight all those rows
+colors[top_indices] <- highlight_color
       
       # Create horizontal bar chart
       plot_ly(
@@ -105,7 +110,7 @@ communityServer <- function(input, output, session,current_theme = NULL) {
         text = ~paste0(round(Percentage, 1), "%")
       ) %>%
         layout(
-          title = "Participación activa en organizaciones",
+          title = "",
           xaxis = list(
             title = "Porcentaje de participación",
             showgrid = TRUE,
@@ -185,26 +190,31 @@ communityServer <- function(input, output, session,current_theme = NULL) {
       # Sort by percentage descending
       plot_data <- plot_data[order(-plot_data$Percentage), ]
       
-      # Get colors from theme
-      primary_color <- if (!is.null(active_theme()$colors$primary)) {
-        active_theme()$colors$primary
-      } else {
-        "#0d6efd"  # Default blue
-      }
-      
-      highlight_color <- if (!is.null(active_theme()$colors$highlight)) {
-        active_theme()$colors$highlight
-      } else {
-        "#28a745"  # Default green
-      }
-      
-      # Highlight top three activities
-      colors <- rep(primary_color, nrow(plot_data))
-      if(nrow(plot_data) >= 3) {
-        colors[1:3] <- highlight_color
-      } else {
-        colors[1:nrow(plot_data)] <- highlight_color
-      }
+ # Get colors from theme
+ primary_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+highlight_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange
+}
+
+# Create single color vector for all bars initially
+colors <- rep(primary_color, nrow(plot_data))
+
+# Handle ties for highlighting top N items
+# First, identify the top 3 unique values
+unique_top_values <- unique(plot_data$Percentage)[1:min(3, length(unique(plot_data$Percentage)))]
+
+# Find all rows that have those top values
+top_indices <- which(plot_data$Percentage %in% unique_top_values)
+
+# Highlight all those rows
+colors[top_indices] <- highlight_color
       
       # Create horizontal bar chart
       plot_ly(

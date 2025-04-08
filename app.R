@@ -257,7 +257,7 @@ ui <- page_navbar(
     title = "Inicio",
     icon = icon("home"),
     value = "overview",
-    create_dashboard_header("Dashboard General", "Vista general del estado de Ciudad Juárez según las encuestas más recientes."),
+    create_dashboard_header("Resultados de las encuestas de Percepción", "Selecciona una categoría: "),
     # Dashboard overview content
     div(
  

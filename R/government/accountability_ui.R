@@ -164,24 +164,8 @@ accountabilityUI <- function() {
           plotlyOutput("federal_corruption_pie", height = "400px")
         )
       )
-    ),
-    
-    # Information about the metrics
-    card(
-      div(
-        class = "info-box info-box-info",
-        div(class = "info-box-icon", bsicons::bs_icon("info-circle")),
-        div(
-          class = "info-box-content",
-          div(class = "info-box-title", "Acerca de las métricas"),
-          div(class = "info-box-value", 
-              "Las percepciones sobre la rendición de cuentas y castigo a la corrupción se miden en escalas de 1 a 4: 
-              <br><br>Para el castigo a delitos: 1=Siempre, 2=Casi siempre, 3=Casi nunca, 4=Nunca
-              <br><br>Para castigo a corrupción y actos de corrupción: 1=Nunca, 2=Poco, 3=Algo, 4=Mucho
-              <br><br>Las respuestas 'No sabe/No contestó' han sido excluidas del análisis."
-          )
-        )
-      )
     )
+    
+    
   )
 }

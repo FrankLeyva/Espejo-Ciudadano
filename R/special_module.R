@@ -88,7 +88,7 @@ create_report_statistics <- function(survey_data) {
       text = ~paste0(round(report, 1), "%"),
       textposition = "inside",
       insidetextfont = list(color = "white", size = 14),
-      hoverinfo = "text",
+      hoverinfo = "none",
       hovertext = ~paste0(service, ": ", round(report, 1), "%")
     )
   
@@ -134,7 +134,7 @@ create_report_statistics <- function(survey_data) {
   # Clean up the layout
   p <- p %>% layout(
     title = list(
-      text = "INTERPUSO ALGÚN REPORTE RELACIONADO AL SERVICIO...",
+      text = "",
       font = list(size = 16)
     ),
     xaxis = list(
@@ -150,7 +150,7 @@ create_report_statistics <- function(survey_data) {
       title = "",
       autorange = "reversed"
     ),
-    showlegend = TRUE,
+    showlegend = FALSE,
     legend = list(
       orientation = "h",
       xanchor = "center",
@@ -160,7 +160,15 @@ create_report_statistics <- function(survey_data) {
     margin = list(l = 180, r = 180, t = 80, b = 80),
     annotations = annotations
   )
-  
+  p <- p %>% config(
+    modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+                               "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                               "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
+    modeBarButtonsToAdd = c("resetScale2d", "toImage"),
+    displaylogo=FALSE,
+    locale = "es",
+    responsive = TRUE
+)
   return(p)
 }
 
@@ -282,154 +290,296 @@ calculate_student_presence <- function(survey_data) {
   return(result_df)
 }
 
-create_education_overview <- function(survey_data, custom_theme = NULL) {
-  #  # Cargar datos de encuesta de Percepción 2024
-  survey_data <- reactive({
-    load_survey_data("PER_2024")
-  })
+create_education_overview <- function(survey_data, geo_data, custom_theme = NULL) {
+  # Check if we have data
+  if (is.null(survey_data) || nrow(survey_data) == 0 || is.null(geo_data)) {
+    return(leaflet() %>% 
+             addTiles() %>%
+             addControl("No hay datos suficientes para visualizar", position = "topright"))
+  }
   
-  # Cargar datos geográficos
-  geo_data <- reactive({
-    tryCatch({
-      sf::st_read('data/geo/Jrz_Map.geojson', quiet = TRUE)
-    }, error = function(e) {
-      showNotification(paste("Error cargando datos geográficos:", e$message), type = "error")
-      NULL
-    })
-  })
-  
-  # Almacenar tema actual
-  current_theme <- reactiveVal(theme_config)
-
-  # Datos sobre hogares con estudiantes (Q6)
-  student_data <- reactive({
-    req(survey_data())
+  # Prepare data about households with students (Q6)
+  # First check if the Q6 structure exists
+  if (!"Q6" %in% names(survey_data)) {
+    # Try to find Q6.x columns (checkbox question style)
+    q6_cols <- grep("^Q6\\.", names(survey_data), value = TRUE)
     
-    # Preparar datos binarios para Q6
-    prepare_binary_data(
-      data = survey_data()$responses,
-      question_id = "Q6",
-      metadata = survey_data()$metadata
-    )
-  })
-  
-    req(student_data(), geo_data())
-    
-    # Obtener datos geográficos
-    geo_data_df <- geo_data()
-    
-    # Calcular porcentajes por distrito
-    district_stats <- student_data() %>%
-      group_by(district) %>%
-      summarise(
-        total_responses = n(),
-        positive_count = sum(binary_value, na.rm = TRUE),
-        positive_percent = round(100 * mean(binary_value, na.rm = TRUE), 1),
-        .groups = 'drop'
-      )
-    
-    # Identificar distritos con porcentajes más altos y más bajos
-    highest_district <- district_stats %>% 
-      filter(positive_percent == max(positive_percent, na.rm = TRUE)) %>% 
-      pull(district) %>% 
-      as.character()
-      
-    lowest_district <- district_stats %>% 
-      filter(positive_percent == min(positive_percent, na.rm = TRUE)) %>% 
-      pull(district) %>% 
-      as.character()
-    
-    # Convertir distrito a numérico para hacer coincidir
-    district_stats$district_num <- as.numeric(as.character(district_stats$district))
-    
-    # Calcular centroides para el marco geográfico
-    geo_data_df$centroid <- sf::st_centroid(geo_data_df$geometry)
-    centroids <- sf::st_coordinates(geo_data_df$centroid)
-    geo_data_df$lng <- centroids[,1]
-    geo_data_df$lat <- centroids[,2]
-    
-    # Calcular promedio general
-    overall_percent <- round(mean(district_stats$positive_percent, na.rm = TRUE), 1)
-    
-    # Colores de distrito - usar colores del tema si están disponibles
-    district_colors <- if (!is.null(current_theme()$palettes$district)) {
-      current_theme()$palettes$district
+    if (length(q6_cols) > 0) {
+      # Create a binary indicator for households with at least one student
+      survey_data$has_student <- apply(survey_data[, q6_cols], 1, function(row) {
+        any(row == "1" | row == "Selected", na.rm = TRUE)
+      })
     } else {
-      c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-       "#8c564b", "#e377c2", "#bcbd22", "#17becf")
+      return(leaflet() %>% 
+               addTiles() %>%
+               addControl("Datos de educación no disponibles en esta encuesta", position = "topright"))
     }
+  } else {
+    # Simple Q6 column exists
+    survey_data$has_student <- survey_data$Q6 == "1" | survey_data$Q6 == "Sí" | 
+                            survey_data$Q6 == "Si" | survey_data$Q6 == "TRUE" | 
+                            survey_data$Q6 == "true" | survey_data$Q6 == "Yes"
+  }
+  
+  # Calculate percentages by district
+  district_stats <- survey_data %>%
+    group_by(DISTRICT) %>%
+    summarise(
+      total_responses = n(),
+      positive_count = sum(has_student, na.rm = TRUE),
+      positive_percent = round(100 * mean(has_student, na.rm = TRUE), 1),
+      .groups = 'drop'
+    )
+  
+  # Identify districts with highest and lowest percentages
+  highest_district <- district_stats %>% 
+    filter(!is.na(positive_percent)) %>%
+    filter(positive_percent == max(positive_percent, na.rm = TRUE)) %>% 
+    pull(DISTRICT) %>% 
+    as.character()
     
-    # Crear mapa
-    map <- leaflet(geo_data_df) %>%
-      addTiles() %>%
-      addPolygons(
-        fillColor = ~{
-          # Use district number to determine color
-          dist_num <- as.numeric(No_Distrit)
-          ifelse(
-            !is.na(dist_num) & dist_num >= 1 & dist_num <= length(district_colors),
-            district_colors[dist_num],
-            "#CCCCCC"  # Default gray
-          )
-        },
-        fillOpacity = 0.7,
-        weight = 1,
-        color = "#666666",
-        dashArray = "3",
-        highlight = highlightOptions(
-          weight = 2,
-          color = "#000000",
-          dashArray = "",
-          fillOpacity = 0.9,
-          bringToFront = TRUE
-        )
-      )
+  lowest_district <- district_stats %>% 
+    filter(!is.na(positive_percent)) %>%
+    filter(positive_percent == min(positive_percent, na.rm = TRUE)) %>% 
+    pull(DISTRICT) %>% 
+    as.character()
+  
+  # Convert district to numeric for proper matching
+  district_stats$district_num <- as.numeric(as.character(district_stats$DISTRICT))
+  
+  # Calculate centroids for label placement
+  geo_data$centroid <- sf::st_centroid(geo_data$geometry)
+  centroids <- sf::st_coordinates(geo_data$centroid)
+  geo_data$lng <- centroids[,1]
+  geo_data$lat <- centroids[,2]
+  
+  # Calculate area and bounding boxes for better label placement
+  geo_data$area <- as.numeric(sf::st_area(geo_data$geometry))
+  
+  # Create a sophisticated position adjustment system based on district relationships
+  calculate_label_positions <- function(geo_data) {
+    n <- nrow(geo_data)
+    positions <- data.frame(
+      district = geo_data$No_Distrit,
+      lng = geo_data$lng,
+      lat = geo_data$lat,
+      offset_x = rep(0, n),
+      offset_y = rep(0, n)
+    )
     
-    # Añadir etiquetas de distrito
-    for (i in 1:nrow(geo_data_df)) {
-      dist_num <- geo_data_df$No_Distrit[i]
-      match_idx <- which(district_stats$district_num == dist_num)
-      
-      if (length(match_idx) > 0 && match_idx <= nrow(district_stats)) {
-        percent_val <- district_stats$positive_percent[match_idx]
-        
-        # Omitir si datos faltantes
-        if (is.na(percent_val)) next
-        
-        # Determinar color de etiqueta según valor alto/bajo
-        bg_color <- "#FFFFFF"  # Default white
-        text_color <- "#000000"  # Default black
-        
-        if (as.character(dist_num) %in% highest_district) {
-          bg_color <- "#4CAF50"  # Green for highest
-          text_color <- "#FFFFFF"
-        } else if (as.character(dist_num) %in% lowest_district) {
-          bg_color <- "#F44336"  # Red for lowest
-          text_color <- "#FFFFFF"
-        }
-        
-        # Etiqueta mejorada con número de distrito
-        label_html <- sprintf(
-          '<div style="background-color: %s; color: %s; padding: 5px 10px; border-radius: 4px; font-weight: bold; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">Distrito %s<br>%.1f%%</div>',
-          bg_color, text_color, dist_num, percent_val
-        )
-        
-        # Añadir marcador de etiqueta
-        map <- map %>% 
-          addLabelOnlyMarkers(
-            lng = geo_data_df$lng[i],
-            lat = geo_data_df$lat[i],
-            label = lapply(list(label_html), HTML),
-            labelOptions = labelOptions(
-              noHide = TRUE,
-              direction = "center",
-              textOnly = TRUE
-            )
-          )
+    # Create a matrix of distances between districts
+    distances <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:(n-1)) {
+      for (j in (i+1):n) {
+        dist <- sqrt((positions$lng[i] - positions$lng[j])^2 + 
+                    (positions$lat[i] - positions$lat[j])^2)
+        distances[i,j] <- distances[j,i] <- dist
       }
     }
     
-    return(map)
+    # Define threshold for nearby districts
+    distance_threshold <- mean(distances[distances > 0]) * 0.6
+    
+    # Identify clusters of nearby districts
+    nearby <- distances < distance_threshold & distances > 0
+    
+    # Apply specific offsets for problematic pairs
+    for (i in 1:n) {
+      nearby_districts <- which(nearby[i,])
+      
+      if (length(nearby_districts) > 0) {
+        # Number the district has nearby
+        num_neighbors <- length(nearby_districts)
+        
+        # Specific handling for district 9 (move it south)
+        if (positions$district[i] == 9) {
+          positions$offset_y[i] <- -0.020  # Move south
+          positions$offset_x[i] <- -0.005  # Slight west adjustment
+        }
+        # Keep district 7 in place but move slightly west
+        else if (positions$district[i] == 7) {
+          positions$offset_x[i] <- -0.008  # Move west
+        }
+        # Move district 8 slightly east
+        else if (positions$district[i] == 8) {
+          positions$offset_x[i] <- 0.010   # Move east
+        }
+        # Default adjustments based on number of neighbors
+        else if (num_neighbors >= 2) {
+          # Districts with many neighbors need more spread
+          angle <- (i %% 8) * (2 * pi / 8)  # Distribute in 8 directions
+          positions$offset_x[i] <- 0.010 * cos(angle)
+          positions$offset_y[i] <- 0.010 * sin(angle)
+        }
+        else if (num_neighbors == 1) {
+          # For districts with one neighbor, move away from that neighbor
+          neighbor_idx <- nearby_districts[1]
+          dx <- positions$lng[i] - positions$lng[neighbor_idx]
+          dy <- positions$lat[i] - positions$lat[neighbor_idx]
+          
+          # Normalize and apply small offset
+          dist <- sqrt(dx^2 + dy^2)
+          if (dist > 0) {
+            positions$offset_x[i] <- 0.006 * (dx / dist)
+            positions$offset_y[i] <- 0.006 * (dy / dist)
+          }
+        }
+      }
+    }
+    
+    return(positions)
+  }
+  
+  # Calculate optimal positions
+  label_positions <- calculate_label_positions(geo_data)
+  
+  # Calculate overall average percentage
+  overall_percent <- round(mean(district_stats$positive_percent, na.rm = TRUE), 1)
+  
+  # Get district colors from custom theme if provided
+  district_colors <- if (!is.null(custom_theme)) {
+    custom_theme$palettes$district
+  } else {
+    c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+     "#8c564b", "#e377c2", "#bcbd22", "#17becf")
+  }
+  
+  # Get diverging palette from custom theme if provided for highlighting
+  diverging_palette <- if (!is.null(custom_theme) && !is.null(custom_theme$palettes$diverging)) {
+    custom_theme$palettes$diverging
+  } else {
+    c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c")
+  }
+  
+  # Extract the high and low colors from the diverging palette
+  highest_color <- diverging_palette[length(diverging_palette)]  # Get last color (highest)
+  lowest_color <- diverging_palette[1]    # Red for lowest
+  
+  # PRE-CALCULATE all values needed for the map
+  geo_data$fill_color <- "#CCCCCC"  # Default gray
+  geo_data$hover_label <- ""
+  geo_data$label_text <- ""
+  geo_data$label_bg <- "#FFFFFF"
+  geo_data$label_color <- "#000000"
+  geo_data$is_extreme <- FALSE
+  geo_data$extreme_type <- ""  # Will be "highest" or "lowest"
+  geo_data$offset_x <- label_positions$offset_x[match(geo_data$No_Distrit, label_positions$district)]
+  geo_data$offset_y <- label_positions$offset_y[match(geo_data$No_Distrit, label_positions$district)]
+  
+  # Apply district colors
+  for (i in 1:nrow(geo_data)) {
+    dist_num <- geo_data$No_Distrit[i]
+    # Convert to 1-based index for district palette (if districts are 2-10)
+    district_index <- as.numeric(dist_num) - 1
+    
+    if (!is.na(district_index) && district_index >= 1 && district_index <= length(district_colors)) {
+      geo_data$fill_color[i] <- district_colors[district_index]
+    }
+  }
+  
+  # Create hover and popup labels
+  for (i in 1:nrow(geo_data)) {
+    dist_num <- geo_data$No_Distrit[i]
+    match_idx <- which(district_stats$district_num == dist_num)
+    
+    if (length(match_idx) > 0) {
+      percent_val <- district_stats$positive_percent[match_idx]
+      
+      geo_data$hover_label[i] <- sprintf(
+        "Distrito: %s<br>Porcentaje de hogares con estudiantes: %s%%<br>Total: %d/%d",
+        dist_num,
+        percent_val,
+        district_stats$positive_count[match_idx],
+        district_stats$total_responses[match_idx]
+      )
+      
+      # Only add label if percent is not NA
+      if (!is.na(percent_val)) {
+        geo_data$label_text[i] <- sprintf("Distrito %s<br>%s%%", dist_num, percent_val)
+        
+        # Set background/text color based on if this is highest/lowest district
+        if (as.character(dist_num) %in% highest_district) {
+          geo_data$is_extreme[i] <- TRUE
+          geo_data$extreme_type[i] <- "highest"
+          geo_data$label_bg[i] <- highest_color
+          geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+        } else if (as.character(dist_num) %in% lowest_district) {
+          geo_data$is_extreme[i] <- TRUE
+          geo_data$extreme_type[i] <- "lowest"
+          geo_data$label_bg[i] <- lowest_color
+          geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+        }
+      }
+    } else {
+      geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
+    }
+  }
+  
+  # Create base map
+  map <- leaflet(geo_data) %>%
+    addProviderTiles(providers$CartoDB.Positron) %>% 
+    addPolygons(
+      fillColor = ~fill_color,
+      fillOpacity = 0.7,
+      weight = 1,
+      color = "#666666",
+      dashArray = "3",
+      highlight = highlightOptions(
+        weight = 2,
+        color = "#000000",
+        dashArray = "",
+        fillOpacity = 0.9,
+        bringToFront = TRUE
+      ),
+      label = ~lapply(hover_label, HTML)
+    )
+  
+  # Add district labels with enhanced styling and adjusted positions
+  for (i in 1:nrow(geo_data)) {
+    if (geo_data$label_text[i] != "") {
+      # Create label HTML with consistent styling but enhanced for extremes
+      if (geo_data$is_extreme[i]) {
+        extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
+                              "Mayor porcentaje", 
+                              "Menor porcentaje")
+        
+        label_html <- sprintf(
+          '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %s</div>',
+          geo_data$label_bg[i], geo_data$label_color[i], extreme_text, geo_data$No_Distrit[i], geo_data$label_text[i]
+        )
+      } else {
+        # Standard label - consistent format for all
+        label_html <- sprintf(
+          '<div style="background-color: white; color: black; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s:<br>%s%%</div>',
+          geo_data$No_Distrit[i], district_stats$positive_percent[match(geo_data$No_Distrit[i], district_stats$district_num)]
+        )
+      }
+      
+      # Add label with calculated offset position
+      map <- map %>% addLabelOnlyMarkers(
+        lng = geo_data$lng[i] + geo_data$offset_x[i],
+        lat = geo_data$lat[i] + geo_data$offset_y[i],
+        label = lapply(list(label_html), HTML),
+        labelOptions = labelOptions(
+          noHide = TRUE,
+          direction = "center",
+          textOnly = TRUE
+        )
+      )
+    }
+  }
+  
+  # Add overall average label
+  map <- map %>% addControl(
+    html = sprintf(
+      '<div style="background-color: #333333; color: white; padding: 5px; border-radius: 3px;"><strong>Porcentaje general: %s%%</strong></div>',
+      overall_percent
+    ),
+    position = "topright"
+  )
+
+  
+  return(map)
 }
 create_healthcare_overview <- function(survey_data, custom_theme = NULL) {
   # Prepare data for Q19 - histogram of general satisfaction with health services
@@ -469,7 +619,7 @@ create_healthcare_overview <- function(survey_data, custom_theme = NULL) {
     )
   ) %>%
     apply_plotly_theme(
-      title = "Distribución de satisfacción con servicios de salud",
+      title = "",
       xlab = "Nivel de satisfacción (1-10)",
       ylab = "Frecuencia",
       custom_theme = custom_theme
@@ -502,12 +652,31 @@ create_utilities_overview <- function(survey_data, custom_theme = NULL) {
     mean_satisfaction = service_means[order(service_means, decreasing = TRUE)]
   )
   
-  # Get color from theme
-  bar_color <- if (!is.null(custom_theme)) {
-    custom_theme$colors$primary
-  } else {
-    theme_config$colors$primary
-  }
+# Get colors from theme
+primary_color <- if (!is.null(custom_theme)) {
+  custom_theme$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+highlight_color <- if (!is.null(custom_theme)) {
+  custom_theme$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange
+}
+
+# Create single color vector for all bars initially
+colors <- rep(primary_color, nrow(plot_data))
+
+# Handle ties for highlighting top N items
+# First, identify the top 3 unique values
+unique_top_values <- unique(plot_data$mean_satisfaction)[1:min(3, length(unique(plot_data$mean_satisfaction)))]
+
+# Find all rows that have those top values
+top_indices <- which(plot_data$mean_satisfaction %in% unique_top_values)
+
+# Highlight all those rows
+colors[top_indices] <- highlight_color
   
   # Create horizontal bar chart
   plot_ly(
@@ -517,28 +686,45 @@ create_utilities_overview <- function(survey_data, custom_theme = NULL) {
     type = "bar",
     orientation = 'h',
     marker = list(
-      color = bar_color
+      color = colors
     ),
     text = ~paste0(service, ": ", round(mean_satisfaction, 2)),
     hoverinfo = "text"
   ) %>%
     apply_plotly_theme(
-      title = "Satisfacción promedio con servicios públicos",
+      title = "",
       xlab = "Satisfacción promedio (1-10)",
       ylab = "",
       custom_theme = custom_theme
     ) %>%
     layout(
-      xaxis = list(range = c(0, 10))  # Set x-axis from 0 to 10
+      xaxis = list(range = c(0, 10)),
+      yaxis = list(
+        categoryorder = "total ascending"
+      )  
     )
 }
 
 create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) {
+  # Check if we have data
+  if (is.null(survey_data) || nrow(survey_data) == 0 || is.null(geo_data)) {
+    return(leaflet() %>% 
+             addProviderTiles(providers$CartoDB.Positron) %>%
+             addControl("No hay datos suficientes para visualizar", position = "topright"))
+  }
+  
+  # Check if Q25 exists in the dataset
+  if (!"Q25" %in% names(survey_data)) {
+    return(leaflet() %>% 
+             addProviderTiles(providers$CartoDB.Positron) %>%
+             addControl("Datos de satisfacción de vivienda no disponibles en esta encuesta", position = "topright"))
+  }
+  
   # Prepare data for Q25 - housing satisfaction map
   housing_data <- survey_data
   
   # Convert Q25 to numeric
-  housing_data$Q25 <- as.numeric(as.character(housing_data$Q25))
+  housing_data$Q25 <- suppressWarnings(as.numeric(as.character(housing_data$Q25)))
   
   # Calculate district averages
   district_stats <- housing_data %>%
@@ -553,12 +739,21 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
   # Convert district to numeric for matching
   district_stats$district_num <- as.numeric(as.character(district_stats$DISTRICT))
   
+  # Make sure district_num column exists and is valid
+  if (nrow(district_stats) == 0 || all(is.na(district_stats$district_num))) {
+    return(leaflet() %>% 
+             addProviderTiles(providers$CartoDB.Positron) %>%
+             addControl("No se pudieron calcular estadísticas de vivienda por distrito", position = "topright"))
+  }
+  
   # Find highest and lowest districts
   highest_district <- district_stats %>% 
+    filter(!is.na(mean_value)) %>%
     filter(mean_value == max(mean_value, na.rm = TRUE)) %>% 
     pull(district_num)
     
   lowest_district <- district_stats %>% 
+    filter(!is.na(mean_value)) %>%
     filter(mean_value == min(mean_value, na.rm = TRUE)) %>% 
     pull(district_num)
   
@@ -568,7 +763,84 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
   geo_data$lng <- centroids[,1]
   geo_data$lat <- centroids[,2]
   
-  # Get district colors from theme or use default
+  # Create a sophisticated position adjustment system based on district relationships
+  calculate_label_positions <- function(geo_data) {
+    n <- nrow(geo_data)
+    positions <- data.frame(
+      district = geo_data$No_Distrit,
+      lng = geo_data$lng,
+      lat = geo_data$lat,
+      offset_x = rep(0, n),
+      offset_y = rep(0, n)
+    )
+    
+    # Create a matrix of distances between districts
+    distances <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:(n-1)) {
+      for (j in (i+1):n) {
+        dist <- sqrt((positions$lng[i] - positions$lng[j])^2 + 
+                    (positions$lat[i] - positions$lat[j])^2)
+        distances[i,j] <- distances[j,i] <- dist
+      }
+    }
+    
+    # Define threshold for nearby districts
+    distance_threshold <- mean(distances[distances > 0]) * 0.6
+    
+    # Identify clusters of nearby districts
+    nearby <- distances < distance_threshold & distances > 0
+    
+    # Apply specific offsets for problematic pairs
+    for (i in 1:n) {
+      nearby_districts <- which(nearby[i,])
+      
+      if (length(nearby_districts) > 0) {
+        # Number the district has nearby
+        num_neighbors <- length(nearby_districts)
+        
+        # Specific handling for district 9 (move it south)
+        if (positions$district[i] == 9) {
+          positions$offset_y[i] <- -0.020  # Move south
+          positions$offset_x[i] <- -0.005  # Slight west adjustment
+        }
+        # Keep district 7 in place but move slightly west
+        else if (positions$district[i] == 7) {
+          positions$offset_x[i] <- -0.008  # Move west
+        }
+        # Move district 8 slightly east
+        else if (positions$district[i] == 8) {
+          positions$offset_x[i] <- 0.010   # Move east
+        }
+        # Default adjustments based on number of neighbors
+        else if (num_neighbors >= 2) {
+          # Districts with many neighbors need more spread
+          angle <- (i %% 8) * (2 * pi / 8)  # Distribute in 8 directions
+          positions$offset_x[i] <- 0.010 * cos(angle)
+          positions$offset_y[i] <- 0.010 * sin(angle)
+        }
+        else if (num_neighbors == 1) {
+          # For districts with one neighbor, move away from that neighbor
+          neighbor_idx <- nearby_districts[1]
+          dx <- positions$lng[i] - positions$lng[neighbor_idx]
+          dy <- positions$lat[i] - positions$lat[neighbor_idx]
+          
+          # Normalize and apply small offset
+          dist <- sqrt(dx^2 + dy^2)
+          if (dist > 0) {
+            positions$offset_x[i] <- 0.006 * (dx / dist)
+            positions$offset_y[i] <- 0.006 * (dy / dist)
+          }
+        }
+      }
+    }
+    
+    return(positions)
+  }
+  
+  # Calculate optimal positions
+  label_positions <- calculate_label_positions(geo_data)
+  
+  # Get district colors from custom theme if provided
   district_colors <- if (!is.null(custom_theme)) {
     custom_theme$palettes$district
   } else {
@@ -576,19 +848,89 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
      "#8c564b", "#e377c2", "#bcbd22", "#17becf")
   }
   
-  # Create map
+  # Get diverging palette from custom theme if provided for highlighting
+  diverging_palette <- if (!is.null(custom_theme) && !is.null(custom_theme$palettes$diverging)) {
+    custom_theme$palettes$diverging
+  } else {
+    c("#1a9641", "#a6d96a", "#ffffbf", "#fdae61", "#d7191c")
+  }
+  
+ # Extract the high and low colors from the diverging palette
+ highest_color <- diverging_palette[length(diverging_palette)]  # Get last color (highest)
+ lowest_color <- diverging_palette[1]    # Red for lowest
+  
+  lowest_color <- if (!is.null(custom_theme) && !is.null(custom_theme$colors$warning)) {
+    custom_theme$colors$warning
+  } else if (length(diverging_palette) > 1) {
+    diverging_palette[1]  # Get first color (lowest)
+  } else {
+    "#F44336"  # Default red
+  }
+  
+  # PRE-CALCULATE all values needed for the map
+  geo_data$fill_color <- "#CCCCCC"  # Default gray
+  geo_data$hover_label <- ""
+  geo_data$label_text <- ""
+  geo_data$label_bg <- "#FFFFFF"
+  geo_data$label_color <- "#000000"
+  geo_data$is_extreme <- FALSE
+  geo_data$extreme_type <- ""  # Will be "highest" or "lowest"
+  geo_data$offset_x <- label_positions$offset_x[match(geo_data$No_Distrit, label_positions$district)]
+  geo_data$offset_y <- label_positions$offset_y[match(geo_data$No_Distrit, label_positions$district)]
+  
+  # Apply district colors
+  for (i in 1:nrow(geo_data)) {
+    dist_num <- geo_data$No_Distrit[i]
+    # Convert to 1-based index for district palette (if districts are 2-10)
+    district_index <- as.numeric(dist_num) - 1
+    
+    if (!is.na(district_index) && district_index >= 1 && district_index <= length(district_colors)) {
+      geo_data$fill_color[i] <- district_colors[district_index]
+    }
+  }
+  
+  # Create hover and popup labels
+  for (i in 1:nrow(geo_data)) {
+    dist_num <- geo_data$No_Distrit[i]
+    match_idx <- which(district_stats$district_num == dist_num)
+    
+    if (length(match_idx) > 0) {
+      mean_val <- district_stats$mean_value[match_idx]
+      
+      geo_data$hover_label[i] <- sprintf(
+        "Distrito: %s<br>Satisfacción vivienda promedio: %.2f<br>N: %d",
+        dist_num,
+        mean_val,
+        district_stats$n[match_idx]
+      )
+      
+      # Only add label if mean is not NA
+      if (!is.na(mean_val)) {
+        geo_data$label_text[i] <- sprintf("%.2f", mean_val)
+        
+        # Set background/text color based on if this is highest/lowest district
+        if (!is.na(dist_num) && dist_num %in% highest_district) {
+          geo_data$is_extreme[i] <- TRUE
+          geo_data$extreme_type[i] <- "highest"
+          geo_data$label_bg[i] <- highest_color
+          geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+        } else if (!is.na(dist_num) && dist_num %in% lowest_district) {
+          geo_data$is_extreme[i] <- TRUE
+          geo_data$extreme_type[i] <- "lowest"
+          geo_data$label_bg[i] <- lowest_color
+          geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+        }
+      }
+    } else {
+      geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
+    }
+  }
+  
+  # Create base map
   map <- leaflet(geo_data) %>%
-    addTiles() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>% 
     addPolygons(
-      fillColor = ~{
-        # Use district number to determine color
-        dist_num <- as.numeric(No_Distrit)
-        ifelse(
-          !is.na(dist_num) & dist_num >= 1 & dist_num <= length(district_colors),
-          district_colors[dist_num],
-          "#CCCCCC"  # Default gray
-        )
-      },
+      fillColor = ~fill_color,
       fillOpacity = 0.7,
       weight = 1,
       color = "#666666",
@@ -599,50 +941,42 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
         dashArray = "",
         fillOpacity = 0.9,
         bringToFront = TRUE
-      )
+      ),
+      label = ~lapply(hover_label, HTML)
     )
   
-  # Add district labels
+  # Add district labels with enhanced styling and adjusted positions
   for (i in 1:nrow(geo_data)) {
-    dist_num <- geo_data$No_Distrit[i]
-    match_idx <- which(district_stats$district_num == dist_num)
-    
-    if (length(match_idx) > 0 && match_idx <= nrow(district_stats)) {
-      mean_val <- district_stats$mean_value[match_idx]
-      
-      # Skip if missing data
-      if (is.na(mean_val)) next
-      
-      # Determine label color based on high/low value
-      bg_color <- "#FFFFFF"  # Default white
-      text_color <- "#000000"  # Default black
-      
-      if (!is.na(dist_num) && dist_num %in% highest_district) {
-        bg_color <- "#4CAF50"  # Green for highest
-        text_color <- "#FFFFFF"
-      } else if (!is.na(dist_num) && dist_num %in% lowest_district) {
-        bg_color <- "#F44336"  # Red for lowest
-        text_color <- "#FFFFFF"
+    if (!is.na(geo_data$label_text[i]) && geo_data$label_text[i] != "") {
+      # Create label HTML with consistent styling but enhanced for extremes
+      if (geo_data$is_extreme[i]) {
+        extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
+                              "Mayor satisfacción", 
+                              "Menor satisfacción")
+        
+        label_html <- sprintf(
+          '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %s</div>',
+          geo_data$label_bg[i], geo_data$label_color[i], extreme_text, geo_data$No_Distrit[i], geo_data$label_text[i]
+        )
+      } else {
+        # Standard label - consistent format for all
+        label_html <- sprintf(
+          '<div style="background-color: white; color: black; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s:<br>%s</div>',
+          geo_data$No_Distrit[i], geo_data$label_text[i]
+        )
       }
       
-      # Create label with district number
-      label_html <- sprintf(
-        '<div style="background-color: %s; color: %s; padding: 5px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s<br>%.2f</div>',
-        bg_color, text_color, dist_num, mean_val
-      )
-      
-      # Add label marker
-      map <- map %>% 
-        addLabelOnlyMarkers(
-          lng = geo_data$lng[i],
-          lat = geo_data$lat[i],
-          label = lapply(list(label_html), HTML),
-          labelOptions = labelOptions(
-            noHide = TRUE,
-            direction = "center",
-            textOnly = TRUE
-          )
+      # Add label with calculated offset position
+      map <- map %>% addLabelOnlyMarkers(
+        lng = geo_data$lng[i] + geo_data$offset_x[i],
+        lat = geo_data$lat[i] + geo_data$offset_y[i],
+        label = lapply(list(label_html), HTML),
+        labelOptions = labelOptions(
+          noHide = TRUE,
+          direction = "center",
+          textOnly = TRUE
         )
+      )
     }
   }
   
@@ -650,13 +984,17 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
   overall_mean <- round(mean(district_stats$mean_value, na.rm = TRUE), 1)
   
   # Add overall average control
-  map %>% addControl(
+  map <- map %>% addControl(
     html = sprintf(
       '<div style="background-color: #333333; color: white; padding: 5px; border-radius: 3px;"><strong>Satisfacción vivienda promedio: %.1f</strong></div>',
       overall_mean
     ),
     position = "topright"
   )
+  
+
+  
+  return(map)
 }
 # Functions for government dashboard visualizations
 
@@ -673,7 +1011,7 @@ create_officials_knowledge_pie <- function(data, question_id, official_type, cus
   }
   
   # Handle the reversed mapping for Q7
-  if(question_id == "Q7") {
+  if(question_id == "Q7"| question_id == "Q8") {
     # For Q7: 1 = No conoce, 2 = Sí conoce
     knows_yes <- sum(values == "2", na.rm = TRUE)
     knows_no <- sum(values == "1", na.rm = TRUE)
@@ -717,7 +1055,7 @@ create_officials_knowledge_pie <- function(data, question_id, official_type, cus
   ) %>%
     layout(
       title = list(
-        text = paste("¿Conoce el nombre de su", official_type, "?"),
+        text = paste(""),
         font = if (!is.null(custom_theme)) {
           list(
             family = custom_theme$typography$font_family,
@@ -732,7 +1070,7 @@ create_officials_knowledge_pie <- function(data, question_id, official_type, cus
           )
         }
       ),
-      showlegend = TRUE
+      showlegend = FALSE
     )
 }
 
@@ -791,7 +1129,7 @@ pie_data <- pie_data %>%
   ) %>%
     layout(
       title = list(
-        text = "¿Cómo considera la desigualdad en Ciudad Juárez?",
+        text = "",
         font = if (!is.null(custom_theme)) {
           list(
             family = custom_theme$typography$font_family,
@@ -806,7 +1144,7 @@ pie_data <- pie_data %>%
           )
         }
       ),
-      showlegend = TRUE
+      showlegend = FALSE
     )
 }
 
@@ -851,7 +1189,7 @@ create_government_expectations_plot <- function(data, custom_theme = NULL) {
     hoverinfo = "text"
   ) %>%
     apply_plotly_theme(
-      title = "Expectativas Ciudadanas por Nivel de Gobierno (Escala 1-10)",
+      title = "",
       xlab = "Nivel de Gobierno",
       ylab = "Expectativa Promedio",
       custom_theme = custom_theme
@@ -897,7 +1235,7 @@ create_important_problems_plot <- function(data, custom_theme = NULL) {
     "16" = "Drenaje pluvial", 
     "17" = "Infraestructura",
     "18" = "Problemas medio ambientales(agua, aire, basura)",
-    "19" = "Otro (especificar cuál)"
+    "19" = "Otro"
   )
   
   # Create data frame for all categories with data
@@ -919,19 +1257,31 @@ create_important_problems_plot <- function(data, custom_theme = NULL) {
   # Sort by count in descending order
   bar_data <- bar_data[order(-bar_data$Count), ]
   
-  # Get colors from custom theme
-  primary_color <- if (!is.null(custom_theme)) custom_theme$colors$primary else "#1f77b4"  # Default blue
-  highlight_color <- if (!is.null(custom_theme)) custom_theme$colors$highlight else "#28a745"  # Default green
-  
-  # Create single color vector for all bars
-  colors <- rep(primary_color, nrow(bar_data))
-  
-  # Highlight top three with the same highlight color
-  if(nrow(bar_data) >= 3) {
-    colors[1:3] <- highlight_color
-  } else {
-    colors[1:nrow(bar_data)] <- highlight_color
-  }
+  # Get colors from theme
+ primary_color <- if (!is.null(custom_theme)) {
+  custom_theme$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+highlight_color <- if (!is.null(custom_theme)) {
+  custom_theme$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange
+}
+
+# Create single color vector for all bars initially
+colors <- rep(primary_color, nrow(bar_data))
+
+# Handle ties for highlighting top N items
+# First, identify the top 3 unique values
+unique_top_values <- unique(bar_data$Percentage)[1:min(3, length(unique(bar_data$Percentage)))]
+
+# Find all rows that have those top values
+top_indices <- which(bar_data$Percentage %in% unique_top_values)
+
+# Highlight all those rows
+colors[top_indices] <- highlight_color
   
   # Create horizontal bar chart
   plot_ly(
@@ -947,7 +1297,7 @@ create_important_problems_plot <- function(data, custom_theme = NULL) {
     text = ~paste0(Percentage, "%")
   ) %>%
     layout(
-      title = "Distribución de Problemas Importantes",
+      title = "",
       xaxis = list(
         title = "Frecuencia",
         showgrid = TRUE,
@@ -996,7 +1346,7 @@ create_bicycle_distribution <- function(survey_data, custom_theme = NULL) {
   
   # Get colors from custom theme if provided
   pie_colors <- if (!is.null(custom_theme)) {
-    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(length(categories))
+    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$secondary))(length(categories))
   } else {
     colorRampPalette(c("#1f77b4", "#3498DB"))(length(categories))
   }
@@ -1015,7 +1365,7 @@ create_bicycle_distribution <- function(survey_data, custom_theme = NULL) {
   ) %>%
     layout(
       title = list(
-        text = "Distribución de Bicicletas por Hogar",
+        text = "",
         font = if (!is.null(custom_theme)) {
           list(
             family = custom_theme$typography$font_family,
@@ -1030,10 +1380,7 @@ create_bicycle_distribution <- function(survey_data, custom_theme = NULL) {
           )
         }
       ),
-      legend = list(
-        orientation = "h",
-        y = -0.1
-      )
+      showlegend = FALSE
     )
 }
 
@@ -1086,7 +1433,7 @@ create_vehicle_distribution <- function(survey_data, custom_theme = NULL) {
   ) %>%
     layout(
       title = list(
-        text = "Distribución de Vehículos Motorizados por Hogar",
+        text = "",
         font = if (!is.null(custom_theme)) {
           list(
             family = custom_theme$typography$font_family,
@@ -1101,10 +1448,7 @@ create_vehicle_distribution <- function(survey_data, custom_theme = NULL) {
           )
         }
       ),
-      legend = list(
-        orientation = "h",
-        y = -0.1
-      )
+      showlegend = FALSE
     )
 }
 # Function to create transportation issues bar plot
@@ -1112,12 +1456,12 @@ create_transport_issues_plot <- function(survey_data, issue_type = "bus", custom
   # Define questions and labels based on issue type
   if (issue_type == "bus") {
     # Bus transportation issues (Q76.1 to Q76.7)
-    question_ids <- paste0("Q76.", 1:7)
-    title <- "Insatisfacción con Aspectos del Servicio de Camión/Rutera"
+    question_ids <- paste0("Q76.", 1:6)
+    title <- ""
   } else {
     # Juarez Bus transportation issues (Q79.1 to Q79.7)
-    question_ids <- paste0("Q79.", 1:7)
-    title <- "Insatisfacción con Aspectos del Servicio de Juárez Bus"
+    question_ids <- paste0("Q79.", 1:6)
+    title <- ""
   }
   
   # Define issue labels
@@ -1127,8 +1471,7 @@ create_transport_issues_plot <- function(survey_data, issue_type = "bus", custom
     "Estado de la parada", 
     "Trato de los choferes",
     "Conducción de la unidad", 
-    "Tarifa", 
-    "Otro"
+    "Tarifa"
   )
   
   # Calculate percentages for each issue
@@ -1150,12 +1493,32 @@ create_transport_issues_plot <- function(survey_data, issue_type = "bus", custom
   # Sort by percentage for better visualization
   plot_data <- plot_data[order(-plot_data$Percentage), ]
   
-  # Get colors from custom theme if provided
-  bar_color <- if (!is.null(custom_theme)) {
-    custom_theme$colors$primary
-  } else {
-    "#1f77b4"  # Default blue
-  }
+# Get primary color from theme
+primary_color <- if (!is.null(custom_theme)) {
+  custom_theme$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+# Get highlight color from theme
+highlight_color <- if (!is.null(custom_theme)) {
+  custom_theme$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange highlight
+}
+
+  # Create single color vector for all bars initially
+  colors <- rep(primary_color, nrow(plot_data))
+  
+  # Handle ties for highlighting top N items
+  # First, identify the top 3 unique values
+  unique_top_values <- unique(plot_data$Percentage)[1:min(3, length(unique(plot_data$Percentage)))]
+  
+  # Find all rows that have those top values
+  top_indices <- which(plot_data$Percentage %in% unique_top_values)
+  
+  # Highlight all those rows
+  colors[top_indices] <- highlight_color
   
   # Create horizontal bar chart
   plot_ly(
@@ -1165,7 +1528,7 @@ create_transport_issues_plot <- function(survey_data, issue_type = "bus", custom
     type = "bar",
     orientation = "h",
     marker = list(
-      color = bar_color
+      color = colors
     ),
     text = ~paste0(Percentage, "%"),
     textposition = "auto",
@@ -1180,7 +1543,7 @@ create_transport_issues_plot <- function(survey_data, issue_type = "bus", custom
     ) %>%
     layout(
       xaxis = list(
-        range = c(0, 10)
+        range = c(0, 6)
       ),
       yaxis = list(
         categoryorder = "total ascending"
@@ -1259,47 +1622,63 @@ create_transportation_comparison <- function(survey_data, custom_theme = NULL) {
       barmode = "group"
     )
 }
-# Function to create environmental problems plot
 create_env_problems_plot <- function(survey_data, custom_theme = NULL) {
   # Extract environmental problems data from Q97
   env_problems <- survey_data$Q97
   env_problems <- env_problems[!is.na(env_problems)]
-
-  # Define problem categories
+  
+  # Define problem categories - excluding "Otro"
   problem_categories <- c(
     "1" = "Neumáticos/llantas tiradas",
     "2" = "Calles sucias/Basura en las calles",
     "3" = "Parques sucios/descuidados",
     "4" = "Falta de recolección de residuos",
     "5" = "Basureros clandestinos/Casas-terrenos",
-    "6" = "Terrenos baldíos",
-    "7" = "Otro"
+    "6" = "Terrenos baldíos"
+    # "7" = "Otro" - Removed
   )
-
+  
   # Create frequency table
   problem_table <- table(env_problems)
-
-  # Create data frame for plotting
+  
+  # Create data frame for plotting (exclude "7" for "Otro")
   plot_data <- data.frame(
-    Problem = sapply(names(problem_table), function(x) problem_categories[x]),
+    Problem = sapply(names(problem_table), function(x) {
+      if (x != "7") problem_categories[x] else NA
+    }),
     Count = as.numeric(problem_table),
     stringsAsFactors = FALSE
   )
-
-  # Calculate percentages
+  
+  # Remove the row with NA (corresponding to "Otro")
+  plot_data <- plot_data[!is.na(plot_data$Problem), ]
+  
+  # Calculate percentages based on the filtered data
   plot_data$Percentage <- round(100 * plot_data$Count / sum(plot_data$Count), 1)
-
+  
   # Sort by count descending
   plot_data <- plot_data[order(-plot_data$Count), ]
-
-  # Get color from custom theme if provided
-  bar_color <- if (!is.null(custom_theme)) {
+  
+  # Get the highest count problem to highlight
+  highest_problem <- which.max(plot_data$Count)
+  
+  # Get colors from custom theme if provided
+  primary_color <- if (!is.null(custom_theme)) {
     custom_theme$colors$primary
   } else {
-    "
-#20c997"  # Default teal green
+    "#20c997"  # Default teal green
   }
-
+  
+  secondary_color <- if (!is.null(custom_theme)) {
+    custom_theme$colors$secondary
+  } else {
+    "#fd7e14"  # Default orange
+  }
+  
+  # Create color vector with all primary color except the highest value
+  colors <- rep(primary_color, nrow(plot_data))
+  colors[highest_problem] <- secondary_color
+  
   # Create bar chart
   plot_ly(
     data = plot_data,
@@ -1307,7 +1686,7 @@ create_env_problems_plot <- function(survey_data, custom_theme = NULL) {
     y = ~Percentage,
     type = "bar",
     marker = list(
-      color = bar_color
+      color = colors
     ),
     text = ~paste0(Percentage, "%"),
     textposition = "auto",
@@ -1323,7 +1702,7 @@ create_env_problems_plot <- function(survey_data, custom_theme = NULL) {
     layout(
       xaxis = list(
         tickangle = 45,
-          categoryorder = 'total ascending'
+        categoryorder = 'total ascending'
       )
     )
 }
@@ -1461,7 +1840,7 @@ create_transport_modes_plot <- function(survey_data, mode_type = "work", custom_
   if (mode_type == "work") {
     # Work transportation questions (Q72.1 to Q72.11)
     question_ids <- paste0("Q72.", 1:11)
-    title <- "Modos de Transporte para ir al Trabajo"
+    title <- ""
     mode_labels <- c(
       "Caminando", "Bicicleta", "Autobús escolar", "Autobús especial", 
       "Taxi", "Uber/Didi/InDriver", "Motocicleta", "Vehículo propio",
@@ -1470,7 +1849,7 @@ create_transport_modes_plot <- function(survey_data, mode_type = "work", custom_
   } else {
     # General transportation questions (Q73.1 to Q73.11)
     question_ids <- paste0("Q73.", 1:11)
-    title <- "Modos de Transporte General"
+    title <- ""
     mode_labels <- c(
       "Caminando", "Bicicleta", "Autobús escolar", "Autobús especial", 
       "Taxi", "Uber/Didi/InDriver", "Motocicleta", "Vehículo propio",
@@ -1497,12 +1876,32 @@ create_transport_modes_plot <- function(survey_data, mode_type = "work", custom_
   # Sort by percentage for better visualization
   plot_data <- plot_data[order(-plot_data$Percentage), ]
   
-  # Get colors from custom theme if provided
-  bar_color <- if (!is.null(custom_theme)) {
-    custom_theme$colors$primary
-  } else {
-    "#1f77b4"  # Default blue
-  }
+ # Get primary color from theme
+ primary_color <- if (!is.null(custom_theme)) {
+  custom_theme$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+# Get highlight color from theme
+highlight_color <- if (!is.null(custom_theme)) {
+  custom_theme$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange highlight
+}
+
+  # Create single color vector for all bars initially
+  colors <- rep(primary_color, nrow(plot_data))
+  
+  # Handle ties for highlighting top N items
+  # First, identify the top 3 unique values
+  unique_top_values <- unique(plot_data$Percentage)[1:min(3, length(unique(plot_data$Percentage)))]
+  
+  # Find all rows that have those top values
+  top_indices <- which(plot_data$Percentage %in% unique_top_values)
+  
+  # Highlight all those rows
+  colors[top_indices] <- highlight_color
   
   # Create horizontal bar chart
   plot_ly(
@@ -1512,7 +1911,7 @@ create_transport_modes_plot <- function(survey_data, mode_type = "work", custom_
     type = "bar",
     orientation = "h",
     marker = list(
-      color = bar_color
+      color = colors
     ),
     text = ~paste0(Percentage, "%"),
     textposition = "auto",

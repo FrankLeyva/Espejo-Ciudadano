@@ -36,7 +36,7 @@ urbanUI <- function() {
     
     # Navigation cards
     layout_columns(
-      col_widths = c(4, 4, 4),
+      col_widths = c(6,6),
       
       # Mobility Dashboard Card
       div(
@@ -84,7 +84,7 @@ urbanUI <- function() {
         title = "Uso de Vehículo Particular (General)",
         value = textOutput("private_vehicle_usage"),
         showcase = bsicons::bs_icon("car-front"),
-        theme = value_box_theme(bg = "#80CBC4", fg = "white")
+        theme = value_box_theme(bg = "#80CBC4", fg = "black")
       ),
       
       # Bus satisfaction
@@ -100,7 +100,7 @@ urbanUI <- function() {
         title = "Satisfacción con Juárez Bus",
         value = textOutput("juarez_bus_satisfaction"),
         showcase = bsicons::bs_icon("star-half"),
-        theme = value_box_theme(bg = "#80CBC4", fg = "white")
+        theme = value_box_theme(bg = "#80CBC4", fg = "black")
       )
     ),
     

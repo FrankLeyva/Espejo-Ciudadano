@@ -98,102 +98,143 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
     )
   })
   
-  # Government Comparison Bar Chart
-  output$government_comparison_plot <- renderPlotly({
-    req(survey_data())
+# Government Comparison Bar Chart
+output$government_comparison_plot <- renderPlotly({
+  req(survey_data())
+  
+  # Define the questions we want to compare
+  question_ids <- list(
+    municipal = c("Q16.2", "Q16.3", "Q16.4"),
+    state = c("Q17.2", "Q17.3", "Q17.4"),
+    federal = c("Q18.2", "Q18.3", "Q18.4")
+  )
+  
+  # Labels for the questions
+  question_labels <- c(
+    "Toma en cuenta a ciudadanos",
+    "Cumple compromisos y metas",
+    "Aplica la ley de manera imparcial"
+  )
+  
+  # Define the answer scale
+  answer_scale <- c(
+    "1" = "Nunca",
+    "2" = "Poco",
+    "3" = "Algo", 
+    "4" = "Mucho",
+    "5" = "NS/NC"
+  )
+  
+  # Initialize data frame to store results
+  comparison_data <- data.frame(
+    Question = character(),
+    Government = character(),
+    Mean = numeric(),
+    Mode = character(),
+    ModeValue = numeric(),
+    stringsAsFactors = FALSE
+  )
+  
+  # Helper function to calculate mode
+  find_mode <- function(x) {
+    # Remove NA values
+    x <- x[!is.na(x)]
+    if(length(x) == 0) return(NA)
     
-    # Define the questions we want to compare
-    question_ids <- list(
-      municipal = c("Q16.2", "Q16.3", "Q16.4"),
-      state = c("Q17.2", "Q17.3", "Q17.4"),
-      federal = c("Q18.2", "Q18.3", "Q18.4")
-    )
+    # Calculate frequencies
+    freq_table <- table(x)
+    # Find the value with highest frequency
+    mode_val <- as.numeric(names(freq_table)[which.max(freq_table)])
+    return(mode_val)
+  }
+  
+  # Calculate means and modes for each question and government level
+  for (gov_level in names(question_ids)) {
+    gov_name <- switch(gov_level,
+                       "municipal" = "Municipal",
+                       "state" = "Estatal",
+                       "federal" = "Federal")
     
-    # Labels for the questions
-    question_labels <- c(
-      "Toma en cuenta a ciudadanos",
-      "Cumple compromisos y metas",
-      "Aplica la ley de manera imparcial"
-    )
-    
-    # Define the answer scale
-    answer_scale <- c(
-      "1" = "Nunca",
-      "2" = "Poco",
-      "3" = "Algo", 
-      "4" = "Mucho",
-      "5" = "NS/NC"
-    )
-    
-    # Initialize data frame to store results
-    comparison_data <- data.frame(
-      Question = character(),
-      Government = character(),
-      Mean = numeric(),
-      stringsAsFactors = FALSE
-    )
-    
-    # Calculate means for each question and government level
-    for (gov_level in names(question_ids)) {
-      gov_name <- switch(gov_level,
-                         "municipal" = "Municipal",
-                         "state" = "Estatal",
-                         "federal" = "Federal")
+    for (i in 1:length(question_ids[[gov_level]])) {
+      q_id <- question_ids[[gov_level]][i]
+      q_label <- question_labels[i]
       
-      for (i in 1:length(question_ids[[gov_level]])) {
-        q_id <- question_ids[[gov_level]][i]
-        q_label <- question_labels[i]
-        
-        # Get values and convert to numeric
-        values <- as.numeric(survey_data()$responses[[q_id]])
-        
-        # Remove NS/NC (value 5)
-        values <- values[!is.na(values) & values != 5]
-        
-        # Calculate mean
-        mean_val <- mean(values, na.rm = TRUE)
-        
-        # Add to data frame
-        comparison_data <- rbind(
-          comparison_data,
-          data.frame(
-            Question = q_label,
-            Government = gov_name,
-            Mean = mean_val,
-            stringsAsFactors = FALSE
-          )
+      # Get values and convert to numeric
+      values <- as.numeric(survey_data()$responses[[q_id]])
+      
+      # Remove NS/NC (value 5)
+      values <- values[!is.na(values) & values != 5]
+      
+      # Calculate mean
+      mean_val <- mean(values, na.rm = TRUE)
+      
+      # Calculate mode
+      mode_val <- find_mode(values)
+      # Get mode label
+      mode_label <- answer_scale[as.character(mode_val)]
+      
+      # Add to data frame
+      comparison_data <- rbind(
+        comparison_data,
+        data.frame(
+          Question = q_label,
+          Government = gov_name,
+          Mean = mean_val,
+          Mode = mode_label,
+          ModeValue = mode_val,
+          stringsAsFactors = FALSE
         )
-      }
-    }
-    
-    # Get colors from theme
-    gov_colors <- c(
-      "Municipal" = "#1f77b4",  # Blue
-      "Estatal" = "#9467bd",    # Purple
-      "Federal" = "#d62728"     # Red
-    )
-    
-    # Create grouped bar chart
-    plot_ly(
-      data = comparison_data,
-      x = ~Question,
-      y = ~Mean,
-      color = ~Government,
-      colors = gov_colors,
-      type = "bar",
-      text = ~paste0(Government, "<br>", round(Mean, 2)),
-      hoverinfo = "text"
-    ) %>%
-      apply_plotly_theme(
-        title = "Percepción de los tres niveles de gobierno",
-        xlab = "",
-        ylab = "Promedio (1-4)",
-        custom_theme = active_theme()
-      ) %>%
-      layout(
-        barmode = "group",
-        yaxis = list(range = c(1, 4)),  # Scale from 1 to 4
-        legend = list(orientation = "h", y = -0.15)
       )
-  })
+    }
+  }
+  
+  # Get colors from theme
+  gov_colors <- c(
+    "Municipal" = "#1f77b4",  # Blue
+    "Estatal" = "#9467bd",    # Purple
+    "Federal" = "#d62728"     # Red
+  )
+  
+  # Create grouped bar chart
+  plot_ly(
+    data = comparison_data,
+    x = ~Question,
+    y = ~Mean,
+    color = ~Government,
+    colors = gov_colors,
+    type = "bar",
+    # Add text that will appear on hover
+    hoverinfo = "text",
+    hovertext = ~paste0(
+      Government, "<br>",
+      "Respuesta más común: ", Mode
+    ),
+    # Add text labels to be displayed on the bars
+    text = ~paste0(round(Mean, 2)),
+    textposition = "outside", # Options: "inside", "outside", "auto", "none"
+    insidetextanchor = "middle",
+    textfont = list(
+      color = "black",
+      size = 12
+    )
+  ) %>%
+    apply_plotly_theme(
+      title = "Percepción de los tres niveles de gobierno",
+      xlab = "",
+      ylab = "Promedio (1-4)",
+      custom_theme = active_theme()
+    ) %>%
+    layout(
+      barmode = "group",
+      yaxis = list(range = c(1, 4)),  # Scale from 1 to 4
+      showlegend = TRUE,
+      legend = list(
+        orientation = "h",
+        xanchor = "center",
+        x = 0.5,
+        y = 1.1
+      ),
+      margin = list(t = 100) # Add margin at the top for the legend
+    )
+})
 }

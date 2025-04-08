@@ -104,23 +104,6 @@ expectationsUI <- function() {
     card(
       card_header("Comparación de Percepción Ciudadana por Nivel de Gobierno"),
       plotlyOutput("government_comparison_plot", height = "500px")
-    ),
-    
-    # Information box explaining the metrics
-    card(
-      div(
-        class = "info-box info-box-info",
-        div(class = "info-box-icon", bsicons::bs_icon("info-circle")),
-        div(
-          class = "info-box-content",
-          div(class = "info-box-title", "Acerca de las métricas"),
-          div(class = "info-box-value", 
-              "Las expectativas ciudadanas se miden en una escala del 1 al 10, donde 10 representa la máxima expectativa.
-              Las percepciones sobre toma en cuenta a ciudadanos, cumplimiento de compromisos y aplicación imparcial de la ley
-              se miden en una escala donde: 1=Nunca, 2=Poco, 3=Algo, 4=Mucho."
-          )
-        )
-      )
     )
   )
 }

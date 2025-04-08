@@ -143,12 +143,31 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       # Sort by percentage in descending order
       results_df <- results_df[order(-results_df$Percentage), ]
       
-      # Get colors from theme
-      bar_color <- if (!is.null(custom_theme)) {
-        custom_theme$colors$primary
-      } else {
-        "#1f77b4"  # Default blue
-      }
+# Get colors from theme
+primary_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$primary
+} else {
+  "#1f77b4"  # Default blue
+}
+
+highlight_color <- if (!is.null(active_theme())) {
+  active_theme()$colors$secondary
+} else {
+  "#ff7f0e"  # Default orange
+}
+
+# Create single color vector for all bars initially
+colors <- rep(primary_color, nrow(results_df))
+
+# Handle ties for highlighting top N items
+# First, identify the top 3 unique values
+unique_top_values <- unique(results_df$Percentage)[1:min(3, length(unique(results_df$Percentage)))]
+
+# Find all rows that have those top values
+top_indices <- which(results_df$Percentage %in% unique_top_values)
+
+# Highlight all those rows
+colors[top_indices] <- highlight_color
       
       # Create bar chart
       plot_ly(
@@ -157,23 +176,17 @@ representationServer <- function(input, output, session,current_theme = NULL) {
         x = ~Percentage,
         type = "bar",
         orientation = "h",
-        marker = list(color = bar_color),
+        marker = list(color = colors),
         text = ~paste0(round(Percentage, 1), "%"),
         textposition = "auto",
         hoverinfo = "text",
         hovertext = ~paste0(Representative, ": ", round(Percentage, 1), "%")
       ) %>%
       layout(
-        title = list(
-          text = paste0("Conocimiento de ", 
-                        ifelse(question_prefix == "Q6", "Regidores", 
-                               ifelse(question_prefix == "Q8", "Diputados Locales", 
-                                     "Diputados Federales"))),
-          font = list(size = 16)
-        ),
+        title = "",
         xaxis = list(
           title = "Porcentaje que conoce",
-          range = c(0, 10)
+          range = c(0, 6)
         ),
         yaxis = list(
           title = "",

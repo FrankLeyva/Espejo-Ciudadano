@@ -29,9 +29,9 @@ environmentUI <- function() {
       tags$a(
         href = "#",
         class = "text-decoration-none",
-        onclick = "Shiny.setInputValue('nav_target', 'urban', {priority: 'event'}); return false;",
+        onclick = "Shiny.setInputValue('nav_target', 'wellness', {priority: 'event'}); return false;",
         tags$i(class = "fas fa-arrow-left me-2"),
-        "Volver a Desarrollo Urbano"
+        "Volver a Bienestar Social y Económico"
       )
     ),
     # Header

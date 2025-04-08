@@ -85,7 +85,8 @@ output$economic_improvement_map <- renderLeaflet({
             highlight_max = F,
             palette= 'sequential',
             inverse =T
-    ) 
+    ) %>% 
+      layout(title="")
   })
   
   # Calculate income sufficiency percentage (options 1 and 2)

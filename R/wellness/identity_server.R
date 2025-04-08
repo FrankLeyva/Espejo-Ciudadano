@@ -130,7 +130,7 @@ identityServer <- function(input, output, session,current_theme = NULL) {
       hovertext = ~paste0(count, " menciones")
     ) %>%
       apply_plotly_theme(
-        title = "Lugares emblemáticos de Ciudad Juárez",
+        title = "",
         xlab = "Porcentaje de menciones (%)",  # Updated axis label
         ylab = "",
       ) %>% 

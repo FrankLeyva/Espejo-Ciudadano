@@ -195,7 +195,7 @@ output$activities_chart <- renderPlotly({
     hovertext = ~paste0(positive_count, "/", total_count, " respuestas)")
   ) %>%
     apply_plotly_theme(
-      title = "Porcentaje de participación en actividades",
+      title = "",
       xlab = "Porcentaje de participación (%)",
       ylab = "",
       custom_theme = active_theme()

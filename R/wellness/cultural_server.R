@@ -169,7 +169,7 @@ output$cultural_activities_plot <- renderPlotly({
     hovertext = ~paste0(positive_count, "/", total_count, " Respuestas")
   ) %>%
     apply_plotly_theme(
-      title = "Porcentaje de participación en actividades culturales",
+      title = "",
       xlab = "Porcentaje de participación (%)",
       ylab = "",
       custom_theme = active_theme()
@@ -232,7 +232,7 @@ output$entertainment_activities_plot <- renderPlotly({
     highlight_max = F,
     palette = "categorical",
     hide_ns_nc = TRUE,
-    inverse=T
+    inverse=F
   ) %>%
   layout(title = "") %>%  # Remove title if not needed
   hide_legend()

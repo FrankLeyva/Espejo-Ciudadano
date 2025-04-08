@@ -1264,7 +1264,7 @@ create_env_problems_plot <- function(survey_data, custom_theme = NULL) {
   # Extract environmental problems data from Q97
   env_problems <- survey_data$Q97
   env_problems <- env_problems[!is.na(env_problems)]
-  
+
   # Define problem categories
   problem_categories <- c(
     "1" = "Neumáticos/llantas tiradas",
@@ -1275,30 +1275,31 @@ create_env_problems_plot <- function(survey_data, custom_theme = NULL) {
     "6" = "Terrenos baldíos",
     "7" = "Otro"
   )
-  
+
   # Create frequency table
   problem_table <- table(env_problems)
-  
+
   # Create data frame for plotting
   plot_data <- data.frame(
     Problem = sapply(names(problem_table), function(x) problem_categories[x]),
     Count = as.numeric(problem_table),
     stringsAsFactors = FALSE
   )
-  
+
   # Calculate percentages
   plot_data$Percentage <- round(100 * plot_data$Count / sum(plot_data$Count), 1)
-  
+
   # Sort by count descending
   plot_data <- plot_data[order(-plot_data$Count), ]
-  
+
   # Get color from custom theme if provided
   bar_color <- if (!is.null(custom_theme)) {
     custom_theme$colors$primary
   } else {
-    "#20c997"  # Default teal green
+    "
+#20c997"  # Default teal green
   }
-  
+
   # Create bar chart
   plot_ly(
     data = plot_data,

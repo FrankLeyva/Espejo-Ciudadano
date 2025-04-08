@@ -71,8 +71,8 @@ wellnessUI <- function() {
         onclick = "Shiny.setInputValue('nav_target', 'environment', {priority: 'event'})",
         card(
           card_body(
-            div(class = "text-center nav-card-icon", bsicons::bs_icon("tree-fill")),
-            h4(class = "text-center", "Medio Ambiente"),
+            div(class = "text-center nav-card-icon text-success", bsicons::bs_icon("tree-fill")),
+            h4(class = "nav-card-title text-center", "Medio Ambiente"),
             p(class = "text-center", "Calidad ambiental")
           )
         )

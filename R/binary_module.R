@@ -518,11 +518,22 @@ create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE
   false_label <- labels$false_label
   
   # Get district colors from custom theme if provided
-  district_colors <- if (!is.null(custom_theme)) {
+  district_palette <- if (!is.null(custom_theme)) {
     custom_theme$palettes$district
   } else {
     theme_config$palettes$district
   }
+  
+  # Get diverging palette from custom theme if provided for highlighting
+  diverging_palette <- if (!is.null(custom_theme) && !is.null(custom_theme$palettes$diverging)) {
+    custom_theme$palettes$diverging
+  } else {
+    theme_config$palettes$diverging
+  }
+  
+  # Extract the high and low colors from the diverging palette
+  highest_color <- diverging_palette[length(diverging_palette)]  # Get last color (highest)
+  lowest_color <- diverging_palette[1]  # Get first color (lowest)
   
   # Calculate percentages by district
   district_stats <- data %>%
@@ -536,10 +547,6 @@ create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE
       .groups = 'drop'
     )
   
-  # Debug information
-  print("District stats:")
-  print(district_stats)
-  
   # Choose which percentage to display based on focus parameter
   if (!focus_on_true) {
     district_stats$selected_percent <- district_stats$false_percent
@@ -551,8 +558,31 @@ create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE
     display_label <- true_label
   }
   
-  # Convert district to numeric to ensure proper matching
-  district_stats$district <- as.numeric(as.character(district_stats$district))
+  # Convert district to numeric for proper matching
+  district_stats$district_num <- as.numeric(as.character(district_stats$district))
+  
+  # Make sure district_num column exists and is valid
+  if (!("district_num" %in% names(district_stats)) || all(is.na(district_stats$district_num))) {
+    district_stats$district_num <- as.numeric(as.character(district_stats$district))
+    if (all(is.na(district_stats$district_num))) {
+      warning("Could not convert district to numeric. Using row numbers as district identifier.")
+      district_stats$district_num <- 1:nrow(district_stats)
+    }
+  }
+  
+  # Find district with highest and lowest percentages if highlighting extremes
+  highest_district <- lowest_district <- NULL
+  if (highlight_extremes) {
+    highest_district <- district_stats %>% 
+      filter(!is.na(selected_percent)) %>%
+      arrange(desc(selected_percent)) %>% 
+      slice(1)
+      
+    lowest_district <- district_stats %>% 
+      filter(!is.na(selected_percent)) %>%
+      arrange(selected_percent) %>% 
+      slice(1)
+  }
   
   # Calculate centroids for label placement
   geo_data$centroid <- sf::st_centroid(geo_data$geometry)
@@ -560,130 +590,215 @@ create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE
   geo_data$lng <- centroids[,1]
   geo_data$lat <- centroids[,2]
   
-  # Find district with highest and lowest percentages if highlighting extremes
-  highest_district <- lowest_district <- NULL
-  if (highlight_extremes) {
-    highest_district <- district_stats %>% arrange(desc(selected_percent)) %>% slice(1)
-    lowest_district <- district_stats %>% arrange(selected_percent) %>% slice(1)
+  # Calculate area and bounding boxes for better label placement
+  geo_data$area <- as.numeric(sf::st_area(geo_data$geometry))
+  
+  # Create a more sophisticated position adjustment system based on district relationships
+  calculate_label_positions <- function(geo_data) {
+    n <- nrow(geo_data)
+    positions <- data.frame(
+      district = geo_data$No_Distrit,
+      lng = geo_data$lng,
+      lat = geo_data$lat,
+      offset_x = rep(0, n),
+      offset_y = rep(0, n)
+    )
+    
+    # Create a matrix of distances between districts
+    distances <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:(n-1)) {
+      for (j in (i+1):n) {
+        dist <- sqrt((positions$lng[i] - positions$lng[j])^2 + 
+                    (positions$lat[i] - positions$lat[j])^2)
+        distances[i,j] <- distances[j,i] <- dist
+      }
+    }
+    
+    # Define threshold for nearby districts
+    distance_threshold <- mean(distances[distances > 0]) * 0.6
+    
+    # Identify clusters of nearby districts
+    nearby <- distances < distance_threshold & distances > 0
+    
+    # Apply specific offsets for problematic pairs
+    for (i in 1:n) {
+      nearby_districts <- which(nearby[i,])
+      
+      if (length(nearby_districts) > 0) {
+        # Number the district has nearby
+        num_neighbors <- length(nearby_districts)
+        
+        # Specific handling for district 9 (move it south)
+        if (positions$district[i] == 9) {
+          positions$offset_y[i] <- -0.020  # Move south
+          positions$offset_x[i] <- -0.005  # Slight west adjustment
+        }
+        # Keep district 7 in place but move slightly west
+        else if (positions$district[i] == 7) {
+          positions$offset_x[i] <- -0.008  # Move west
+        }
+        # Move district 8 slightly east
+        else if (positions$district[i] == 8) {
+          positions$offset_x[i] <- 0.010   # Move east
+        }
+        # Default adjustments based on number of neighbors
+        else if (num_neighbors >= 2) {
+          # Districts with many neighbors need more spread
+          angle <- (i %% 8) * (2 * pi / 8)  # Distribute in 8 directions
+          positions$offset_x[i] <- 0.010 * cos(angle)
+          positions$offset_y[i] <- 0.010 * sin(angle)
+        }
+        else if (num_neighbors == 1) {
+          # For districts with one neighbor, move away from that neighbor
+          neighbor_idx <- nearby_districts[1]
+          dx <- positions$lng[i] - positions$lng[neighbor_idx]
+          dy <- positions$lat[i] - positions$lat[neighbor_idx]
+          
+          # Normalize and apply small offset
+          dist <- sqrt(dx^2 + dy^2)
+          if (dist > 0) {
+            positions$offset_x[i] <- 0.006 * (dx / dist)
+            positions$offset_y[i] <- 0.006 * (dy / dist)
+          }
+        }
+      }
+    }
+    
+    return(positions)
   }
   
-  # PRE-CALCULATE ALL POLYGON COLORS - key fix for the error
-  geo_data$polygon_color <- "#CCCCCC"  # Default gray
+  # Calculate optimal positions
+  label_positions <- calculate_label_positions(geo_data)
   
-  # Debug info
-  print("Geo data district numbers:")
-  print(geo_data$No_Distrit)
+  # PRE-CALCULATE all values needed for the map
+  geo_data$fill_color <- "#CCCCCC"  # Default gray
+  geo_data$hover_label <- ""
+  geo_data$label_text <- ""
+  geo_data$label_bg <- "#FFFFFF"
+  geo_data$label_color <- "#000000"
+  geo_data$is_extreme <- FALSE
+  geo_data$extreme_type <- ""  # Will be "highest" or "lowest"
+  geo_data$offset_x <- label_positions$offset_x[match(geo_data$No_Distrit, label_positions$district)]
+  geo_data$offset_y <- label_positions$offset_y[match(geo_data$No_Distrit, label_positions$district)]
   
-  # Create a named vector of colors for easier lookup
-  district_color_map <- setNames(
-    # Make sure we have enough colors for all districts (2-10)
-    if(length(district_colors) >= 9) {
-      district_colors[1:9]
-    } else {
-      # If not enough colors, repeat the last ones
-      c(district_colors, rep(district_colors[length(district_colors)], 9 - length(district_colors)))
-    },
-    # Map colors to district numbers 2-10
-    2:10
-  )
-  
-  # Assign colors to districts
+  # Apply district colors
   for (i in 1:nrow(geo_data)) {
     dist_num <- geo_data$No_Distrit[i]
-    # Simply look up the color by district number
-    if (!is.na(dist_num) && as.character(dist_num) %in% names(district_color_map)) {
-      geo_data$polygon_color[i] <- district_color_map[as.character(dist_num)]
+    # Convert to 1-based index for district palette (if districts are 2-10)
+    district_index <- as.numeric(dist_num) - 1
+
+    if (!is.na(district_index) && district_index >= 1 && district_index <= length(district_palette)) {
+      geo_data$fill_color[i] <- district_palette[district_index]
     }
   }
-  
-  # Create HTML hover labels - pre-calculate to avoid errors
-  geo_data$hover_label <- ""
+
+  # Pre-calculate hover and popup labels
   for (i in 1:nrow(geo_data)) {
     dist_num <- geo_data$No_Distrit[i]
-    # Find matching district in stats
-    match_idx <- which(district_stats$district == dist_num)
+    match_idx <- which(district_stats$district_num == dist_num)
     
-    if (length(match_idx) > 0 && match_idx <= nrow(district_stats)) {
+    if (length(match_idx) > 0) {
+      percent <- district_stats$selected_percent[match_idx]
+      
       geo_data$hover_label[i] <- sprintf(
         "Distrito: %s<br>%s: %s%%<br>Respuestas: %d/%d",
         dist_num,
         display_label,
-        district_stats$selected_percent[match_idx],
+        percent,
         district_stats$selected_count[match_idx],
         district_stats$total_responses[match_idx]
       )
+      
+      # Only add label if percent is not NA
+      if (!is.na(percent)) {
+        geo_data$label_text[i] <- sprintf("Distrito %s<br>%s%%", dist_num, percent)
+        
+        # Set background/text color based on if this is highest/lowest district
+        if (highlight_extremes) {
+          if (!is.null(highest_district) && 
+              !is.na(highest_district$district_num) && 
+              dist_num == highest_district$district_num) {
+            geo_data$is_extreme[i] <- TRUE
+            geo_data$extreme_type[i] <- "highest"
+            geo_data$label_bg[i] <- highest_color
+            geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+          } else if (!is.null(lowest_district) && 
+                    !is.na(lowest_district$district_num) && 
+                    dist_num == lowest_district$district_num) {
+            geo_data$is_extreme[i] <- TRUE
+            geo_data$extreme_type[i] <- "lowest"
+            geo_data$label_bg[i] <- lowest_color
+            geo_data$label_color[i] <- "#FFFFFF"  # White text for readability
+          }
+        }
+      }
     } else {
       geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
     }
   }
-  
-  # Create map with pre-calculated values
+
+  # Create base map
   map <- leaflet(geo_data) %>%
-    addTiles() %>% 
+    addProviderTiles(providers$CartoDB.Positron) %>% 
     addPolygons(
+      fillColor = ~fill_color,
       fillOpacity = 0.7,
       weight = 1,
-      color = ~polygon_color,  # Use pre-calculated colors
+      color = "#666666",
       dashArray = "3",
       highlight = highlightOptions(
         weight = 2,
-        color = "#666666",
+        color = "#000000",
         dashArray = "",
-        fillOpacity = 0.7,
+        fillOpacity = 0.9,
         bringToFront = TRUE
       ),
-      label = ~lapply(hover_label, HTML)  # Use pre-calculated labels
+      label = ~lapply(hover_label, HTML)
     )
-  
-  # Add labels for each district
-  for(i in 1:nrow(geo_data)) {
-    district_num <- geo_data$No_Distrit[i]
-    # Find matching district in stats
-    match_idx <- which(district_stats$district == district_num)
-    
-    # Skip if no match found
-    if(length(match_idx) == 0) next
-    
-    percent <- district_stats$selected_percent[match_idx]
-    
-    # Skip if no percentage data
-    if(is.na(percent)) next
-    
-    # Determine background color based on whether this is highest or lowest district
-    bg_color <- "#FFFFFF"  # Default white background
-    text_color <- "#000000"  # Default black text
-    
-    if(highlight_extremes) {
-      if(!is.null(highest_district) && !is.na(highest_district$district) && 
-         district_num == highest_district$district) {
-        bg_color <- "#87CEEB"  # Light blue background for highest
-        text_color <- "#000000"  # Black text
-      } else if(!is.null(lowest_district) && !is.na(lowest_district$district) && 
-                district_num == lowest_district$district) {
-        bg_color <- "#012A4A"  # Dark blue background for lowest
-        text_color <- "#FFFFFF"  # White text
+
+  # Add district labels with enhanced styling and adjusted positions
+  for (i in 1:nrow(geo_data)) {
+    if (geo_data$label_text[i] != "") {
+      # Get percentage value
+      dist_num <- geo_data$No_Distrit[i]
+      match_idx <- which(district_stats$district_num == dist_num)
+      
+      if (length(match_idx) > 0) {
+        percent <- district_stats$selected_percent[match_idx]
+        
+        # Create label HTML with consistent styling but enhanced for extremes
+        if (geo_data$is_extreme[i]) {
+          extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
+                                "Distrito más alto", 
+                                "Distrito más bajo")
+          
+          label_html <- sprintf(
+            '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %s%%</div>',
+            geo_data$label_bg[i], geo_data$label_color[i], extreme_text, dist_num, percent
+          )
+        } else {
+          # Standard label - consistent format for all
+          label_html <- sprintf(
+            '<div style="background-color: white; color: black; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s:<br>%s%%</div>',
+            dist_num, percent
+          )
+        }
+        
+        # Add label with calculated offset position
+        map <- map %>% addLabelOnlyMarkers(
+          lng = geo_data$lng[i] + geo_data$offset_x[i],
+          lat = geo_data$lat[i] + geo_data$offset_y[i],
+          label = lapply(list(label_html), HTML),
+          labelOptions = labelOptions(
+            noHide = TRUE,
+            direction = "center",
+            textOnly = TRUE
+          )
+        )
       }
     }
-    
-    # Create label HTML
-    label_html <- sprintf(
-      '<div style="background-color: %s; color: %s; padding: 5px; border-radius: 3px; font-weight: bold;">Distrito %s<br>%s%%</div>',
-      bg_color, text_color, district_num, percent
-    )
-    
-    # Add label
-    map <- map %>% addLabelOnlyMarkers(
-      lng = geo_data$lng[i],
-      lat = geo_data$lat[i],
-      label = lapply(list(label_html), HTML),
-      labelOptions = labelOptions(
-        noHide = TRUE,
-        direction = "center",
-        textOnly = TRUE
-      )
-    )
   }
-  
+
   # Add overall average label
   overall_percent <- round(mean(district_stats$selected_percent, na.rm = TRUE), 1)
   
@@ -697,7 +812,6 @@ create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE
   
   return(map)
 }
-
 create_binary_district_bars <- function(data, orientation = "v", custom_theme = NULL) {
   # Check if we have data
   if (nrow(data) == 0) {

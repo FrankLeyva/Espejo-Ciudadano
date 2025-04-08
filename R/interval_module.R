@@ -460,6 +460,85 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
   centroids <- sf::st_coordinates(geo_data$centroid)
   geo_data$lng <- centroids[,1]
   geo_data$lat <- centroids[,2]
+  
+  # Create a sophisticated position adjustment system based on district relationships
+  calculate_label_positions <- function(geo_data) {
+    n <- nrow(geo_data)
+    positions <- data.frame(
+      district = geo_data$No_Distrit,
+      lng = geo_data$lng,
+      lat = geo_data$lat,
+      offset_x = rep(0, n),
+      offset_y = rep(0, n)
+    )
+    
+    # Create a matrix of distances between districts
+    distances <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:(n-1)) {
+      for (j in (i+1):n) {
+        dist <- sqrt((positions$lng[i] - positions$lng[j])^2 + 
+                     (positions$lat[i] - positions$lat[j])^2)
+        distances[i,j] <- distances[j,i] <- dist
+      }
+    }
+    
+    # Define threshold for nearby districts
+    distance_threshold <- mean(distances[distances > 0]) * 0.6
+    
+    # Identify clusters of nearby districts
+    nearby <- distances < distance_threshold & distances > 0
+    
+    # Apply specific offsets for problematic pairs
+    for (i in 1:n) {
+      nearby_districts <- which(nearby[i,])
+      
+      if (length(nearby_districts) > 0) {
+        # Number the district has nearby
+        num_neighbors <- length(nearby_districts)
+        
+        # Specific handling for district 9 (move it south)
+        if (positions$district[i] == 9) {
+          positions$offset_y[i] <- -0.020  # Move south
+          positions$offset_x[i] <- -0.005  # Slight west adjustment
+        }
+        # Keep district 7 in place but move slightly west
+        else if (positions$district[i] == 7) {
+          positions$offset_x[i] <- -0.008  # Move west
+        }
+        # Move district 8 slightly east
+        else if (positions$district[i] == 8) {
+          positions$offset_x[i] <- 0.010   # Move east
+        }
+        # Default adjustments based on number of neighbors
+        else if (num_neighbors >= 2) {
+          # Districts with many neighbors need more spread
+          angle <- (i %% 8) * (2 * pi / 8)  # Distribute in 8 directions
+          positions$offset_x[i] <- 0.010 * cos(angle)
+          positions$offset_y[i] <- 0.010 * sin(angle)
+        }
+        else if (num_neighbors == 1) {
+          # For districts with one neighbor, move away from that neighbor
+          neighbor_idx <- nearby_districts[1]
+          dx <- positions$lng[i] - positions$lng[neighbor_idx]
+          dy <- positions$lat[i] - positions$lat[neighbor_idx]
+          
+          # Normalize and apply small offset
+          dist <- sqrt(dx^2 + dy^2)
+          if (dist > 0) {
+            positions$offset_x[i] <- 0.006 * (dx / dist)
+            positions$offset_y[i] <- 0.006 * (dy / dist)
+          }
+        }
+      }
+    }
+    
+    return(positions)
+  }
+  
+  # Calculate optimal positions
+  label_positions <- calculate_label_positions(geo_data)
+  geo_data$offset_x <- label_positions$offset_x[match(geo_data$No_Distrit, label_positions$district)]
+  geo_data$offset_y <- label_positions$offset_y[match(geo_data$No_Distrit, label_positions$district)]
 
   # Handle case when no responses are selected - show mean values
   if (is.null(selected_responses) || length(selected_responses) == 0) {
@@ -574,8 +653,11 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
       
       if (length(match_idx) > 0) {
         geo_data$hover_label[i] <- sprintf(
-          "Respuesta más común: %s",
-          district_stats$mode_label[match_idx]
+          "Distrito: %s<br>Promedio: %.2f<br>Respuesta más común: %s<br>N: %d",
+          dist_num,
+          district_stats$mean_value[match_idx],
+          district_stats$mode_label[match_idx],
+          district_stats$n[match_idx]
         )
         
         # Check if this is highest or lowest district
@@ -639,33 +721,29 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
         
         # Only add label if mean is not NA
         if (!is.na(mean_value)) {
-          # Get mode label for additional info
-          mode_label <- district_stats$mode_label[match_idx]
-          
-          # Create popup HTML
+          # Create label HTML with consistent styling but enhanced for extremes
           if (geo_data$is_extreme[i]) {
-            # Enhanced label for extreme values
             extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
-                                   "Distrito más alto", 
-                                   "Distrito más bajo")
+                                 "Distrito más alto", 
+                                 "Distrito más bajo")
             
-            popup_html <- sprintf(
-              '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center; min-width: 120px;">%s<br>Distrito %s: %.1f</div>',
+            label_html <- sprintf(
+              '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %.1f</div>',
               geo_data$label_bg[i], geo_data$label_color[i], extreme_text, dist_num, mean_value
             )
           } else {
-            # Standard label
-            popup_html <- sprintf(
-              '<div style="text-align: center; font-weight: bold; background: white; padding: 3px 8px; border-radius: 3px;">Distrito %s:<br> %.1f</div>',
+            # Standard label - consistent format for all
+            label_html <- sprintf(
+              '<div style="background-color: white; color: black; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s:<br>%.1f</div>',
               dist_num, mean_value
             )
           }
           
-          # Add popup marker
+          # Add label with calculated offset position
           map <- map %>% addLabelOnlyMarkers(
-            lng = geo_data$lng[i],
-            lat = geo_data$lat[i],
-            label = lapply(list(popup_html), HTML),
+            lng = geo_data$lng[i] + geo_data$offset_x[i],
+            lat = geo_data$lat[i] + geo_data$offset_y[i],
+            label = lapply(list(label_html), HTML),
             labelOptions = labelOptions(
               noHide = TRUE,
               direction = "center",
@@ -687,8 +765,6 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
       position = "topright"
     )
     
-
-
     return(map)
   } else {
     # Selected responses mode - calculate percentages
@@ -811,7 +887,9 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
         percent <- district_stats$selected_percent[match_idx]
         
         geo_data$hover_label[i] <- sprintf(
-          "Respuestas: %d/%d",
+          "Distrito: %s<br>Porcentaje: %s%%<br>Respuestas: %d/%d",
+          dist_num,
+          percent,
           district_stats$selected_count[match_idx],
           district_stats$total_responses[match_idx]
         )
@@ -845,7 +923,7 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
     }
 
     # Create base map
-    map <- leaflet(geo_data) %>% 
+    map <- leaflet(geo_data) %>%
       addProviderTiles(providers$CartoDB.Positron) %>% 
       addPolygons(
         fillColor = ~fill_color,
@@ -874,7 +952,7 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
       )
     }
 
-    # Add district labels with enhanced styling
+    # Add district labels with enhanced styling and adjusted for position
     for (i in 1:nrow(geo_data)) {
       if (geo_data$label_text[i] != "") {
         # Get percentage value
@@ -884,28 +962,28 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
         if (length(match_idx) > 0) {
           percent <- district_stats$selected_percent[match_idx]
           
-          # Create label HTML with enhanced styling for extremes
+          # Create label HTML with consistent styling but enhanced for extremes
           if (geo_data$is_extreme[i]) {
             extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
-                                  "Distrito más alto", 
-                                  "Distrito más bajo")
+                                 "Distrito más alto", 
+                                 "Distrito más bajo")
             
             label_html <- sprintf(
               '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %s%%</div>',
               geo_data$label_bg[i], geo_data$label_color[i], extreme_text, dist_num, percent
             )
           } else {
-            # Standard label
+            # Standard label - consistent format for all
             label_html <- sprintf(
-              '<div style="background-color: white; color: black; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s:<br> %s%%</div>',
+              '<div style="background-color: white; color: black; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s:<br>%s%%</div>',
               dist_num, percent
             )
           }
           
-          # Add label
+          # Add label with calculated offset position
           map <- map %>% addLabelOnlyMarkers(
-            lng = geo_data$lng[i],
-            lat = geo_data$lat[i],
+            lng = geo_data$lng[i] + geo_data$offset_x[i],
+            lat = geo_data$lat[i] + geo_data$offset_y[i],
             label = lapply(list(label_html), HTML),
             labelOptions = labelOptions(
               noHide = TRUE,
@@ -928,8 +1006,6 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
       position = "topright"
     )
     
-
-
     return(map)
   }
 }

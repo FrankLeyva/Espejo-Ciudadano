@@ -179,11 +179,7 @@ educationServer <- function(input, output, session, current_theme = NULL) {
     all_data <- bind_rows(basic_by_district, highschool_by_district, college_by_district)
     
     # Colores para cada nivel educativo
-    level_colors <- c(
-      "Educación Básica" = "#2A9D8F",
-      "Educación Media Superior" = "#E9C46A", 
-      "Educación Superior" = "#E76F51"
-    )
+    level_colors <- active_theme()$palettes$categorical
     
     # Crear gráfico
     plot_ly(

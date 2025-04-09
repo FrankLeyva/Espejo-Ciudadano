@@ -94,15 +94,13 @@ participationUI <- function() {
     # Voting Map Section
     card(
       card_header("Importancia del voto por distrito"),
-      p("Porcentaje de personas que consideran que votar es importante o poco importante"),
       leafletOutput("voting_map", height = "500px")
     ),
     
     # Political Interest Pie Chart
     card(
       card_header("Interés en participar en política municipal"),
-      p("Distribución del interés en participar en la política municipal, interviniendo en decisiones o realizando acciones de interés público"),
-      plotlyOutput("interest_pie", height = "400px")
+            plotlyOutput("interest_pie", height = "400px")
     )
   )
 }

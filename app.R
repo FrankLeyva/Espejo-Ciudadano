@@ -95,7 +95,8 @@ source("R/participation/community_server.R")
 # Extra section
 source("R/extra/methodology_ui.R")
 source("R/extra/methodology_server.R")
-
+source("R/extra/about_ui.R")
+source("R/extra/about_server.R")
 
 
 # Header component function
@@ -257,7 +258,6 @@ ui <- page_navbar(
     title = "Inicio",
     icon = icon("home"),
     value = "overview",
-    create_dashboard_header("Resultados de las encuestas de Percepción", "Selecciona una categoría: "),
     # Dashboard overview content
     div(
  
@@ -551,16 +551,16 @@ ui <- page_navbar(
   nav_menu(
     title = "Extras",
     icon = icon("ellipsis-h"),
-    nav_panel(
-      title = "Reportes",
-      icon = icon("file-alt"),
-      value = "reports",
-      div(
-        class = "container mt-4",
-        h2("Reportes Personalizados"),
-        p("Esta sección le permitirá generar reportes personalizados según sus necesidades específicas.")
-      )
-    ),
+    # nav_panel(
+    #  title = "Reportes",
+    #  icon = icon("file-alt"),
+     # value = "reports",
+   #   div(
+   #     class = "container mt-4",
+   #     h2("Reportes Personalizados"),
+    #    p("Esta sección le permitirá generar reportes personalizados según sus necesidades específicas.")
+   #   )
+ #   ),
     nav_panel(
       title = "Metodología",
       icon = icon("download"),
@@ -571,11 +571,7 @@ ui <- page_navbar(
       title = "Acerca de",
       icon = icon("info-circle"),
       value = "about",
-      div(
-        class = "container mt-4",
-        h2("Acerca del Dashboard"),
-        p("Información sobre el propósito de este dashboard y el equipo detrás de él.")
-      )
+      aboutUI("about_section")
     )
   ),
 )
@@ -687,6 +683,8 @@ server <- function(input, output, session) {
       communityServer(input, output, session, current_theme)
     } else if (current_tab == "methodology") {
       methodologyServer(input, output, session, current_theme)
+    } else if (current_tab == "about") {
+      aboutServer("about_section")
     }
   })
 }

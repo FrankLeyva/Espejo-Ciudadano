@@ -386,19 +386,7 @@ create_category_pie <- function(data,
       # Use colors from palette
       colors <- palette_colors[1:nrow(freq_data)]
     }
-  } else if (!is.null(palette) && palette == "categorical") {
-    # Use a special categorical palette that ensures distinct colors
-    categorical_colors <- c(
-      "#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F",
-      "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#BAB0AC"
-    )
-    # Generate more colors if needed
-    if (length(categorical_colors) < nrow(freq_data)) {
-      colors <- colorRampPalette(categorical_colors)(nrow(freq_data))
-    } else {
-      colors <- categorical_colors[1:nrow(freq_data)]
-    }
-  } else {
+  }  else {
     # Default gradient from primary to highlight
     colors <- colorRampPalette(c(active_theme$colors$primary, active_theme$colors$highlight))(nrow(freq_data))
   }

@@ -65,7 +65,7 @@ representationUI <- function() {
           title = "Regidores: Representación de Intereses Ciudadanos",
           value = textOutput("regidores_rating"),
           showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#6969B3", fg = "white")
+          theme = value_box_theme(bg = "#5E35B1", fg = "white")
         ),
         
         # Value box 2: Síndico representation rating
@@ -81,7 +81,7 @@ representationUI <- function() {
           title = "Diputado(a) Local: Representación de Intereses Ciudadanos",
           value = textOutput("diputado_local_rating"),
           showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#6969B3", fg = "white")
+          theme = value_box_theme(bg = "#5E35B1", fg = "white")
         ),
         
         # Value box 4: Federal deputy representation rating

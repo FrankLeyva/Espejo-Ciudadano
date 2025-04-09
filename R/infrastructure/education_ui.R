@@ -106,7 +106,6 @@ educationUI <- function() {
       card_header(
         h4("Satisfacción con Niveles Educativos", class = "section-title")
       ),
-      p("Evaluación de la satisfacción con diferentes niveles educativos por distrito."),
       
       navset_tab(
         id = "education_tabs",
@@ -117,13 +116,6 @@ educationUI <- function() {
           icon = bsicons::bs_icon("book"),
           
           card(
-            card_header(
-              div(
-                class = "d-flex justify-content-between align-items-center",
-                span("Satisfacción con Educación Básica")
-              ),
-              class = "bg-light"
-            ),
             leafletOutput("basic_education_map", height = "500px")
           )
         ),
@@ -134,13 +126,7 @@ educationUI <- function() {
           icon = bsicons::bs_icon("journal-text"),
           
           card(
-            card_header(
-              div(
-                class = "d-flex justify-content-between align-items-center",
-                span("Satisfacción con Educación Media Superior")
-              ),
-              class = "bg-light"
-            ),
+            
             leafletOutput("highschool_education_map", height = "500px")
           )
         ),
@@ -151,13 +137,7 @@ educationUI <- function() {
           icon = bsicons::bs_icon("mortarboard"),
           
           card(
-            card_header(
-              div(
-                class = "d-flex justify-content-between align-items-center",
-                span("Satisfacción con Educación Superior")
-              ),
-              class = "bg-light"
-            ),
+           
             leafletOutput("college_education_map", height = "500px")
           )
         ),
@@ -168,10 +148,7 @@ educationUI <- function() {
           icon = bsicons::bs_icon("bar-chart"),
           
           card(
-            card_header(
-              "Comparación entre Niveles Educativos",
-              class = "bg-light"
-            ),
+            
             plotlyOutput("education_comparison_plot", height = "450px")          )
         )
       )

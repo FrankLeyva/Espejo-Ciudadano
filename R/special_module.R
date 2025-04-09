@@ -593,7 +593,7 @@ create_healthcare_overview <- function(survey_data, custom_theme = NULL) {
   
   # Get colors from theme
   bar_color <- if (!is.null(custom_theme)) {
-    custom_theme$colors$primary
+    custom_theme$palettes$sequential
   } else {
     theme_config$colors$primary
   }
@@ -660,7 +660,7 @@ primary_color <- if (!is.null(custom_theme)) {
 }
 
 highlight_color <- if (!is.null(custom_theme)) {
-  custom_theme$colors$secondary
+  custom_theme$colors$accent
 } else {
   "#ff7f0e"  # Default orange
 }
@@ -857,15 +857,7 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
   
  # Extract the high and low colors from the diverging palette
  highest_color <- diverging_palette[length(diverging_palette)]  # Get last color (highest)
- lowest_color <- diverging_palette[1]    # Red for lowest
-  
-  lowest_color <- if (!is.null(custom_theme) && !is.null(custom_theme$colors$warning)) {
-    custom_theme$colors$warning
-  } else if (length(diverging_palette) > 1) {
-    diverging_palette[1]  # Get first color (lowest)
-  } else {
-    "#F44336"  # Default red
-  }
+ lowest_color <- diverging_palette[1]   
   
   # PRE-CALCULATE all values needed for the map
   geo_data$fill_color <- "#CCCCCC"  # Default gray
@@ -991,12 +983,11 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
     ),
     position = "topright"
   )
-  
 
   
   return(map)
 }
-# Functions for government dashboard visualizations
+
 
 # Function for Card 1: Officials Knowledge Pie Charts
 create_officials_knowledge_pie <- function(data, question_id, official_type, custom_theme = NULL) {
@@ -1110,9 +1101,9 @@ pie_data <- pie_data %>%
   
   # Get colors from custom theme if provided
   colorscale <- if (!is.null(custom_theme)) {
-    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(nrow(pie_data))
+    rev(custom_theme$palettes$sequential)
   } else {
-    colorRampPalette(c("#1f77b4", "#3498DB"))(nrow(pie_data))
+    rev(colorRampPalette(c("#1f77b4", "#3498DB"))(nrow(pie_data)))
   }
   
   # Create pie chart
@@ -1171,7 +1162,7 @@ create_government_expectations_plot <- function(data, custom_theme = NULL) {
   
   # Get colors from custom theme if provided
   bar_colors <- if (!is.null(custom_theme)) {
-    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(3)
+    custom_theme$palettes$categorical
   } else {
     c("#1f77b4", "#ff7f0e", "#2ca02c")
   }
@@ -1265,7 +1256,7 @@ create_important_problems_plot <- function(data, custom_theme = NULL) {
 }
 
 highlight_color <- if (!is.null(custom_theme)) {
-  custom_theme$colors$secondary
+  custom_theme$colors$accent
 } else {
   "#ff7f0e"  # Default orange
 }
@@ -1346,7 +1337,7 @@ create_bicycle_distribution <- function(survey_data, custom_theme = NULL) {
   
   # Get colors from custom theme if provided
   pie_colors <- if (!is.null(custom_theme)) {
-    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$secondary))(length(categories))
+    custom_theme$palettes$sequential
   } else {
     colorRampPalette(c("#1f77b4", "#3498DB"))(length(categories))
   }
@@ -1358,7 +1349,7 @@ create_bicycle_distribution <- function(survey_data, custom_theme = NULL) {
     type = "pie",
     textinfo = "label+percent",
     hoverinfo = "text",
-    text = ~paste0(plot_data$Category, ": ", plot_data$Count, " hogares (", plot_data$Percentage, "%)"),
+    text = ~paste0(plot_data$Count, " hogares"),
     marker = list(
       colors = pie_colors
     )
@@ -1414,9 +1405,8 @@ create_vehicle_distribution <- function(survey_data, custom_theme = NULL) {
   
   # Get colors from custom theme if provided
   pie_colors <- if (!is.null(custom_theme)) {
-    colorRampPalette(c(custom_theme$colors$secondary, custom_theme$colors$highlight))(length(categories))
-  } else {
-    colorRampPalette(c("#E74C3C", "#F39C12"))(length(categories))
+    custom_theme$palettes$sequential
+
   }
   
   # Create pie chart
@@ -1449,6 +1439,15 @@ create_vehicle_distribution <- function(survey_data, custom_theme = NULL) {
         }
       ),
       showlegend = FALSE
+    )%>%
+      config(
+        modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+                                   "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                                   "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
+        modeBarButtonsToAdd = c("resetScale2d", "toImage"),
+        displaylogo=FALSE,
+        locale = "es",
+        responsive = TRUE
     )
 }
 # Function to create transportation issues bar plot
@@ -1502,7 +1501,7 @@ primary_color <- if (!is.null(custom_theme)) {
 
 # Get highlight color from theme
 highlight_color <- if (!is.null(custom_theme)) {
-  custom_theme$colors$secondary
+  custom_theme$colors$accent
 } else {
   "#ff7f0e"  # Default orange highlight
 }
@@ -1548,6 +1547,15 @@ highlight_color <- if (!is.null(custom_theme)) {
       yaxis = list(
         categoryorder = "total ascending"
       )
+    ) %>%
+      config(
+        modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+                                   "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                                   "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
+        modeBarButtonsToAdd = c("resetScale2d", "toImage"),
+        displaylogo=FALSE,
+        locale = "es",
+        responsive = TRUE
     )
 }
 
@@ -1670,7 +1678,7 @@ create_env_problems_plot <- function(survey_data, custom_theme = NULL) {
   }
   
   secondary_color <- if (!is.null(custom_theme)) {
-    custom_theme$colors$secondary
+    custom_theme$colors$accent
   } else {
     "#fd7e14"  # Default orange
   }
@@ -1885,7 +1893,7 @@ create_transport_modes_plot <- function(survey_data, mode_type = "work", custom_
 
 # Get highlight color from theme
 highlight_color <- if (!is.null(custom_theme)) {
-  custom_theme$colors$secondary
+  custom_theme$colors$accent
 } else {
   "#ff7f0e"  # Default orange highlight
 }

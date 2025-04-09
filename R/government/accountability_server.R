@@ -65,7 +65,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     
     # Get colors from theme
     bar_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$primary)) {
-      active_theme()$colors$primary
+      active_theme()$palettes$sequential
     } else {
       "#1f77b4"  # Default blue
     }
@@ -114,7 +114,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     
     # Get colors from theme
     bar_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$secondary)) {
-      active_theme()$colors$secondary
+      active_theme()$palettes$sequential
     } else {
       "#9467bd"  # Default purple
     }
@@ -163,7 +163,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     
     # Get colors from theme
     bar_color <- if (!is.null(active_theme()) && !is.null(active_theme()$colors$secondary)) {
-      active_theme()$colors$secondary
+      active_theme()$palettes$sequential
     } else {
       "#d62728"  # Default red
     }
@@ -220,13 +220,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     # Calculate percentages
     pie_data$Percentage <- round(100 * pie_data$Count / sum(pie_data$Count), 1)
     
-    # Get colors for pie chart
-    if (is.null(color_palette)) {
-      color_palette <- c(
-        "#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F",
-        "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#BAB0AC"
-      )
-    }
+      color_palette <- active_theme()$palettes$categorical
     
     # Create pie chart
     plot_ly(

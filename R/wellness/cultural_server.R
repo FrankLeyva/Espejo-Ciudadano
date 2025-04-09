@@ -131,13 +131,13 @@ output$cultural_activities_plot <- renderPlotly({
   
   # Get colors from the active theme
   primary_color <- active_theme()$colors$primary
-  highlight_color <- active_theme()$colors$secondary
+  highlight_color <- active_theme()$colors$accent
   
   # If highlight color is not defined, fall back to a secondary color
   if (is.null(highlight_color)) {
     # Try to get another distinctive color from the theme
-    if (!is.null(active_theme()$colors$secondary)) {
-      highlight_color <- active_theme()$colors$secondary
+    if (!is.null(active_theme()$colors$accent)) {
+      highlight_color <- active_theme()$colors$accent
     } else if (!is.null(active_theme()$colors$success)) {
       highlight_color <- active_theme()$colors$success
     } else {

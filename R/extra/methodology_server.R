@@ -1,5 +1,5 @@
 # Server function for Methodology and Data Download Dashboard
-methodologyServer <- function(input, output, session,current_theme = NULL) {
+methodologyServer <- function(input, output, session, current_theme = NULL) {
   # Load utility functions for metadata
   source("R/utils.R")
   
@@ -23,6 +23,73 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
     metadata_values$per_2024_meta <- generate_survey_metadata("PER_2024")
     metadata_values$par_2024_meta <- generate_survey_metadata("PAR_2024")
   })
+  
+  # Function to create a formatted data dictionary with the required columns
+  create_data_dictionary <- function(survey_id) {
+    tryCatch({
+      # Load survey data
+      survey_data <- load_survey_data(survey_id)
+      
+      # Get metadata from the survey
+      survey_meta <- survey_data$metadata
+      
+      # Select and rename the required columns
+      if (is.null(survey_meta) || nrow(survey_meta) == 0) {
+        # If metadata is not available, create a dummy dictionary
+        dictionary <- data.frame(
+          variable = character(0),
+          label = character(0),
+          value_labels = character(0),
+          scale_type = character(0),
+          stringsAsFactors = FALSE
+        )
+      } else {
+        # Select the needed columns and rename them as required
+        dictionary <- survey_meta %>%
+          dplyr::select(
+            variable = variable,
+            label = label,
+            value_labels = value_labels,
+            scale_type = scale_type
+          ) %>%
+          # Convert NA to empty strings for better display
+          dplyr::mutate(
+            label = ifelse(is.na(label), "", label),
+            value_labels = ifelse(is.na(value_labels), "", value_labels),
+            scale_type = ifelse(is.na(scale_type), "", scale_type)
+          )
+      }
+      
+      return(dictionary)
+      
+    }, error = function(e) {
+      # Return empty data frame with correct structure on error
+      warning(paste("Error creating data dictionary for", survey_id, ":", e$message))
+      data.frame(
+        variable = character(0),
+        label = character(0),
+        value_labels = character(0),
+        scale_type = character(0),
+        stringsAsFactors = FALSE
+      )
+    })
+  }
+  
+  # Function to prepare data for download
+  prepare_download_data <- function(survey_data) {
+    # Extract responses from the survey data
+    responses <- survey_data$responses
+    
+    # Check if responses exist and have the right format
+    if (is.null(responses) || nrow(responses) == 0) {
+      return(data.frame(
+        ERROR = "No hay respuestas disponibles para esta encuesta."
+      ))
+    }
+    
+    # Return the responses data frame directly
+    return(responses)
+  }
   
   # Handler for downloading 2024 surveys
   output$download_per_2024 <- downloadHandler(
@@ -226,7 +293,7 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
     # Show modal with data dictionary
     showModal(modalDialog(
       title = "Diccionario de Datos - Encuesta de Percepción Ciudadana 2024",
-      size = "l",
+      size = "xl",
       
       # Render data dictionary as DT table
       DT::renderDataTable({
@@ -234,20 +301,41 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
         DT::datatable(
           metadata_values$current_dictionary,
           options = list(
-            pageLength = 10,
+            pageLength = 15,
             scrollX = TRUE,
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv')
+            autoWidth = TRUE,
+            columnDefs = list(
+              list(width = "120px", targets = 0),  # variable
+              list(width = "200px", targets = 1),  # label
+              list(width = "300px", targets = 2),  # value_labels
+              list(width = "100px", targets = 3)   # scale_type
+            ),
+            dom = 'Blfrtip',
+            buttons = c('copy', 'csv', 'excel'),
+            lengthMenu = list(c(15, 30, 50, 100, -1), c('15', '30', '50', '100', 'Todos'))
           ),
-          rownames = FALSE
+          rownames = FALSE,
+          colnames = c("Variable", "Descripción", "Etiquetas de Valores", "Tipo de Escala"),
+          filter = 'top',
+          class = 'cell-border stripe'
+        ) %>%
+        DT::formatStyle(
+          'scale_type',
+          backgroundColor = DT::styleEqual(
+            c("nominal", "ordinal", "interval", "ratio", "binary"),
+            c("#e3f2fd", "#e8f5e9", "#fff8e1", "#fce4ec", "#ede7f6")
+          )
         )
       }),
       
       # Modal footer with download and close buttons
       footer = tagList(
-        downloadButton("download_dictionary", "Descargar Diccionario (CSV)"),
+        downloadButton("download_dictionary", "Descargar Diccionario (CSV)", class = "btn-primary"),
         modalButton("Cerrar")
-      )
+      ),
+      
+      easyClose = TRUE,
+      fade = TRUE
     ))
   })
   
@@ -259,7 +347,7 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
     # Show modal with data dictionary
     showModal(modalDialog(
       title = "Diccionario de Datos - Encuesta de Participación Ciudadana 2024",
-      size = "l",
+      size = "xl",
       
       # Render data dictionary as DT table
       DT::renderDataTable({
@@ -267,20 +355,41 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
         DT::datatable(
           metadata_values$current_dictionary,
           options = list(
-            pageLength = 10,
+            pageLength = 15,
             scrollX = TRUE,
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv')
+            autoWidth = TRUE,
+            columnDefs = list(
+              list(width = "120px", targets = 0),  # variable
+              list(width = "200px", targets = 1),  # label
+              list(width = "300px", targets = 2),  # value_labels
+              list(width = "100px", targets = 3)   # scale_type
+            ),
+            dom = 'Blfrtip',
+            buttons = c('copy', 'csv', 'excel'),
+            lengthMenu = list(c(15, 30, 50, 100, -1), c('15', '30', '50', '100', 'Todos'))
           ),
-          rownames = FALSE
+          rownames = FALSE,
+          colnames = c("Variable", "Descripción", "Etiquetas de Valores", "Tipo de Escala"),
+          filter = 'top',
+          class = 'cell-border stripe'
+        ) %>%
+        DT::formatStyle(
+          'scale_type',
+          backgroundColor = DT::styleEqual(
+            c("nominal", "ordinal", "interval", "ratio", "binary"),
+            c("#e3f2fd", "#e8f5e9", "#fff8e1", "#fce4ec", "#ede7f6")
+          )
         )
       }),
       
       # Modal footer with download and close buttons
       footer = tagList(
-        downloadButton("download_dictionary", "Descargar Diccionario (CSV)"),
+        downloadButton("download_dictionary", "Descargar Diccionario (CSV)", class = "btn-primary"),
         modalButton("Cerrar")
-      )
+      ),
+      
+      easyClose = TRUE,
+      fade = TRUE
     ))
   })
   
@@ -293,7 +402,7 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
     # Show modal with data dictionary
     showModal(modalDialog(
       title = "Diccionario de Datos - Encuesta de Percepción Ciudadana 2023",
-      size = "l",
+      size = "xl",
       
       # Render data dictionary as DT table
       DT::renderDataTable({
@@ -301,20 +410,41 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
         DT::datatable(
           metadata_values$current_dictionary,
           options = list(
-            pageLength = 10,
+            pageLength = 15,
             scrollX = TRUE,
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv')
+            autoWidth = TRUE,
+            columnDefs = list(
+              list(width = "120px", targets = 0),  # variable
+              list(width = "200px", targets = 1),  # label
+              list(width = "300px", targets = 2),  # value_labels
+              list(width = "100px", targets = 3)   # scale_type
+            ),
+            dom = 'Blfrtip',
+            buttons = c('copy', 'csv', 'excel'),
+            lengthMenu = list(c(15, 30, 50, 100, -1), c('15', '30', '50', '100', 'Todos'))
           ),
-          rownames = FALSE
+          rownames = FALSE,
+          colnames = c("Variable", "Descripción", "Etiquetas de Valores", "Tipo de Escala"),
+          filter = 'top',
+          class = 'cell-border stripe'
+        ) %>%
+        DT::formatStyle(
+          'scale_type',
+          backgroundColor = DT::styleEqual(
+            c("nominal", "ordinal", "interval", "ratio", "binary"),
+            c("#e3f2fd", "#e8f5e9", "#fff8e1", "#fce4ec", "#ede7f6")
+          )
         )
       }),
       
       # Modal footer with download and close buttons
       footer = tagList(
-        downloadButton("download_dictionary", "Descargar Diccionario (CSV)"),
+        downloadButton("download_dictionary", "Descargar Diccionario (CSV)", class = "btn-primary"),
         modalButton("Cerrar")
-      )
+      ),
+      
+      easyClose = TRUE,
+      fade = TRUE
     ))
   })
   
@@ -326,7 +456,7 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
     # Show modal with data dictionary
     showModal(modalDialog(
       title = "Diccionario de Datos - Encuesta de Participación Ciudadana 2023",
-      size = "l",
+      size = "xl",
       
       # Render data dictionary as DT table
       DT::renderDataTable({
@@ -334,20 +464,41 @@ methodologyServer <- function(input, output, session,current_theme = NULL) {
         DT::datatable(
           metadata_values$current_dictionary,
           options = list(
-            pageLength = 10,
+            pageLength = 15,
             scrollX = TRUE,
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv')
+            autoWidth = TRUE,
+            columnDefs = list(
+              list(width = "120px", targets = 0),  # variable
+              list(width = "200px", targets = 1),  # label
+              list(width = "300px", targets = 2),  # value_labels
+              list(width = "100px", targets = 3)   # scale_type
+            ),
+            dom = 'Blfrtip',
+            buttons = c('copy', 'csv', 'excel'),
+            lengthMenu = list(c(15, 30, 50, 100, -1), c('15', '30', '50', '100', 'Todos'))
           ),
-          rownames = FALSE
+          rownames = FALSE,
+          colnames = c("Variable", "Descripción", "Etiquetas de Valores", "Tipo de Escala"),
+          filter = 'top',
+          class = 'cell-border stripe'
+        ) %>%
+        DT::formatStyle(
+          'scale_type',
+          backgroundColor = DT::styleEqual(
+            c("nominal", "ordinal", "interval", "ratio", "binary"),
+            c("#e3f2fd", "#e8f5e9", "#fff8e1", "#fce4ec", "#ede7f6")
+          )
         )
       }),
       
       # Modal footer with download and close buttons
       footer = tagList(
-        downloadButton("download_dictionary", "Descargar Diccionario (CSV)"),
+        downloadButton("download_dictionary", "Descargar Diccionario (CSV)", class = "btn-primary"),
         modalButton("Cerrar")
-      )
+      ),
+      
+      easyClose = TRUE,
+      fade = TRUE
     ))
   })
   

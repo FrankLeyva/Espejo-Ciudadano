@@ -23,7 +23,7 @@ culturalUI <- function() {
     theme = bs_theme(
       version = 5,
       bootswatch = "litera",
-      primary = "#0d6efd"
+      primary = "#1E88E5"
     ),
     div(
       class = "mb-4",
@@ -54,7 +54,7 @@ culturalUI <- function() {
         title = "Actividades dentro del hogar",
         value = textOutput("home_activities_pct"),
         showcase = bsicons::bs_icon("house-fill"),
-        theme = value_box_theme(bg = "#006D77", fg = "white")
+        theme = value_box_theme(bg = "#1E88E5", fg = "white")
       ),
       
       # Exercise activities
@@ -62,7 +62,7 @@ culturalUI <- function() {
         title = "Ejercicio o actividad física",
         value = textOutput("exercise_activities_pct"),
         showcase = bsicons::bs_icon("bicycle"),
-        theme = value_box_theme(bg = "#83C5BE", fg = "black")
+        theme = value_box_theme(bg = "#FFA000", fg = "white")
       ),
       
       # Park/nature activities
@@ -70,7 +70,7 @@ culturalUI <- function() {
         title = "Contacto con la naturaleza",
         value = textOutput("nature_activities_pct"),
         showcase = bsicons::bs_icon("tree-fill"),
-        theme = value_box_theme(bg = "#006D77", fg = "white")
+        theme = value_box_theme(bg = "#1E88E5", fg = "white")
       )
     ),
     
@@ -85,9 +85,7 @@ culturalUI <- function() {
           class = "bg-light"
         ),
         plotlyOutput("cultural_activities_plot", height = "500px"),
-        card_footer(
-          "Porcentaje de personas que reportan haber asistido a cada actividad"
-        )
+
       ),
       
       # Commercial/entertainment activities pie chart
@@ -97,9 +95,6 @@ culturalUI <- function() {
           class = "bg-light"
         ),
         plotlyOutput("entertainment_activities_plot", height = "500px"),
-        card_footer(
-          "Porcentaje de participación en actividades comerciales y de entretenimiento"
-        )
       )
     )
   

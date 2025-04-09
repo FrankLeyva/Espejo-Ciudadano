@@ -92,9 +92,6 @@ economyUI <- function() {
           class = "bg-light"
         ),
         leafletOutput("economic_improvement_map", height = "500px"),
-        card_footer(
-          "Porcentaje de personas que reportan mejora económica (respuestas 'Mejorado algo' y 'Mejorado mucho')"
-        )
       ),
       
       # Right column: Pie chart and summary stats

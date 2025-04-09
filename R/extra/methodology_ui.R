@@ -20,12 +20,15 @@ methodologyUI <- function() {
           margin-bottom: 15px;
           color: #0d6efd;
           font-weight: 600;
+          border-bottom: 2px solid #eaecef;
+          padding-bottom: 8px;
         }
         
         .methodology-section h4 {
           margin-top: 20px;
           margin-bottom: 10px;
           font-weight: 600;
+          color: #495057;
         }
         
         .methodology-section p {
@@ -33,7 +36,7 @@ methodologyUI <- function() {
           text-align: justify;
         }
         
-        .methodology-section ol {
+        .methodology-section ol, .methodology-section ul {
           padding-left: 22px;
           margin-bottom: 15px;
         }
@@ -45,14 +48,17 @@ methodologyUI <- function() {
         .formula-box {
           background-color: #f8f9fa;
           padding: 15px;
-          border-radius: 5px;
+          border-radius: 8px;
           margin: 20px 0;
           font-family: Consolas, Monaco, 'Courier New', monospace;
           text-align: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+          border-left: 4px solid #0d6efd;
         }
         
         .download-card {
-          transition: transform 0.3s;
+          transition: transform 0.3s, box-shadow 0.3s;
+          height: 100%;
         }
         
         .download-card:hover {
@@ -61,7 +67,7 @@ methodologyUI <- function() {
         }
         
         .download-icon {
-          font-size: 2rem;
+          font-size: 2.5rem;
           color: #0d6efd;
           margin-bottom: 15px;
         }
@@ -69,9 +75,10 @@ methodologyUI <- function() {
         .methodology-diagram {
           text-align: center;
           margin: 20px 0;
-          padding: 15px;
+          padding: 20px;
           background-color: #f8f9fa;
-          border-radius: 5px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
         /* Custom callout styles */
@@ -80,7 +87,8 @@ methodologyUI <- function() {
           margin: 20px 0;
           border: 1px solid #eee;
           border-left-width: 5px;
-          border-radius: 5px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
         
         .callout-info {
@@ -96,14 +104,72 @@ methodologyUI <- function() {
         /* Year tabs styling */
         .year-tabs .nav-link {
           padding: 10px 20px;
-          border-radius: 5px 5px 0 0;
+          border-radius: 8px 8px 0 0;
           font-weight: 600;
+          transition: all 0.2s;
         }
         
         .year-tabs .nav-link.active {
           background-color: #0d6efd;
           color: white;
           border-color: #0d6efd;
+          box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Data table styling */
+        .dataTables_wrapper {
+          font-size: 14px;
+        }
+        
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter {
+          margin-bottom: 15px;
+        }
+        
+        .dataTables_wrapper .dataTable th {
+          background-color: #f8f9fa;
+          font-weight: 600;
+        }
+        
+        /* Card styling */
+        .card {
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+          margin-bottom: 20px;
+          overflow: hidden;
+        }
+        
+        .card-header {
+          background-color: rgba(13, 110, 253, 0.05);
+          border-bottom: 1px solid rgba(13, 110, 253, 0.1);
+        }
+        
+        /* Page title styling */
+        .page-title {
+          font-weight: 700;
+          color: #0d6efd;
+          margin-bottom: 20px;
+        }
+        
+        /* Button styling */
+        .btn-primary {
+          transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Modal styling */
+        .modal-header {
+          background-color: #f8f9fa;
+          border-bottom: 2px solid #eaecef;
+        }
+        
+        .modal-title {
+          font-weight: 600;
+          color: #0d6efd;
         }
       "))
     ),
@@ -119,7 +185,7 @@ methodologyUI <- function() {
       fill = FALSE,
       card(
         card_header(
-          h2("Metodología y Descarga de Datos", class = "text-center")
+          h2("Metodología y Descarga de Datos", class = "text-center page-title")
         )
       )
     ),
@@ -164,7 +230,7 @@ methodologyUI <- function() {
                         actionLink(
                           "view_per_2024_metadata", 
                           "Ver diccionario de datos",
-                          class = "text-center"
+                          class = "text-center mt-2"
                         )
                       )
                     )
@@ -191,7 +257,7 @@ methodologyUI <- function() {
                         actionLink(
                           "view_par_2024_metadata", 
                           "Ver diccionario de datos",
-                          class = "text-center"
+                          class = "text-center mt-2"
                         )
                       )
                     )
@@ -227,7 +293,7 @@ methodologyUI <- function() {
                         actionLink(
                           "view_per_2023_metadata", 
                           "Ver diccionario de datos",
-                          class = "text-center"
+                          class = "text-center mt-2"
                         )
                       )
                     )
@@ -254,7 +320,7 @@ methodologyUI <- function() {
                         actionLink(
                           "view_par_2023_metadata", 
                           "Ver diccionario de datos",
-                          class = "text-center"
+                          class = "text-center mt-2"
                         )
                       )
                     )
@@ -267,7 +333,7 @@ methodologyUI <- function() {
         
         # Information callout about data comparison
         div(
-          class = "callout callout-info mt-3",
+          class = "callout callout-info mt-4",
           h4("Comparación de datos entre años"),
           p("Las encuestas de 2023 y 2024 siguen la misma metodología, lo que permite hacer comparaciones directas entre ambos conjuntos de datos. Los usuarios pueden descargar ambos años para realizar análisis comparativos o de tendencias. Algunas preguntas específicas pueden haber cambiado o sido actualizadas entre los diferentes años, consulte el diccionario de datos para más detalles.")
         ),
@@ -294,11 +360,11 @@ methodologyUI <- function() {
           p("Con el propósito de obtener información precisa, confiable y comparativa a lo largo del tiempo desde 2011, se lleva a cabo una investigación cuantitativa que combina tanto el enfoque transversal como longitudinal. Esta investigación se basa en dos encuestas dirigidas a la ciudadanía:"),
           
           tags$ol(
-            tags$li("Encuesta de percepción ciudadana."),
-            tags$li("Encuesta de participación ciudadana y buen gobierno.")
+            tags$li(strong("Encuesta de percepción ciudadana."), " Diseñada para evaluar las percepciones y experiencias de los ciudadanos respecto a diversos aspectos de la vida en Ciudad Juárez."),
+            tags$li(strong("Encuesta de participación ciudadana y buen gobierno."), " Enfocada en medir los niveles de involucramiento cívico y la percepción sobre la gobernanza local.")
           ),
           
-          p("Ambos estudios fueron diseñados con características metodológicas distintas y muestras específicas. Sin embargo, se realizaron de forma simultánea durante el mismo período de tiempo, dado que forman parte de una consulta ciudadana integral."),
+          p("Ambos estudios fueron diseñados con características metodológicas distintas y muestras específicas. Sin embargo, se realizaron de forma simultánea durante el mismo período de tiempo, dado que forman parte de una consulta ciudadana integral que busca presentar un panorama completo de la realidad social de la ciudad."),
           
           p("Las encuestas están respaldadas por una metodología robusta de múltiples etapas y una muestra estadística representativa y adecuada de la población juarense de 18 años en adelante. Este enfoque combina diversas técnicas estadísticas para garantizar la fiabilidad y la relevancia de los resultados obtenidos."),
           
@@ -327,10 +393,10 @@ methodologyUI <- function() {
           p("Donde:"),
           tags$ul(
             tags$li(tags$strong("n:"), " es el tamaño de la muestra a estimar."),
-            tags$li(tags$strong("Z:"), " es el nivel de confianza deseado, con referencia a municipios con más de 100,000 habitantes, utilizando la tabla Z de distribución normal."),
-            tags$li(tags$strong("p:"), " es la probabilidad de éxito o la proporción de la población con la característica deseada (siempre entre 0 y 1)."),
-            tags$li(tags$strong("q:"), " es la probabilidad de fracaso o la proporción de la población sin la característica deseada (siempre entre 0 y 1)."),
-            tags$li(tags$strong("e:"), " es el nivel de error estadístico aceptado por el investigador, recomendado máximo de ±5%."),
+            tags$li(tags$strong("Z:"), " es el nivel de confianza deseado (95%), con referencia a municipios con más de 100,000 habitantes, utilizando la tabla Z de distribución normal."),
+            tags$li(tags$strong("p:"), " es la probabilidad de éxito o la proporción de la población con la característica deseada (0.5 para maximizar el tamaño de la muestra)."),
+            tags$li(tags$strong("q:"), " es la probabilidad de fracaso o la proporción de la población sin la característica deseada (0.5)."),
+            tags$li(tags$strong("e:"), " es el nivel de error estadístico aceptado (±4.1%)."),
             tags$li(tags$strong("N:"), " es el tamaño de la población, considerando el número de viviendas en el municipio para este estudio.")
           ),
           
@@ -339,94 +405,226 @@ methodologyUI <- function() {
           
           p("Se utilizó un método de muestreo probabilístico para obtener una muestra representativa de la población de interés. Este método consistió en seleccionar aleatoriamente áreas geográficas específicas (AGEB) dentro de cada distrito electoral y recoger cuestionarios en puntos de levantamiento designados como «semillas»."),
           
-          p("Para este estudio, una semilla se define como el AGEB seleccionado aleatoriamente mediante el método de Muestreo Aleatorio Simple y se seleccionaron 57 semillas."),
+          p("Para este estudio, una semilla se define como el AGEB seleccionado aleatoriamente mediante el método de Muestreo Aleatorio Simple y se seleccionaron 57 semillas distribuidas proporcionalmente entre los distritos electorales de la ciudad."),
           
           p("El número de cuestionarios por AGEB se determinó en función del peso proporcional de la población. En cada semilla, se eligió un punto de partida y, siguiendo el recorrido de las manecillas del reloj, se encuestó una vivienda por manzana, saltando al menos dos viviendas entre cada entrevistada y limitando las entrevistas a un máximo de cinco por manzana. Se permitió la sustitución en caso de no poder completar el cuestionario o si quedaba incompleto."),
           
-          # Diagrama visual mejorado del método de muestreo por semillas
+          # Diagrama visual mejorado del método de muestreo por semillas estilo profesional
           div(
             class = "methodology-diagram",
             tags$strong("Metodología de Muestreo por Semillas"),
             br(),
             br(),
             div(
-              style = "width: 100%; max-width: 700px; margin: 0 auto;",
+              style = "width: 100%; max-width: 800px; margin: 0 auto;",
               div(
-                style = "display: flex; flex-direction: column; align-items: center;",
-                # Representación del área semilla con cuadrículas
+                style = "display: flex; justify-content: space-between; align-items: center;",
+                # Columna izquierda: Área semilla
                 div(
-                  style = "display: flex; flex-direction: column; margin-bottom: 20px;",
+                  style = "flex: 1; padding: 15px;",
+                  h4(style = "color: #666; font-weight: 600; margin-bottom: 15px; text-align: center;", "Área semilla"),
+                  # Cuadrícula de área semilla
                   div(
-                    style = "display: flex; justify-content: center; align-items: center;",
-                    div(style = "width: 60px; height: 60px; background-color: #E0E0E0; margin: 5px; border: 1px solid #B0B0B0; display: flex; justify-content: center; align-items: center;", ""),
-                    div(style = "width: 60px; height: 60px; background-color: #E0E0E0; margin: 5px; border: 1px solid #B0B0B0; display: flex; justify-content: center; align-items: center;", ""),
-                    div(style = "width: 60px; height: 60px; background-color: #E0E0E0; margin: 5px; border: 1px solid #B0B0B0; display: flex; justify-content: center; align-items: center;", "")
-                  ),
-                  div(
-                    style = "display: flex; justify-content: center; align-items: center;",
-                    div(style = "width: 60px; height: 60px; background-color: #E0E0E0; margin: 5px; border: 1px solid #B0B0B0; display: flex; justify-content: center; align-items: center;", ""),
-                    div(style = "width: 60px; height: 60px; background-color: #e74c3c; margin: 5px; border: 1px solid #B0B0B0; color: white; font-weight: bold; display: flex; justify-content: center; align-items: center;", "AGEB Semilla"),
-                    div(style = "width: 60px; height: 60px; background-color: #E0E0E0; margin: 5px; border: 1px solid #B0B0B0; display: flex; justify-content: center; align-items: center;", "")
-                  ),
-                  div(
-                    style = "display: flex; justify-content: center; align-items: center;",
-                    div(style = "width: 60px; height: 60px; background-color: #E0E0E0; margin: 5px; border: 1px solid #B0B0B0; display: flex; justify-content: center; align-items: center;", ""),
-                    div(style = "width: 60px; height: 60px; background-color: #E0E0E0; margin: 5px; border: 1px solid #B0B0B0; display: flex; justify-content: center; align-items: center;", ""),
-                    div(style = "width: 60px; height: 60px; background-color: #E0E0E0; margin: 5px; border: 1px solid #B0B0B0; display: flex; justify-content: center; align-items: center;", "")
+                    style = "display: flex; flex-direction: column; align-items: center;",
+                    # Fila 1
+                    div(
+                      style = "display: flex; justify-content: center;",
+                      div(style = "width: 55px; height: 40px; background-color: #f8f9fa; margin: 3px; border: 2px solid #CCCCCC; border-radius: 10px;"),
+                      div(style = "width: 55px; height: 40px; background-color: #f8f9fa; margin: 3px; border: 2px solid #CCCCCC; border-radius: 10px;"),
+                      div(style = "width: 55px; height: 40px; background-color: #f8f9fa; margin: 3px; border: 2px solid #CCCCCC; border-radius: 10px;")
+                    ),
+                    # Fila 2 con AGEB semilla
+                    div(
+                      style = "display: flex; justify-content: center;",
+                      div(style = "width: 55px; height: 40px; background-color: #f8f9fa; margin: 3px; border: 2px solid #CCCCCC; border-radius: 10px;"),
+                      div(style = "width: 120px; height: 60px; background-color: #F8AF59; margin: 3px; border: 2px solid #F8AF59; border-radius: 15px; color: white; font-weight: bold; display: flex; justify-content: center; align-items: center; flex-direction: column;", 
+                         div(style = "font-size: 14px;", "Semilla"),
+                         div(style = "font-size: 12px;", "Cuadrada")),
+                      div(style = "width: 55px; height: 40px; background-color: #f8f9fa; margin: 3px; border: 2px solid #CCCCCC; border-radius: 10px;")
+                    ),
+                    # Fila 3
+                    div(
+                      style = "display: flex; justify-content: center;",
+                      div(style = "width: 55px; height: 40px; background-color: #f8f9fa; margin: 3px; border: 2px solid #CCCCCC; border-radius: 10px;"),
+                      div(style = "width: 55px; height: 40px; background-color: #f8f9fa; margin: 3px; border: 2px solid #CCCCCC; border-radius: 10px;"),
+                      div(style = "width: 55px; height: 40px; background-color: #f8f9fa; margin: 3px; border: 2px solid #CCCCCC; border-radius: 10px;")
+                    ),
+                    # Flechas señalando la semilla
+                    div(
+                      style = "position: relative; width: 100%; height: 0;",
+                      div(style = "position: absolute; top: -140px; left: 50px; transform: rotate(-45deg);", 
+                          bsicons::bs_icon("arrow-up", width = "24px", height = "24px", fill = "#F8AF59")),
+                      div(style = "position: absolute; top: -55px; left: 20px; transform: rotate(-90deg);", 
+                          bsicons::bs_icon("arrow-up", width = "24px", height = "24px", fill = "#F8AF59")),
+                      div(style = "position: absolute; top: -140px; right: 50px; transform: rotate(45deg);", 
+                          bsicons::bs_icon("arrow-up", width = "24px", height = "24px", fill = "#F8AF59")),
+                      div(style = "position: absolute; top: -55px; right: 20px; transform: rotate(90deg);", 
+                          bsicons::bs_icon("arrow-up", width = "24px", height = "24px", fill = "#F8AF59"))
+                    )
                   )
                 ),
                 
-                # Flechas de conexión
-                bsicons::bs_icon("arrow-down", width = "32px", height = "32px"),
-                
-                # Representación detallada de una manzana dentro del AGEB semilla
+                # Flecha de conexión
                 div(
-                  style = "margin-top: 15px; border: 2px solid #333; padding: 10px; background-color: #f8f9fa;",
+                  style = "margin: 0 15px;",
+                  bsicons::bs_icon("chevron-right", width = "40px", height = "40px", fill = "#AAAAAA")
+                ),
+                
+                # Columna derecha: Manzana dentro de semilla
+                div(
+                  style = "flex: 1.2; padding: 15px;",
+                  h4(style = "color: #666; font-weight: 600; margin-bottom: 15px; text-align: center;", "Manzana dentro de semilla"),
+                  # Visualización de domicilios
                   div(
-                    style = "text-align: center; margin-bottom: 10px; font-weight: bold;",
-                    "Manzanas dentro del AGEB Semilla"
+                    style = "display: flex; flex-direction: column; align-items: center;",
+                    # Flecha derecha
+                    div(
+                      style = "width: 100%; text-align: center; margin-bottom: 10px;",
+                      bsicons::bs_icon("arrow-right", width = "32px", height = "32px", fill = "#F8AF59")
+                    ),
+                    # Fila 1 de casas
+                    div(
+                      style = "display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px;",
+                      # Casa 1 - encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#F8AF59" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#F8AF59" stroke="#F8AF59" stroke-width="2"/>
+                              </svg>')),
+                      # Casa 2 - no encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#CCCCCC" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#CCCCCC" stroke="#CCCCCC" stroke-width="2"/>
+                              </svg>')),
+                      # Casa 3 - no encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#CCCCCC" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#CCCCCC" stroke="#CCCCCC" stroke-width="2"/>
+                              </svg>')),
+                      # Casa 4 - encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#F8AF59" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#F8AF59" stroke="#F8AF59" stroke-width="2"/>
+                              </svg>')),
+                      # Casa 5 - no encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#CCCCCC" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#CCCCCC" stroke="#CCCCCC" stroke-width="2"/>
+                              </svg>'))
+                    ),
+                    # Fila 2 de casas
+                    div(
+                      style = "display: flex; justify-content: space-between; width: 100%;",
+                      # Casa 6 - encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#F8AF59" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#F8AF59" stroke="#F8AF59" stroke-width="2"/>
+                              </svg>')),
+                      # Casa 7 - no encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#CCCCCC" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#CCCCCC" stroke="#CCCCCC" stroke-width="2"/>
+                              </svg>')),
+                      # Casa 8 - no encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#CCCCCC" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#CCCCCC" stroke="#CCCCCC" stroke-width="2"/>
+                              </svg>')),
+                      # Casa 9 - encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#F8AF59" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#F8AF59" stroke="#F8AF59" stroke-width="2"/>
+                              </svg>')),
+                      # Casa 10 - no encuestada
+                      div(style = "width: 45px; height: 45px;", 
+                          HTML('<svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 42.5V17.5L22.5 5L40 17.5V42.5H5Z" fill="white" stroke="#CCCCCC" stroke-width="3"/>
+                                <path d="M22.5 5L5 17.5H40L22.5 5Z" fill="#CCCCCC" stroke="#CCCCCC" stroke-width="2"/>
+                              </svg>'))
+                    ),
+                    # Flecha izquierda
+                    div(
+                      style = "width: 100%; text-align: center; margin-top: 10px;",
+                      bsicons::bs_icon("arrow-left", width = "32px", height = "32px", fill = "#F8AF59")
+                    )
                   ),
+                  
+                  # Leyenda de casas
                   div(
-                    style = "display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;",
-                    div(style = "width: 50px; height: 50px; background-color: #f8f9fa; border: 1px solid #ddd; display: flex; justify-content: center; align-items: center;", bsicons::bs_icon("check-circle-fill", size = "1.5em", class = "text-success")),
-                    div(style = "width: 50px; height: 50px; background-color: #f8f9fa; border: 1px solid #ddd; display: flex; justify-content: center; align-items: center;", bsicons::bs_icon("x-circle-fill", size = "1.5em", class = "text-danger")),
-                    div(style = "width: 50px; height: 50px; background-color: #f8f9fa; border: 1px solid #ddd; display: flex; justify-content: center; align-items: center;", bsicons::bs_icon("x-circle-fill", size = "1.5em", class = "text-danger")),
-                    div(style = "width: 50px; height: 50px; background-color: #f8f9fa; border: 1px solid #ddd; display: flex; justify-content: center; align-items: center;", bsicons::bs_icon("check-circle-fill", size = "1.5em", class = "text-success")),
-                    div(style = "width: 50px; height: 50px; background-color: #f8f9fa; border: 1px solid #ddd; display: flex; justify-content: center; align-items: center;", bsicons::bs_icon("x-circle-fill", size = "1.5em", class = "text-danger"))
-                  ),
-                  div(
-                    style = "margin-top: 15px; display: flex; justify-content: space-around;",
-                    div(style = "display: flex; align-items: center;", 
-                        bsicons::bs_icon("check-circle-fill", size = "1em", class = "text-success"), 
-                        span(style = "margin-left: 5px;", "Domicilio encuestado")),
-                    div(style = "display: flex; align-items: center;", 
-                        bsicons::bs_icon("x-circle-fill", size = "1em", class = "text-danger"), 
-                        span(style = "margin-left: 5px;", "Domicilio no encuestado"))
+                    style = "margin-top: 20px; display: flex; justify-content: flex-end;",
+                    div(
+                      style = "display: flex; flex-direction: column; gap: 8px;",
+                      div(
+                        style = "display: flex; align-items: center;",
+                        div(style = "width: 30px; height: 30px; margin-right: 10px;", 
+                            HTML('<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M3 28V12L15 3L27 12V28H3Z" fill="white" stroke="#F8AF59" stroke-width="2"/>
+                                  <path d="M15 3L3 12H27L15 3Z" fill="#F8AF59" stroke="#F8AF59" stroke-width="1"/>
+                                </svg>')),
+                        div(style = "color: #555; font-size: 14px;", "Domicilio encuestado")
+                      ),
+                      div(
+                        style = "display: flex; align-items: center;",
+                        div(style = "width: 30px; height: 30px; margin-right: 10px;", 
+                            HTML('<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M3 28V12L15 3L27 12V28H3Z" fill="white" stroke="#CCCCCC" stroke-width="2"/>
+                                  <path d="M15 3L3 12H27L15 3Z" fill="#CCCCCC" stroke="#CCCCCC" stroke-width="1"/>
+                                </svg>')),
+                        div(style = "color: #555; font-size: 14px;", 
+                            "Domicilio sustituido",
+                            div(style = "color: #888; font-size: 12px; font-style: italic;", "(No encuestado)")
+                      )
+                    )
                   )
                 )
               )
             ),
+            
+            # Explicación del método
             div(
-              style = "margin-top: 20px;",
-              p("Este tipo de técnicas garantizan que la distribución de la muestra sea a lo largo y ancho de la región analizada y que se obtenga información que sea representativa."),
-              p("En cada AGEB seleccionada como semilla, se recorre una manzana siguiendo el sentido de las manecillas del reloj, seleccionando domicilios específicos y saltando al menos dos viviendas entre cada entrevista.")
+              style = "margin-top: 25px; text-align: left; max-width: 800px; margin: 25px auto 0;",
+              p("Esta técnica de muestreo garantiza que la distribución de la muestra sea representativa de toda la extensión territorial de Ciudad Juárez, lo que permite obtener información estadísticamente válida sobre la población."),
+              p("En cada AGEB seleccionada como semilla, se recorre una manzana siguiendo el sentido de las manecillas del reloj, seleccionando domicilios específicos y saltando al menos dos viviendas entre cada entrevista para asegurar la aleatoriedad en la selección de participantes.")
             )
           ),
           
           # Perfil y levantamiento
-          h3("Perfil del entrevistado"),
-          p("Hombres y mujeres mayores de edad con residencia en la vivienda seleccionada."),
+          h3("Perfil del entrevistado y método de levantamiento"),
           
-          h3("Levantamiento de campo"),
-          div(
-            id = "fechas_levantamiento",
-            p("El levantamiento de campo se realizó en los siguientes periodos:"),
-            tags$ul(
-              tags$li(tags$strong("Encuestas 2023:"), " del 6 al 26 de noviembre del 2023."),
-              tags$li(tags$strong("Encuestas 2024:"), " del 10 al 28 de febrero del 2025.")
+          div(class = "row mb-4",
+            div(class = "col-md-6",
+              h4("Perfil del entrevistado"),
+              p("Hombres y mujeres de 18 años o más con residencia en la vivienda seleccionada. Se aplicaron cuotas por género y grupo de edad para garantizar la representatividad demográfica de la muestra."),
             ),
-            p("En todos los casos, se aplicó cada cuestionario cara a cara en la vivienda del entrevistado.")
-          )
+            div(class = "col-md-6",
+              h4("Levantamiento de campo"),
+              div(
+                id = "fechas_levantamiento",
+                p("El levantamiento de campo se realizó en los siguientes periodos:"),
+                tags$ul(
+                  tags$li(tags$strong("Encuestas 2023:"), " del 6 al 26 de noviembre del 2023."),
+                  tags$li(tags$strong("Encuestas 2024:"), " del 10 al 28 de febrero del 2025.")
+                ),
+                p("En todos los casos, se aplicó cada cuestionario cara a cara en la vivienda del entrevistado, con una duración aproximada de 25-30 minutos por encuesta.")
+              )
+            )
+          ),
+          
+          # Error muestral y confiabilidad
+          h3("Error muestral y nivel de confianza"),
+          p("El diseño muestral se realizó considerando un nivel de confianza del 95% y un margen de error de ±4.1%, lo que garantiza la robustez estadística de los resultados obtenidos. Se implementaron protocolos de validación y control de calidad en todas las etapas del proceso para asegurar la integridad de los datos recopilados."),
+          
+          # Procesamiento de datos
+          h3("Procesamiento y análisis de datos"),
+          p("Los datos recopilados se procesaron utilizando software estadístico especializado que permite realizar análisis descriptivos, inferenciales y comparativos. Se aplicaron técnicas de ponderación para ajustar posibles desviaciones en la representatividad de la muestra con respecto a los parámetros poblacionales establecidos por el INEGI. Todos los análisis presentados en este dashboard se derivan de estos datos procesados, permitiendo visualizar de manera clara y accesible la información recopilada.")
         )
       )
     ),
@@ -463,6 +661,20 @@ methodologyUI <- function() {
             tags$li("La estructura general de ambos conjuntos de datos es compatible para realizar análisis comparativos.")
           ),
           p("Para más información sobre la estructura de los datos o el diccionario de variables, puede consultar los diccionarios de datos disponibles para cada conjunto.")
+        ),
+        
+        div(
+          class = "callout callout-info mt-4",
+          h4("Interpretación de escalas y tipos de datos"),
+          p("En los diccionarios de datos, encontrará los siguientes tipos de escalas:"),
+          tags$ul(
+            tags$li(tags$strong("Nominal:"), " Categorías sin orden jerárquico (ej. género, estado civil)."),
+            tags$li(tags$strong("Ordinal:"), " Categorías con un orden natural (ej. nivel de satisfacción: bajo, medio, alto)."),
+            tags$li(tags$strong("Intervalo:"), " Escala numérica con intervalos iguales (ej. calificación de 1 a 10)."),
+            tags$li(tags$strong("Razón:"), " Escala numérica con cero absoluto (ej. edad, ingresos)."),
+            tags$li(tags$strong("Binario:"), " Respuestas dicotómicas (ej. sí/no, verdadero/falso).")
+          ),
+          p("Esta información es útil para determinar qué tipos de análisis estadísticos son apropiados para cada variable.")
         )
       )
     ),
@@ -472,12 +684,13 @@ methodologyUI <- function() {
       layout_columns(
         col_widths = c(6, 6),
         div(
-          p("Encuestas realizadas por Plan Estratégico de Juárez", class = "text-center text-muted")
+          p("Encuestas realizadas por Plan Estratégico de Juárez", class = "text-center text-muted my-2")
         ),
         div(
-          p("Última actualización: Abril 2025", class = "text-center text-muted")
+          p("Última actualización: Abril 2025", class = "text-center text-muted my-2")
         )
       )
     )
   )
+)
 }

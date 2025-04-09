@@ -77,7 +77,7 @@ participationServer <- function(input, output, session,current_theme = NULL) {
         highlight_extremes = TRUE,
         use_gradient = F,
         color_scale = "Blues",
-        custom_theme = current_theme()
+        custom_theme = active_theme()
       )
     }, error = function(e) {
       warning(paste("Error creating voting map:", e$message))
@@ -124,7 +124,7 @@ participationServer <- function(input, output, session,current_theme = NULL) {
       plot_data$Percentage <- round(100 * plot_data$Count / sum(plot_data$Count), 1)
       
       # Create color gradient based on interest level
-      colors <- colorRampPalette(c("#FFAB91", "#E76F51"))(5)
+      colors <- active_theme()$palettes$sequential
       
       # Create pie chart
       plot_ly(

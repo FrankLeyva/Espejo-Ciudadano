@@ -189,11 +189,7 @@ output$government_comparison_plot <- renderPlotly({
   }
   
   # Get colors from theme
-  gov_colors <- c(
-    "Municipal" = "#1f77b4",  # Blue
-    "Estatal" = "#9467bd",    # Purple
-    "Federal" = "#d62728"     # Red
-  )
+  gov_colors <- active_theme()$palettes$categorical
   
   # Create grouped bar chart
   plot_ly(

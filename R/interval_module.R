@@ -1466,7 +1466,7 @@ pie_colors <- palette_colors[1:nrow(plot_data)]
 }
 } else {
 # Create a gradient from primary to highlight color
-pie_colors <- colorRampPalette(c(active_theme$colors$primary, active_theme$colors$highlight))(nrow(plot_data))
+pie_colors <- colorRampPalette(c(active_theme$colors$primary, active_theme$colors$accent))(nrow(plot_data))
 }
 
 # If highlight_max is TRUE, make the first slice (highest count) stand out

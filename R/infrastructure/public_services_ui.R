@@ -134,19 +134,26 @@ publicServicesUI <- function() {
           line-height: 1.4;
         }
         
+        /* Blue for water */
         .info-box-info {
-          background-color: #d1ecf1;
-          color: #0c5460;
+          background-color: #d1ecf1 !important;
+          color: #0c5460 !important;
         }
         
-        .info-box-warning {
-          background-color: #fff3cd;
-          color: #856404;
+        /* Yellow for electricity */
+        .info-box-warning, 
+        div.info-box.info-box-warning,
+        div[class*='info-box-warning'] {
+          background-color: #FFF3CD !important;
+          color: #856404 !important;
         }
         
-        .info-box-success {
-          background-color: #d4edda;
-          color: #155724;
+        /* Green for trash */
+        .info-box-success,
+        div.info-box.info-box-success,
+        div[class*='info-box-success'] {
+          background-color: #D4EDDA !important;
+          color: #155724 !important;
         }
       "))
     ),
@@ -277,6 +284,7 @@ publicServicesUI <- function() {
       card(
         div(
           class = "info-box info-box-warning",
+          style = "background-color: #FFF3CD !important; color: #856404 !important;",
           div(class = "info-box-icon", bsicons::bs_icon("lightning-fill")),
           div(
             class = "info-box-content",
@@ -292,6 +300,7 @@ publicServicesUI <- function() {
       card(
         div(
           class = "info-box info-box-success",
+          style = "background-color: #D4EDDA !important; color: #155724 !important;",
           div(class = "info-box-icon", bsicons::bs_icon("trash-fill")),
           div(
             class = "info-box-content",

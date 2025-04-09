@@ -158,7 +158,7 @@ output$activities_chart <- renderPlotly({
   # Create a color vector - highlight top 3, use primary color for others
   # Get colors from the active theme
   primary_color <- active_theme()$colors$primary
-  highlight_color <- active_theme()$colors$secondary
+  highlight_color <- active_theme()$colors$accent
   
   # If highlight color is not defined, fall back to a secondary color
   if (is.null(highlight_color)) {

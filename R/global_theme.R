@@ -1,18 +1,66 @@
 # Enhanced theme_config with a more cohesive color palette and section-based themes
+add_footer_to_plot <- function(p, footer_text = "Informacion proveniente de las encuestas para el Así Estamos Ju
+arez:Plan Estratégico de Juárez", custom_theme = NULL) {
+  # Get appropriate font settings from theme
+  font_family <- if (!is.null(custom_theme)) {
+    custom_theme$typography$font_family
+  } else {
+    "Arial, sans-serif"
+  }
+  
+  font_size <- if (!is.null(custom_theme)) {
+    custom_theme$typography$sizes$label
+  } else {
+    10
+  }
+  
+  font_color <- if (!is.null(custom_theme)) {
+    custom_theme$colors$text
+  } else {
+    "#333333"
+  }
+  
+  # Add the annotation to the plot
+  p %>% 
+    layout(
+      annotations = list(
+        list(
+          text = footer_text,
+          showarrow = FALSE,
+          xref = "paper",
+          yref = "paper",
+          x = 0.5,
+          y = -0.15,
+          xanchor = "center",
+          yanchor = "top",
+          font = list(
+            family = font_family,
+            size = font_size,
+            color = font_color
+          )
+        )
+      ),
+      margin = list(b = 50)  # Increase bottom margin to make room for the footer
+    )
+}
+
+
+
+
 theme_config <- list(
   # Base colors
   colors = list(
-    primary = "#0D6EFD",       # Primary blue
-    secondary = "#6C757D",     # Secondary gray
-    success = "#2A9D8F",       # Green for positive values
-    warning = "#E9C46A",       # Yellow for warnings
-    danger = "#E76F51",        # Red for negative or alerts
-    info = "#4CC9F0",          # Light blue for information
-    light = "#F8F9FA",         # Light background
-    dark = "#212529",          # Dark text
-    background = "#FFFFFF",    # White background
-    text = "#212529",          # Dark text
-    neutral = "#DEE2E6"        # Neutral for dividers, borders, etc.
+    primary = "#0D6EFD",
+    secondary = "#6C757D",
+    success = "#198754",
+    warning = "#FFC107",
+    danger = "#DC3545",
+    info = "#0DCAF0",
+    light = "#F8F9FA",
+    dark = "#212529",
+    background = "#FFFFFF",
+    text = "#212529",
+    neutral = "#DEE2E6"
   ),
   
   # Categorical palettes - coordinated colors
@@ -50,53 +98,53 @@ theme_config <- list(
   # Section-specific themes
   sections = list(
     bienestar = list(
-      primary = "#006D77",
-      secondary = "#83C5BE",
-      accent = "#006D77",
+      primary = "#1E88E5",
+      secondary = "#90CAF9",
+      accent = "#FFA000",
       palettes = list(
-        sequential = c("#B2D8D8", "#88C1C1", "#5EAAAA", "#349393", "#007C7C"),
-        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#006D77"))(11),
-        categorical = c("#006D77", "#83C5BE", "#EDF6F9", "#FFDDD2", "#E29578", "#006466")
+        sequential = c("#BFD3E6", "#9EBCDA", "#8C96C6", "#6BAED6", "#4292C6", "#2171B5", "#084594"),
+        categorical = c("#1E88E5", "#42A5F5", "#90CAF9", "#FFA000", "#FFCA28", "#FFE082"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#1E88E5"))(9)
       )
     ),
     movilidad = list(
-      primary = "#2A9D8F", 
-      secondary = "#80CBC4",
-      accent = "#2A9D8F",
+      primary = "#43A047",
+      secondary = "#A5D6A7",
+      accent = "#052F5F",
       palettes = list(
-        sequential = colorRampPalette(c("#F8F9FA", "#2A9D8F"))(9),
-        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#2A9D8F"))(11),
-        categorical= c("#2A9D8F", "#70D6BC", "#B5E2D8", "#F6BD60", "#F7EDE2", "#F5CAC3")
+        sequential = c("#C7E9C0", "#A1D99B", "#74C476", "#41AB5D", "#238B45", "#006D2C", "#00441B"),
+        categorical =c("#43A047", "#66BB6A", "#A5D6A7", "#052F5F", "#2D4A70", "#5788A0"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#43A047"))(9)
       )
     ),
     gobierno = list(
-      primary = "#6969B3",
+      primary = "#5E35B1",
       secondary = "#B39DDB",
-      accent = "#6969B3",
+      accent = "#FB8C00",
       palettes = list(
-        sequential = colorRampPalette(c("#F8F9FA", "#6969B3"))(9),
-        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#6969B3"))(11),
-        categorical = c("#6969B3", "#A06CD5", "#B7C0EE", "#FDA4BA", "#FEE7EC", "#8E94F2")
+        sequential = c("#CAB2D6", "#9E9AC8", "#756BB1", "#5E35B1", "#54278F", "#41236C", "#3A1E61"),
+        categorical = c("#5E35B1", "#7E57C2", "#B39DDB", "#FB8C00", "#FFA726", "#FFCC80"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#5E35B1"))(9)
       )
     ),
     infraestructura = list(
-      primary = "#F4A261",
+      primary = "#F57C00",  # Changed from E64A19 to be more distinct from danger color
       secondary = "#FFCC80",
-      accent = "#F4A261",
+      accent = "#039BE5",
       palettes = list(
-        sequential = colorRampPalette(c("#F8F9FA", "#F4A261"))(9),
-        diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#F4A261"))(11),
-        categorical = c("#F4A261", "#F8BC8B", "#FDCFA4", "#B98B73", "#AACDBE", "#738580")
+        sequential = c("#FBB582", "#FA954F", "#F57C00", "#E66D00", "#D45F00", "#B65200", "#8F3F00"),
+        categorical = c("#F57C00", "#FB8C00", "#FFCC80", "#039BE5", "#29B6F6", "#81D4FA"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#F57C00"))(9)
       )
     ),
     participacion = list(
-      primary = "#E76F51",
-      secondary = "#FFAB91",
-      accent = "#E76F51",
+      primary = "#8E24AA",
+      secondary = "#CE93D8",
+      accent = "#00ACC1",
       palettes = list(
-        sequential = colorRampPalette(c("#F8F9FA", "#E76F51"))(9),
-        diverging = colorRampPalette(c("#6969B3", "#F8F9FA", "#E76F51"))(11),
-        categorical =c("#E76F51", "#FFA987", "#F9DCC4", "#C8D5B9", "#8FC0A9", "#68B0AB")
+        sequential = c("#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77", "#8E24AA", "#980043", "#67001F"),
+        categorical = c("#8E24AA", "#AB47BC", "#CE93D8", "#00ACC1", "#26C6DA", "#80DEEA"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#8E24AA"))(9)
       )
     )
   )
@@ -120,7 +168,7 @@ get_section_theme <- function(section_name = NULL) {
     full_theme <- theme_config
     full_theme$colors$primary <- section_theme$primary
     full_theme$colors$secondary <- section_theme$secondary
-    full_theme$colors$highlight <- section_theme$accent
+    full_theme$colors$accent <- section_theme$accent
     
     # Override palettes if present in section theme
     if (!is.null(section_theme$palettes)) {
@@ -129,6 +177,9 @@ get_section_theme <- function(section_name = NULL) {
       }
       if (!is.null(section_theme$palettes$diverging)) {
         full_theme$palettes$diverging <- section_theme$palettes$diverging
+      }
+      if (!is.null(section_theme$palettes$categorical)) {
+        full_theme$palettes$categorical <- section_theme$palettes$categorical
       }
     }
     
@@ -214,10 +265,11 @@ apply_plotly_theme <- function(p, title = "", xlab = "", ylab = "", custom_theme
                                    "zoomIn2d", "zoomOut2d", "autoScale2d", 
                                    "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
         modeBarButtonsToAdd = c("resetScale2d", "toImage"),
-        displaylogo=FALSE,
+        displaylogo= FALSE,
         locale = "es",
         responsive = TRUE
-    )
+    ) %>%  add_footer_to_plot(, custom_theme = custom_theme)
+
 }
 
 #' Enhanced color palette function with section awareness

@@ -108,10 +108,6 @@ housingUI <- function() {
 
         
         card(
-          card_header(
-            "Satisfacción con la Calidad de los Materiales por Distrito",
-            class = "bg-light"
-          ),
           leafletOutput("materials_map", height = "500px")
         )
       ),
@@ -123,10 +119,7 @@ housingUI <- function() {
         
         
         card(
-          card_header(
-            "Satisfacción con el Tamaño y Espacios por Distrito",
-            class = "bg-light"
-          ),
+
           leafletOutput("spaces_map", height = "500px")
         )
       ),
@@ -137,10 +130,7 @@ housingUI <- function() {
         icon = bsicons::bs_icon("geo-alt"),
       
         card(
-          card_header(
-            "Satisfacción con la Ubicación y Accesibilidad por Distrito",
-            class = "bg-light"
-          ),
+
           leafletOutput("location_map", height = "500px")
         )
       ),
@@ -151,19 +141,12 @@ housingUI <- function() {
         icon = bsicons::bs_icon("graph-up"),
         
         card(
-          card_header(
-            "Comparación de Satisfacción entre Aspectos de Vivienda",
-            class = "bg-light"
-          ),
+
           plotlyOutput("comparison_plot", height = "500px")
         )
       )
     ),
     
-    # Pie de página
-    card(
-      p("Datos obtenidos de la Encuesta de Percepción Ciudadana 2024", class = "text-center text-muted"),
-      p("Última actualización: Marzo 2025", class = "text-center text-muted")
-    )
+
   )
 }

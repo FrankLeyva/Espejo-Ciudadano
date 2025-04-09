@@ -80,7 +80,7 @@ communityServer <- function(input, output, session,current_theme = NULL) {
 }
 
 highlight_color <- if (!is.null(active_theme())) {
-  active_theme()$colors$secondary
+  active_theme()$colors$accent
 } else {
   "#ff7f0e"  # Default orange
 }
@@ -198,7 +198,7 @@ colors[top_indices] <- highlight_color
 }
 
 highlight_color <- if (!is.null(active_theme())) {
-  active_theme()$colors$secondary
+  active_theme()$colors$accent
 } else {
   "#ff7f0e"  # Default orange
 }

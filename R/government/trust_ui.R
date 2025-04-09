@@ -59,17 +59,6 @@ trustUI <- function() {
       card_body(
         plotlyOutput("public_safety_institutions_plot", height = "500px")
       )
-    ),
-    
-    # Source note card
-    card(
-      card_body(
-        p(
-          class = "text-muted small",
-          "Fuente: Encuesta de Participación Ciudadana (PAR) 2024.",
-          "Notas: Se excluyen las respuestas \"No sabe/No contesta\" del análisis."
-        )
-      )
     )
   )
 }

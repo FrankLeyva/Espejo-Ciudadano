@@ -99,9 +99,7 @@ healthcareUI <- function() {
     
     # Primera sección: Mapas de satisfacción
     card(
-      card_header(
-        h4("Satisfacción con los Servicios de Salud por Distrito")
-      ),
+
       
       # Selector de preguntas sobre satisfacción
       navset_tab(
@@ -127,10 +125,7 @@ healthcareUI <- function() {
           icon = bsicons::bs_icon("building"),
           
           card(
-            card_header(
-              "Satisfacción con las Instalaciones de Salud",
-              class = "bg-light"
-            ),
+
             leafletOutput("facilities_map", height = "500px")
           ),
           
@@ -157,10 +152,7 @@ healthcareUI <- function() {
           icon = bsicons::bs_icon("stopwatch"),
           
           card(
-            card_header(
-              "Satisfacción con el Tiempo de Atención",
-              class = "bg-light"
-            ),
+
             leafletOutput("attention_time_map", height = "500px")
           )
           
@@ -173,10 +165,7 @@ healthcareUI <- function() {
           icon = bsicons::bs_icon("capsule"),
           
           card(
-            card_header(
-              "Satisfacción con la Disponibilidad de Medicamentos",
-              class = "bg-light"
-            ),
+
             leafletOutput("medication_map", height = "500px")
           )
         
@@ -188,10 +177,7 @@ healthcareUI <- function() {
           icon = bsicons::bs_icon("star"),
           
           card(
-            card_header(
-              "Satisfacción con la Calidad del Servicio",
-              class = "bg-light"
-            ),
+
             leafletOutput("service_quality_map", height = "500px")
           )
         ),
@@ -219,12 +205,7 @@ healthcareUI <- function() {
         h4("Proveedores de Servicios de Salud")
       ),
       plotlyOutput('healthcare_providers_chart')
-    ),
-    
-    # Pie de página
-    card(
-      p("Datos obtenidos de la Encuesta de Percepción Ciudadana 2024", class = "text-center text-muted"),
-      p("Última actualización: Marzo 2025", class = "text-center text-muted")
     )
+  
   )
 }

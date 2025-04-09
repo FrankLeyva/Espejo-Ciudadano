@@ -90,16 +90,13 @@ wellnessUI <- function() {
           class = "bg-light"
         ),
         plotlyOutput("economic_situation_pie", height = "450px"),
-        card_footer(
-          "Comparación de situación económica personal respecto al año anterior (Q4)"
-        )
       ),
       
       card(
         card_header(
           div(
             class = "d-flex justify-content-between align-items-center",
-            h4("Frecuencia con que piensa en irse de la ciudad", class = "m-0"),
+            "Frecuencia con que piensa en irse de la ciudad",
             downloadButton(
               "download_migration_map", 
               "", 
@@ -110,9 +107,7 @@ wellnessUI <- function() {
           class = "bg-light"
         ),
         leafletOutput("migration_intention_map", height = "450px"),
-        card_footer(
-          "Porcentaje de personas que pensaron irse de la ciudad muchas o algunas veces (Q63)"
-        )
+
       )
     ),
     
@@ -123,10 +118,7 @@ wellnessUI <- function() {
           "Actividades realizadas en los últimos 3 meses",
           class = "bg-light"
         ),
-        plotlyOutput("activities_chart", height = "550px"),
-        card_footer(
-          "Porcentaje de personas que reportan haber realizado cada actividad (Q16.1-Q16.15)"
-        )
+        plotlyOutput("activities_chart", height = "550px")
       )
     )
   )

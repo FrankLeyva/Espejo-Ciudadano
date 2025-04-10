@@ -1811,12 +1811,7 @@ create_env_quality_plot <- function(survey_data, custom_theme = NULL) {
   )
   
   # Get colors from custom theme
-  bar_colors <- if (!is.null(custom_theme)) {
-    colorRampPalette(c(custom_theme$colors$primary, custom_theme$colors$highlight))(length(env_questions))
-  } else {
-    c("#3498db", "#2ecc71", "#f1c40f", "#9b59b6")
-  }
-  
+  bar_colors <- custom_theme$palettes$categorical[c(1,5,3,6)]
   # Create bar chart
   plot_ly(
     data = plot_data,

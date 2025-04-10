@@ -3,6 +3,9 @@
 aboutUI <- function(id) {
   ns <- NS(id)
   
+  # The color from your image appears to be a dark charcoal/gray
+  header_color <- "#2d2d2d"
+  
   tagList(
     div(
       class = "container mt-4",
@@ -16,7 +19,7 @@ aboutUI <- function(id) {
         ),
         div(
           class = "col-md-9",
-          h2("Acerca del Dashboard", class = "display-5 fw-bold text-primary"),
+          h2("Acerca del Dashboard", class = "display-5 fw-bold", style = paste0("color: ", header_color, ";")),
           p(class = "lead", "Una herramienta para visualizar los resultados de las encuestas ciudadanas de Ciudad Juárez")
         )
       ),
@@ -31,7 +34,7 @@ aboutUI <- function(id) {
           card(
             card_header(
               h3("Sobre el Dashboard", class = "m-0 fw-bold"),
-              class = "bg-primary bg-opacity-10"
+              style = paste0("background-color: ", header_color, "; color: white;")
             ),
             card_body(
               h4("Propósito", class = "mb-3"),
@@ -57,7 +60,7 @@ aboutUI <- function(id) {
           card(
             card_header(
               h3("Plan Estratégico de Juárez", class = "m-0 fw-bold"),
-              class = "bg-primary bg-opacity-10"
+              style = paste0("background-color: ", header_color, "; color: white;")
             ),
             card_body(
               tags$blockquote(
@@ -90,7 +93,7 @@ aboutUI <- function(id) {
           card(
             card_header(
               h3("Información Técnica", class = "m-0 fw-bold"),
-              class = "bg-primary bg-opacity-10"
+              style = paste0("background-color: ", header_color, "; color: white;")
             ),
             card_body(
               h4("Tecnologías Utilizadas", class = "mb-3"),
@@ -126,7 +129,7 @@ aboutUI <- function(id) {
           card(
             card_header(
               h3("Contacto", class = "m-0 fw-bold"),
-              class = "bg-primary bg-opacity-10"
+              style = paste0("background-color: ", header_color, "; color: white;")
             ),
             card_body(
               h4("¿Necesitas más información?", class = "mb-3"),
@@ -178,7 +181,7 @@ aboutUI <- function(id) {
                   icon("globe"), " Sitio Web"
                 ),
                 a(
-                  href = "https://www.facebook.com/PlanEstrategicoJuarez/", 
+                  href = "https://www.facebook.com/PlanJuarez/", 
                   target = "_blank",
                   class = "btn btn-outline-primary",
                   icon("facebook"), " Facebook"
@@ -200,7 +203,7 @@ aboutUI <- function(id) {
           card(
             card_header(
               h3("¿Cómo Utilizar Este Dashboard?", class = "m-0 fw-bold"),
-              class = "bg-primary bg-opacity-10"
+              style = paste0("background-color: ", header_color, "; color: white;")
             ),
             card_body(
               div(

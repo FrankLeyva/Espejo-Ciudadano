@@ -206,37 +206,46 @@ output$activities_chart <- renderPlotly({
     )
 })
   # Add this to the wellnessServer function
-output$download_migration_map <- downloadHandler(
-  filename = function() {
-    paste("mapa_migracion_", Sys.Date(), ".png", sep = "")
-  },
-  content = function(file) {
-    # We need to save the map to a temporary file first
-    # Create or ensure the temp directory exists
-    tmp_dir <- tempdir()
-    tmp_file <- file.path(tmp_dir, "temp_map.html")
-    
-    # Get the currently rendered map
-    map <- create_interval_district_map(
-      migration_intention_data(),
-      geo_data(),
-      selected_responses = c("1", "2"),
-      highlight_extremes = TRUE,
-      use_gradient = F,
-      color_scale = "Blues",
-      custom_theme = current_theme()
-    )
-    
-    # Save map to HTML file
-    htmlwidgets::saveWidget(map, tmp_file, selfcontained = TRUE)
-    
-    # Use webshot package to take a screenshot
-    webshot::webshot(
-      url = tmp_file,
-      file = file,
-      cliprect = "viewport",
-      zoom = 2
-    )
-  }
-)
+  output$download_migration_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_migracion_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      # We need to save the map to a temporary file first
+      tmp_dir <- tempdir()
+      tmp_file <- file.path(tmp_dir, "temp_map.html")
+      
+      # Get the currently rendered map
+      map <- create_interval_district_map(
+        migration_intention_data(),
+        geo_data(),
+        selected_responses = c("1", "2"),
+        highlight_extremes = TRUE,
+        use_gradient = F,
+        color_scale = "Blues",
+        custom_theme = current_theme()
+      )
+      
+      # Save map to HTML file
+      htmlwidgets::saveWidget(map, tmp_file, selfcontained = TRUE)
+      
+      # Use pagedown with Chrome headless
+      pagedown::chrome_print(
+        input = tmp_file,
+        output = file,
+        options = list(
+          printBackground = TRUE,
+          scale = 2.0
+        ),
+        format = "png",
+        browser = "/usr/bin/google-chrome-stable",
+        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+      )
+      
+      # Clean up the temporary file
+      if (file.exists(tmp_file)) {
+        file.remove(tmp_file)
+      }
+    }
+  )
 }

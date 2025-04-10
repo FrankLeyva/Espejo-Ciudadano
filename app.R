@@ -18,7 +18,7 @@ library(colourpicker)
 library(RColorBrewer)
 library(viridisLite)
 library(bsicons)
-library(webshot)
+library(pagedown)
 library(htmlwidgets)
 
 # Source all necessary files

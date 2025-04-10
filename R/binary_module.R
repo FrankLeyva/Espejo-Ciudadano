@@ -739,7 +739,7 @@ create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE
 
   # Create base map
   map <- leaflet(geo_data) %>%
-    addProviderTiles(providers$CartoDB.Positron) %>% 
+    addProviderTiles(providers$Stadia.StamenTonerLite) %>% 
     addPolygons(
       fillColor = ~fill_color,
       fillOpacity = 0.7,

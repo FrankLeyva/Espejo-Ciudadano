@@ -220,7 +220,7 @@ apply_plotly_theme <- function(p, title = "", xlab = "", ylab = "", custom_theme
         displaylogo= FALSE,
         locale = "es",
         responsive = TRUE
-    ) %>%  add_footer_to_plot(, custom_theme = custom_theme)
+    ) 
 
 }
 

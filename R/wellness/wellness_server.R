@@ -206,46 +206,60 @@ output$activities_chart <- renderPlotly({
     )
 })
   # Add this to the wellnessServer function
-  output$download_migration_map <- downloadHandler(
-    filename = function() {
-      paste("mapa_migracion_", Sys.Date(), ".png", sep = "")
-    },
-    content = function(file) {
-      # We need to save the map to a temporary file first
-      tmp_dir <- tempdir()
-      tmp_file <- file.path(tmp_dir, "temp_map.html")
-      
-      # Get the currently rendered map
-      map <- create_interval_district_map(
-        migration_intention_data(),
-        geo_data(),
-        selected_responses = c("1", "2"),
-        highlight_extremes = TRUE,
-        use_gradient = F,
-        color_scale = "Blues",
-        custom_theme = current_theme()
+# Add to the wellnessServer function in wellness_server.R
+output$download_migration_map <- downloadHandler(
+  filename = function() {
+    paste("mapa_migracion_", Sys.Date(), ".png", sep = "")
+  },
+  content = function(file) {
+    # We need to save the map to a temporary file first
+    tmp_html <- tempfile(fileext = ".html")
+    
+    # Get the map
+    map <- create_interval_district_map(
+      migration_intention_data(),
+      geo_data(),
+      selected_responses = c("1", "2"),
+      highlight_extremes = TRUE,
+      use_gradient = F,
+      custom_theme = active_theme()
+    )
+    
+    # Add title and footer to the map directly
+    map <- map %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                    "Frecuencia con que piensa en irse de la ciudad", 
+                    "</div>"),
+        position = "topright"
+      ) %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                    paste("Resultados de la encuesta de percepción y participación ciudadana y buen gobierno", selectedYear()),
+                    "</div>"),
+        position = "bottomright"
       )
-      
-      # Save map to HTML file
-      htmlwidgets::saveWidget(map, tmp_file, selfcontained = TRUE)
-      
-      # Use pagedown with Chrome headless
-      pagedown::chrome_print(
-        input = tmp_file,
-        output = file,
-        options = list(
-          printBackground = TRUE,
-          scale = 2.0
-        ),
-        format = "png",
-        browser = "/usr/bin/google-chrome-stable",
-        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
-      )
-      
-      # Clean up the temporary file
-      if (file.exists(tmp_file)) {
-        file.remove(tmp_file)
-      }
+    
+    # Save the map to HTML
+    htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+    
+    # Use pagedown with Chrome headless
+    pagedown::chrome_print(
+      input = tmp_html,
+      output = file,
+      options = list(
+        printBackground = TRUE,
+        scale = 2.0
+      ),
+      format = "png",
+      browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+    )
+    
+    # Clean up temporary files
+    if (file.exists(tmp_html)) {
+      file.remove(tmp_html)
     }
-  )
+  }
+)
 }

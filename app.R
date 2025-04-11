@@ -21,8 +21,6 @@ library(bsicons)
 library(pagedown)
 library(htmlwidgets)
 
-# Source all necessary files
-# Technical modules
 source("R/global_theme.R")
 source("R/utils.R")
 source("R/survey_config.R")
@@ -250,7 +248,8 @@ ui <- page_navbar(
       $('#yearDropdown').text(year);
     });
   });
-"))
+")),
+tags$script(src = "custom.js")
   ),
   
   # Main overview tab
@@ -622,8 +621,13 @@ server <- function(input, output, session) {
  
  # Set initial dropdown text on load
  # This ensures the dropdown shows 2024 even before any user interaction
- session$sendCustomMessage("updateYearDropdown", "2024")
-  
+ observe({
+  # This will update whenever selectedYear() changes
+  session$sendCustomMessage(
+    "setCurrentYear", 
+    selectedYear()
+  )
+})
   # Handle navigation between tabs
   observeEvent(input$nav_target, {
     nav_value <- input$nav_target

@@ -214,14 +214,26 @@ apply_plotly_theme <- function(p, title = "", xlab = "", ylab = "", custom_theme
     ) %>%
     config(
         modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
-                                   "zoomIn2d", "zoomOut2d", "autoScale2d", 
-                                   "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
-        modeBarButtonsToAdd = c("resetScale2d", "toImage"),
+                                  "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                                  "hoverClosestCartesian", "hoverCompareCartesian",
+                                  "hoverClosestPie", "toImage"),  # Remove default toImage
+        modeBarButtonsToAdd = list(
+          list(
+            name = "customDownload",
+            title = "Descargar con encabezado y pie de página",
+            icon = list(
+              path = "M4 5h16v16H4V5m16 14V7H6v12h14M17 9H7v2h10V9m0 4H7v2h10v-2z", 
+              transform = "matrix(1 0 0 -1 0 24)",
+              width = 24,
+              height = 24
+            ),
+            click = htmlwidgets::JS("function(gd) { window.customPlotDownload(gd); }")
+          )
+        ),
         displaylogo= FALSE,
         locale = "es",
         responsive = TRUE
     ) 
-
 }
 
 #' Enhanced color palette function with section awareness

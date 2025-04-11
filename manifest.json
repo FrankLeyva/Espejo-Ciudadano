@@ -10,6 +10,37 @@
     "has_parameters": false
   },
   "packages": {
+    "AsioHeaders": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "AsioHeaders",
+        "Type": "Package",
+        "Title": "'Asio' C++ Header Files",
+        "Version": "1.28.2-1",
+        "Date": "2025-04-08",
+        "Authors@R": "c(person(\"Dirk\", \"Eddelbuettel\", role = c(\"aut\", \"cre\"), email = \"edd@debian.org\",\n                    comment = c(ORCID = \"0000-0001-6419-907X\")),\n             person(\"Christopher M.\", \"Kohlhoff\", role = \"aut\",\n                    comment = \"Author of Asio\"))",
+        "Description": "'Asio' is a cross-platform C++ library for network and low-level\n I/O programming that provides developers with a consistent asynchronous model\n using a modern C++ approach. It is also included in Boost but requires linking\n when used with Boost. Standalone it can be used header-only (provided a recent\n compiler). 'Asio' is written and maintained by Christopher M. Kohlhoff, and\n released under the 'Boost Software License', Version 1.0.",
+        "Copyright": "file inst/COPYRIGHTS",
+        "License": "BSL-1.0",
+        "URL": "https://github.com/eddelbuettel/asioheaders,\nhttps://dirk.eddelbuettel.com/code/asioheaders.html",
+        "BugReports": "https://github.com/eddelbuettel/asioheaders/issues",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-04-08 17:07:18 UTC; edd",
+        "Author": "Dirk Eddelbuettel [aut, cre] (<https://orcid.org/0000-0001-6419-907X>),\n  Christopher M. Kohlhoff [aut] (Author of Asio)",
+        "Maintainer": "Dirk Eddelbuettel <edd@debian.org>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-04-08 23:20:15 UTC",
+        "Built": "R 4.4.3; ; 2025-04-10 11:18:47 UTC; windows",
+        "RemoteType": "standard",
+        "RemotePkgRef": "AsioHeaders",
+        "RemoteRef": "AsioHeaders",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "1.28.2-1"
+      }
+    },
     "DBI": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -474,6 +505,45 @@
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
         "RemoteSha": "1.2.4"
+      }
+    },
+    "bookdown": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "bookdown",
+        "Type": "Package",
+        "Title": "Authoring Books and Technical Documents with R Markdown",
+        "Version": "0.42",
+        "Authors@R": "c(\n    person(\"Yihui\", \"Xie\", role = c(\"aut\", \"cre\"), email = \"xie@yihui.name\", comment = c(ORCID = \"0000-0003-0645-5666\")),\n    person(\"Christophe\", \"Dervieux\", , \"cderv@posit.co\", role = c(\"ctb\"),\n           comment = c(ORCID = \"0000-0003-4474-2498\")),\n    person(\"JJ\", \"Allaire\", role = \"ctb\"),\n    person(\"Albert\", \"Kim\", role = \"ctb\"),\n    person(\"Alessandro\", \"Samuel-Rosa\", role = \"ctb\"),\n    person(\"Andrzej\", \"Oles\", role = \"ctb\"),\n    person(\"Atsushi\", \"Yasumoto\", role = \"ctb\", comment = c(ORCID = \"0000-0002-8335-495X\")),\n    person(\"Aust\", \"Frederik\", role = \"ctb\", comment = c(ORCID = \"0000-0003-4900-788X\")),\n    person(\"Bastiaan\", \"Quast\", role = \"ctb\"),\n    person(\"Ben\", \"Marwick\", role = \"ctb\"),\n    person(\"Chester\", \"Ismay\", role = \"ctb\"),\n    person(\"Clifton\", \"Franklund\", role = \"ctb\"),\n    person(\"Daniel\", \"Emaasit\", role = \"ctb\"),\n    person(\"David\", \"Shuman\", role = \"ctb\"),\n    person(\"Dean\", \"Attali\", role = \"ctb\"),\n    person(\"Drew\", \"Tyre\", role = \"ctb\"),\n    person(\"Ellis\", \"Valentiner\", role = \"ctb\"),\n    person(\"Frans\", \"van Dunne\", role = \"ctb\"),\n    person(\"Hadley\", \"Wickham\", role = \"ctb\"),\n    person(\"Jeff\", \"Allen\", role = \"ctb\"),\n    person(\"Jennifer\", \"Bryan\", role = \"ctb\"),\n    person(\"Jonathan\", \"McPhers\", role = \"ctb\"),\n    person(\"JooYoung\", \"Seo\", role=\"ctb\", comment = c(ORCID = \"0000-0002-4064-6012\")),\n    person(\"Joyce\", \"Robbins\", role = \"ctb\"),\n    person(\"Junwen\", \"Huang\", role = \"ctb\"),\n    person(\"Kevin\", \"Cheung\", role = \"ctb\"),\n    person(\"Kevin\", \"Ushey\", role = \"ctb\"),\n    person(\"Kim\", \"Seonghyun\", role = \"ctb\"),\n    person(\"Kirill\", \"Muller\", role = \"ctb\"),\n    person(\"Luciano\", \"Selzer\", role = \"ctb\"),\n    person(\"Matthew\", \"Lincoln\", role = \"ctb\"),\n    person(\"Maximilian\", \"Held\", role = \"ctb\"),\n    person(\"Michael\", \"Sachs\", role = \"ctb\"),\n    person(\"Michal\", \"Bojanowski\", role = \"ctb\"),\n    person(\"Nathan\", \"Werth\", role = \"ctb\"),\n    person(\"Noam\", \"Ross\", role = \"ctb\"),\n    person(\"Peter\", \"Hickey\", role = \"ctb\"),\n    person(\"Pedro Rafael D.\", \"Marinho\", role=\"ctb\", comment = c(ORCID = \"0000-0003-1591-8300\")),\n    person(\"Romain\", \"Lesur\", role = \"ctb\", comment = c(ORCID = \"0000-0002-0721-5595\")),\n    person(\"Sahir\", \"Bhatnagar\", role = \"ctb\"),\n    person(\"Shir\", \"Dekel\", role = \"ctb\", comment = c(ORCID = \"0000-0003-1773-2446\")),\n    person(\"Steve\", \"Simpson\", role = \"ctb\"),\n    person(\"Thierry\", \"Onkelinx\", role = \"ctb\", comment = c(ORCID = \"0000-0001-8804-4216\")),\n    person(\"Vincent\", \"Fulco\", role = \"ctb\"),\n    person(\"Yixuan\", \"Qiu\", role = \"ctb\"),\n    person(\"Zhuoer\", \"Dong\", role = \"ctb\"),\n    person(given = \"Posit Software, PBC\", role = c(\"cph\", \"fnd\")),\n    person(\"Bartek\", \"Szopka\", role = \"ctb\", comment = \"The jQuery Highlight plugin\"),\n    person(\"Zeno\", \"Rocha\", role = \"cph\", comment = \"clipboard.js library\"),\n    person(family = \"MathQuill contributors\", role = \"ctb\", comment = \"The MathQuill library; authors listed in inst/resources/AUTHORS\"),\n    person(family = \"FriendCode Inc\", role = c(\"cph\", \"ctb\"), comment = \"The gitbook style, with modifications\")\n    )",
+        "Maintainer": "Yihui Xie <xie@yihui.name>",
+        "Description": "Output formats and utilities for authoring books and technical documents with R Markdown.",
+        "License": "GPL-3",
+        "Depends": "R (>= 3.5.0)",
+        "Imports": "htmltools (>= 0.3.6), knitr (>= 1.38), rmarkdown (>= 2.14),\njquerylib, xfun (>= 0.48), tinytex (>= 0.12), yaml (>= 2.1.19)",
+        "Suggests": "bslib (>= 0.2.4), downlit (>= 0.4.0), htmlwidgets, jsonlite,\nrstudioapi, miniUI, rsconnect (>= 0.4.3), servr (>= 0.13),\nshiny, tibble, testit (>= 0.9), tufte, xml2, webshot, testthat\n(>= 3.1.0), withr (>= 2.3.0)",
+        "URL": "https://github.com/rstudio/bookdown,\nhttps://pkgs.rstudio.com/bookdown/",
+        "BugReports": "https://github.com/rstudio/bookdown/issues",
+        "SystemRequirements": "Pandoc (>= 1.17.2)",
+        "RoxygenNote": "7.3.2",
+        "Encoding": "UTF-8",
+        "Config/Needs/book": "remotes, webshot, svglite",
+        "Config/Needs/website": "pkgdown, tidyverse/tidytemplate, rstudio/quillt",
+        "Config/testthat/edition": "3",
+        "VignetteBuilder": "knitr",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-01-07 14:48:34 UTC; runner",
+        "Author": "Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\n  Christophe Dervieux [ctb] (<https://orcid.org/0000-0003-4474-2498>),\n  JJ Allaire [ctb],\n  Albert Kim [ctb],\n  Alessandro Samuel-Rosa [ctb],\n  Andrzej Oles [ctb],\n  Atsushi Yasumoto [ctb] (<https://orcid.org/0000-0002-8335-495X>),\n  Aust Frederik [ctb] (<https://orcid.org/0000-0003-4900-788X>),\n  Bastiaan Quast [ctb],\n  Ben Marwick [ctb],\n  Chester Ismay [ctb],\n  Clifton Franklund [ctb],\n  Daniel Emaasit [ctb],\n  David Shuman [ctb],\n  Dean Attali [ctb],\n  Drew Tyre [ctb],\n  Ellis Valentiner [ctb],\n  Frans van Dunne [ctb],\n  Hadley Wickham [ctb],\n  Jeff Allen [ctb],\n  Jennifer Bryan [ctb],\n  Jonathan McPhers [ctb],\n  JooYoung Seo [ctb] (<https://orcid.org/0000-0002-4064-6012>),\n  Joyce Robbins [ctb],\n  Junwen Huang [ctb],\n  Kevin Cheung [ctb],\n  Kevin Ushey [ctb],\n  Kim Seonghyun [ctb],\n  Kirill Muller [ctb],\n  Luciano Selzer [ctb],\n  Matthew Lincoln [ctb],\n  Maximilian Held [ctb],\n  Michael Sachs [ctb],\n  Michal Bojanowski [ctb],\n  Nathan Werth [ctb],\n  Noam Ross [ctb],\n  Peter Hickey [ctb],\n  Pedro Rafael D. Marinho [ctb] (<https://orcid.org/0000-0003-1591-8300>),\n  Romain Lesur [ctb] (<https://orcid.org/0000-0002-0721-5595>),\n  Sahir Bhatnagar [ctb],\n  Shir Dekel [ctb] (<https://orcid.org/0000-0003-1773-2446>),\n  Steve Simpson [ctb],\n  Thierry Onkelinx [ctb] (<https://orcid.org/0000-0001-8804-4216>),\n  Vincent Fulco [ctb],\n  Yixuan Qiu [ctb],\n  Zhuoer Dong [ctb],\n  Posit Software, PBC [cph, fnd],\n  Bartek Szopka [ctb] (The jQuery Highlight plugin),\n  Zeno Rocha [cph] (clipboard.js library),\n  MathQuill contributors [ctb] (The MathQuill library; authors listed in\n    inst/resources/AUTHORS),\n  FriendCode Inc [cph, ctb] (The gitbook style, with modifications)",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-01-07 16:00:07 UTC",
+        "Built": "R 4.4.3; ; 2025-04-07 02:20:38 UTC; windows",
+        "RemoteType": "standard",
+        "RemotePkgRef": "bookdown",
+        "RemoteRef": "bookdown",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "0.42"
       }
     },
     "broom": {
@@ -2956,6 +3026,41 @@
         "RemoteSha": "4.2.8"
       }
     },
+    "pagedown": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "pagedown",
+        "Type": "Package",
+        "Title": "Paginate the HTML Output of R Markdown with CSS for Print",
+        "Version": "0.22",
+        "Authors@R": "c(\n  person(\"Yihui\", \"Xie\", role = c(\"aut\", \"cre\"), email = \"xie@yihui.name\", comment = c(ORCID = \"0000-0003-0645-5666\")),\n  person(\"Romain\", \"Lesur\", role = c(\"aut\", \"cph\"), comment = c(ORCID = \"0000-0002-0721-5595\")),\n  person(\"Christophe\", \"Dervieux\", role = c(\"ctb\"), comment = c(ORCID = \"0000-0003-4474-2498\")),\n  person(\"Brent\", \"Thorne\", role = \"aut\", comment = c(ORCID = \"0000-0002-1099-3857\")),\n  person(\"Xianying\", \"Tan\", role = \"aut\", comment = c(ORCID = \"0000-0002-6072-3521\")),\n  person(\"Atsushi\", \"Yasumoto\", role = c(\"ctb\"), comment = c(ORCID = \"0000-0002-8335-495X\")),\n  person(given = \"Posit Software, PBC\", role = c(\"cph\", \"fnd\")),\n  person(\"Adam\", \"Hyde\", role = \"ctb\", comment = \"paged.js in resources/js/\"),\n  person(\"Min-Zhong\", \"Lu\", role = \"ctb\", comment = \"resume.css in resources/css/\"),\n  person(\"Zulko\", role = \"ctb\", comment = \"poster-relaxed.css in resources/css/\"),\n  person()\n  )",
+        "Description": "Use the paged media properties in CSS and the JavaScript\n  library 'paged.js' to split the content of an HTML document into discrete\n  pages. Each page can have its page size, page numbers, margin boxes, and\n  running headers, etc. Applications of this package include books, letters,\n  reports, papers, business cards, resumes, and posters.",
+        "Depends": "R (>= 3.5.0)",
+        "Imports": "rmarkdown (>= 2.13), bookdown (>= 0.8), htmltools, jsonlite,\nlater (>= 1.0.0), processx, servr (>= 0.31), httpuv, xfun,\nwebsocket",
+        "Suggests": "promises, testit, xaringan, pdftools, revealjs, covr, xml2",
+        "License": "MIT + file LICENSE",
+        "URL": "https://github.com/rstudio/pagedown",
+        "BugReports": "https://github.com/rstudio/pagedown/issues",
+        "SystemRequirements": "Pandoc (>= 2.2.3)",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.2",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-01-07 14:10:09 UTC; runner",
+        "Author": "Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\n  Romain Lesur [aut, cph] (<https://orcid.org/0000-0002-0721-5595>),\n  Christophe Dervieux [ctb] (<https://orcid.org/0000-0003-4474-2498>),\n  Brent Thorne [aut] (<https://orcid.org/0000-0002-1099-3857>),\n  Xianying Tan [aut] (<https://orcid.org/0000-0002-6072-3521>),\n  Atsushi Yasumoto [ctb] (<https://orcid.org/0000-0002-8335-495X>),\n  Posit Software, PBC [cph, fnd],\n  Adam Hyde [ctb] (paged.js in resources/js/),\n  Min-Zhong Lu [ctb] (resume.css in resources/css/),\n  Zulko [ctb] (poster-relaxed.css in resources/css/)",
+        "Maintainer": "Yihui Xie <xie@yihui.name>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-01-07 15:20:11 UTC",
+        "Built": "R 4.4.3; ; 2025-04-07 02:21:29 UTC; windows",
+        "RemoteType": "standard",
+        "RemotePkgRef": "pagedown",
+        "RemoteRef": "pagedown",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "0.22"
+      }
+    },
     "pillar": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -3657,7 +3762,7 @@
         "Maintainer": "Kevin Ushey <kevin@rstudio.com>",
         "Repository": "CRAN",
         "Date/Publication": "2025-03-18 10:50:02 UTC",
-        "Built": "R 4.4.3; ; 2025-04-07 22:07:48 UTC; windows"
+        "Built": "R 4.4.3; ; 2025-04-10 22:11:46 UTC; windows"
       }
     },
     "reprex": {
@@ -4024,6 +4129,40 @@
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
         "RemoteSha": "0.4-2"
+      }
+    },
+    "servr": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "servr",
+        "Type": "Package",
+        "Title": "A Simple HTTP Server to Serve Static Files or Dynamic Documents",
+        "Version": "0.32",
+        "Authors@R": "c(\n  person(\"Yihui\", \"Xie\", role = c(\"aut\", \"cre\"), email = \"xie@yihui.name\", comment = c(ORCID = \"0000-0003-0645-5666\")),\n  person(\"Carson\", \"Sievert\", role = \"ctb\"),\n  person(\"Jesse\", \"Anderson\", role = \"ctb\"),\n  person(\"Ramnath\", \"Vaidyanathan\", role = \"ctb\"),\n  person(\"Romain\", \"Lesur\", role = \"ctb\"),\n  person(given = \"Posit Software, PBC\", role = c(\"cph\", \"fnd\")),\n  person()\n  )",
+        "Description": "Start an HTTP server in R to serve static files, or dynamic\n    documents that can be converted to HTML files (e.g., R Markdown) under a\n    given directory.",
+        "Depends": "R (>= 3.0.0)",
+        "Imports": "mime (>= 0.2), httpuv (>= 1.5.2), xfun (>= 0.48), jsonlite",
+        "Suggests": "tools, later, rstudioapi, knitr (>= 1.9), rmarkdown",
+        "License": "GPL",
+        "URL": "https://github.com/yihui/servr",
+        "BugReports": "https://github.com/yihui/servr/issues",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.2",
+        "NeedsCompilation": "no",
+        "Packaged": "2024-10-04 15:28:44 UTC; yihui",
+        "Author": "Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>),\n  Carson Sievert [ctb],\n  Jesse Anderson [ctb],\n  Ramnath Vaidyanathan [ctb],\n  Romain Lesur [ctb],\n  Posit Software, PBC [cph, fnd]",
+        "Maintainer": "Yihui Xie <xie@yihui.name>",
+        "Repository": "CRAN",
+        "Date/Publication": "2024-10-04 17:20:02 UTC",
+        "Built": "R 4.4.3; ; 2025-04-07 01:58:39 UTC; windows",
+        "RemoteType": "standard",
+        "RemotePkgRef": "servr",
+        "RemoteRef": "servr",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "0.32"
       }
     },
     "sf": {
@@ -4906,39 +5045,40 @@
         "RemoteSha": "1.6.5"
       }
     },
-    "webshot": {
+    "websocket": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
       "description": {
-        "Package": "webshot",
-        "Title": "Take Screenshots of Web Pages",
-        "Version": "0.5.5",
-        "Authors@R": "c(\n    person(\"Winston\", \"Chang\", email = \"winston@rstudio.com\", role = c(\"aut\", \"cre\")),\n    person(\"Yihui\", \"Xie\", role = \"ctb\"),\n    person(\"Francois\", \"Guillem\", role = \"ctb\"),\n    person(\"Barret\", \"Schloerke\", role = \"ctb\"),\n    person(\"Nicolas\", \"Perriault\", role = \"ctb\", comment = \"The CasperJS library\")\n    )",
-        "Description": "Takes screenshots of web pages, including Shiny applications and R\n    Markdown documents.",
-        "Depends": "R (>= 3.0)",
-        "Imports": "magrittr, jsonlite, callr",
-        "Suggests": "httpuv, knitr, rmarkdown, shiny, testthat (>= 3.0.0)",
+        "Package": "websocket",
+        "Version": "1.4.4",
+        "Title": "'WebSocket' Client Library",
+        "Description": "Provides a 'WebSocket' client interface for R.\n    'WebSocket' is a protocol for low-overhead real-time communication:\n    <https://en.wikipedia.org/wiki/WebSocket>.",
+        "Authors@R": "c(\n    person(\"Winston\", \"Chang\", role = c(\"aut\", \"cre\"), email = \"winston@posit.co\"),\n    person(\"Joe\", \"Cheng\", role = \"aut\", email = \"joe@posit.co\"),\n    person(\"Alan\", \"Dipert\", role = \"aut\"),\n    person(\"Barbara\", \"Borges\", role = \"aut\"),\n    person(family = \"Posit, PBC\", role = \"cph\"),\n    person(\"Peter\", \"Thorson\", role = c(\"ctb\", \"cph\"), comment = \"WebSocket++ library\"),\n    person(\"René\", \"Nyffenegger\", role = c(\"ctb\", \"cph\"), comment = \"Base 64 library\"),\n    person(\"Micael\", \"Hildenborg\", role = c(\"ctb\", \"cph\"), comment = \"SHA1 library\"),\n    person(family = \"Aladdin Enterprises\", role = \"cph\", comment = \"MD5 library\"),\n    person(\"Bjoern\", \"Hoehrmann\", role = c(\"ctb\", \"cph\"), comment = \"UTF8 Validation library\"))",
         "License": "GPL-2",
-        "SystemRequirements": "PhantomJS for taking screenshots, ImageMagick or\nGraphicsMagick and OptiPNG for manipulating images.",
-        "RoxygenNote": "7.2.3",
         "Encoding": "UTF-8",
-        "URL": "https://wch.github.io/webshot/, https://github.com/wch/webshot/",
-        "BugReports": "https://github.com/wch/webshot/issues",
-        "Config/testthat/edition": "3",
-        "NeedsCompilation": "no",
-        "Packaged": "2023-06-26 22:07:00 UTC; winston",
-        "Author": "Winston Chang [aut, cre],\n  Yihui Xie [ctb],\n  Francois Guillem [ctb],\n  Barret Schloerke [ctb],\n  Nicolas Perriault [ctb] (The CasperJS library)",
-        "Maintainer": "Winston Chang <winston@rstudio.com>",
+        "ByteCompile": "true",
+        "Imports": "R6, later (>= 1.2.0)",
+        "LinkingTo": "cpp11, AsioHeaders, later",
+        "BugReports": "https://github.com/rstudio/websocket/issues",
+        "SystemRequirements": "GNU make, OpenSSL >= 1.0.2",
+        "RoxygenNote": "7.3.2",
+        "Suggests": "httpuv, testthat, knitr, rmarkdown",
+        "VignetteBuilder": "knitr",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-04-09 10:46:21 UTC; cg334",
+        "Author": "Winston Chang [aut, cre],\n  Joe Cheng [aut],\n  Alan Dipert [aut],\n  Barbara Borges [aut],\n  Posit, PBC [cph],\n  Peter Thorson [ctb, cph] (WebSocket++ library),\n  René Nyffenegger [ctb, cph] (Base 64 library),\n  Micael Hildenborg [ctb, cph] (SHA1 library),\n  Aladdin Enterprises [cph] (MD5 library),\n  Bjoern Hoehrmann [ctb, cph] (UTF8 Validation library)",
+        "Maintainer": "Winston Chang <winston@posit.co>",
         "Repository": "CRAN",
-        "Date/Publication": "2023-06-26 23:30:02 UTC",
-        "Built": "R 4.4.3; ; 2025-04-04 01:47:32 UTC; windows",
+        "Date/Publication": "2025-04-10 09:00:02 UTC",
+        "Built": "R 4.4.3; x86_64-w64-mingw32; 2025-04-10 11:20:00 UTC; windows",
+        "Archs": "x64",
         "RemoteType": "standard",
-        "RemotePkgRef": "webshot",
-        "RemoteRef": "webshot",
+        "RemotePkgRef": "websocket",
+        "RemoteRef": "websocket",
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteReposName": "CRAN",
         "RemotePkgPlatform": "x86_64-w64-mingw32",
-        "RemoteSha": "0.5.5"
+        "RemoteSha": "1.4.4"
       }
     },
     "withr": {
@@ -5226,10 +5366,10 @@
       "checksum": "dcb240655dcbf79b8706d11c8c2a169c"
     },
     ".Rprofile": {
-      "checksum": "8433448a27d8ee5aad5053fb675b8874"
+      "checksum": "75c6750849a95643869ba8484b6952c4"
     },
     "app.R": {
-      "checksum": "9378cf77f5ab666515bf2531e3324b12"
+      "checksum": "6c7c9fb88551e5ef0ecaa0411824cb81"
     },
     "config.yml": {
       "checksum": "d41d8cd98f00b204e9800998ecf8427e"
@@ -5376,91 +5516,97 @@
       "checksum": "d229da563da18fe5d58cd95a6467d584"
     },
     "R/binary_module.R": {
-      "checksum": "6b8aba395ea497d7804a3043ff8593e7"
+      "checksum": "c54e204898f11004e7921828e5a0b974"
     },
     "R/categorical_module.R": {
-      "checksum": "d34364f7942c5d2da646b22777e09a84"
+      "checksum": "b83dbd25ef09b0d2dd61e72526251bb6"
     },
     "R/data_loader.R": {
       "checksum": "8403b3284d404e41a52eee05892c6710"
     },
+    "R/extra/about_server.R": {
+      "checksum": "dc1cb4584a90a419ea7714c352786a40"
+    },
+    "R/extra/about_ui.R": {
+      "checksum": "748eafd12599413710462d9b7989460e"
+    },
     "R/extra/methodology_server.R": {
-      "checksum": "35ec203d6a8e36107b6a33930640db44"
+      "checksum": "7dd910fa4adf278cfb624cafee13f027"
     },
     "R/extra/methodology_ui.R": {
-      "checksum": "6a50dc7bf0f245f8be46f0deb2e06af4"
+      "checksum": "3997f4c10b4b3b38ffa2eab253dae60a"
     },
     "R/global_theme.R": {
-      "checksum": "82ee1729eb379466d5d08d28e2b976b1"
+      "checksum": "ef69297cafe64ba4c35df4a66984bc1d"
     },
     "R/government/accountability_server.R": {
-      "checksum": "b608a41fc9bff55c289b469d4d857536"
+      "checksum": "76a9357a873eec84739eb8dd88d94ea2"
     },
     "R/government/accountability_ui.R": {
-      "checksum": "461b396e7919b748f97acaf80d97af30"
+      "checksum": "0d7fb724286e87811d096bcf02a5e4cd"
     },
     "R/government/expectations_server.R": {
-      "checksum": "2fdbd628ee3fa1113bc0fd9a813be4ef"
+      "checksum": "a85d7a807a8d91f93949dd4791e1b257"
     },
     "R/government/expectations_ui.R": {
-      "checksum": "f8f02ca2b3c4361a12a9ab1905265dae"
+      "checksum": "f8b94a1a66afbea5945a33bbd640412c"
     },
     "R/government/government_server.R": {
       "checksum": "163d53dfb18f3e867713f2aaa6009819"
     },
     "R/government/government_ui.R": {
-      "checksum": "80560af6da35850205bcf41d9ef7b832"
+      "checksum": "09c1fc2ccefb24a68b8cc2790dd514cf"
     },
     "R/government/inequality_server.R": {
-      "checksum": "0e0a9bb4dfcc5be7b6ba04445cb483cb"
+      "checksum": "9e6da0f23b0bf4fcca442c3a72056354"
     },
     "R/government/inequality_ui.R": {
-      "checksum": "49ee4eee08f097645be32abd0572ec07"
+      "checksum": "88c7d446819db85aa21ea0371b822e96"
     },
     "R/government/representation_server.R": {
-      "checksum": "6b5ab5d4f6efe35bb2054502f5b58ae9"
+      "checksum": "456a62bd3f3b4812ca5567f927326b96"
     },
     "R/government/representation_ui.R": {
-      "checksum": "85bdb61ecb602f11716b74b667f5e4c0"
+      "checksum": "506fe89a9ad858dbdd67f01ee925a23f"
     },
     "R/government/trust_server.R": {
-      "checksum": "981457631115dfbcb7d997418e625a82"
+      "checksum": "5885aa4e3e723038c4b7a8bdfe162432"
     },
     "R/government/trust_ui.R": {
-      "checksum": "f49eec54fc88edc3591e4c9424772296"
+      "checksum": "0549c87f1c245664c0c03910659bdbcf"
     },
     "R/infrastructure/education_server.R": {
-      "checksum": "2fed77daf97698448f80e1d6598451d1"
+      "checksum": "eb079ec6bb52fb070122f47417a888ec"
     },
     "R/infrastructure/education_ui.R": {
-      "checksum": "aebb9f6a2d6a4f97067a15822d286021"
+      "checksum": "5a406a61b8c7f86f5b4c176cfff34098"
     },
     "R/infrastructure/healthcare_server.R": {
-      "checksum": "9e8a036c88f4af2fce6bc758403624d9"
+      "checksum": "e353d4b85f433dba82a7922f48f696ac"
     },
     "R/infrastructure/healthcare_ui.R": {
-      "checksum": "69c1d061e393703189f6d3c883772272"
+      "checksum": "d8bda2d9440bd68e81807b0186e7c05d"
     },
     "R/infrastructure/housing_server.R": {
-      "checksum": "b68640ecc5773ff8a5d36c24c4196710"
+      "checksum": "5c6340ccc8945ce9fe329b7b3ffdb1e0"
     },
     "R/infrastructure/housing_ui.R": {
-      "checksum": "8bd30c19da2bae0b464b2187c28a9c7a"
+      "checksum": "fb49a2a9c7b6a8d5720df038e23c6686"
     },
     "R/infrastructure/infrastructure_server.R": {
-      "checksum": "c81825135af8653755b34e9f32b09d69"
+      "checksum": "3f3d57bc18c4d59d35afa4860a815574"
     },
     "R/infrastructure/infrastructure_ui.R": {
       "checksum": "5fd30fa67dac2ad59cbc65fa12df21d2"
     },
     "R/infrastructure/public_services_server.R": {
-      "checksum": "ed0b7f910521614c09aab86e8e685655"
+      "checksum": "7f599ef89bf45d68dd073795beac5381"
     },
     "R/infrastructure/public_services_ui.R": {
-      "checksum": "b513d16057c20d7c064cd975f55fd430"
+      "checksum": "ce232f1a7ce34ca3d7006811d1a6706b"
     },
     "R/interval_module.R": {
-      "checksum": "ffdd5030f042f3af1bf2045597d36a79"
+      "checksum": "b796e5d71fbecb6cbd2cce22128b69d2"
     },
     "R/nominal_module.R": {
       "checksum": "899e477e1b148bf4bd390f5ddc6f0bdd"
@@ -5469,22 +5615,22 @@
       "checksum": "9b6091da838f282cf21074656f078eba"
     },
     "R/participation/civic_server.R": {
-      "checksum": "9a1a1bad90075f98c5273de3dd891bd4"
+      "checksum": "0a445790bd46eef577a02e4f6ef8db60"
     },
     "R/participation/civic_ui.R": {
-      "checksum": "72e2496f5dc97bb4a1c10db27e5454b6"
+      "checksum": "79151748c7c78a1fb9616f80225437f8"
     },
     "R/participation/community_server.R": {
-      "checksum": "ecaaf145a77c9fe463dae7338364b304"
+      "checksum": "140c8257fb37cebef95c6e54ca080266"
     },
     "R/participation/community_ui.R": {
-      "checksum": "b2409034b6bdb89e129464aca659e920"
+      "checksum": "6e549387e8ee60a3e43ef96cab58d29e"
     },
     "R/participation/participation_server.R": {
-      "checksum": "63c36a4117c8d6aa87a105f72e187d85"
+      "checksum": "7a8663e15b32d39410da345a6ac3ae45"
     },
     "R/participation/participation_ui.R": {
-      "checksum": "9ce7f0bebea02bf1bd1bbb6ac14f139b"
+      "checksum": "5b918442d68307ab2201191ced6037ca"
     },
     "R/question_classifier.R": {
       "checksum": "30e2eb244c5488dd5f07e5751984efeb"
@@ -5493,7 +5639,7 @@
       "checksum": "88a54a4e17e44cacc9739b9aaa2cd067"
     },
     "R/special_module.R": {
-      "checksum": "645bc393dec53d5f41dabcceee240881"
+      "checksum": "2a7d86a96009b013dd1f6afc71cef3b4"
     },
     "R/survey_config.R": {
       "checksum": "d3e2708881f9fea0c3dd8ee9aaca4261"
@@ -5505,7 +5651,7 @@
       "checksum": "ef4dad24817994a4f3af7016e2ab6744"
     },
     "R/urban/mobility_ui.R": {
-      "checksum": "fe084dfc3e76535a46f135dde9a3d849"
+      "checksum": "1053c9169363e1edb1c0c1c78e322a95"
     },
     "R/urban/transportation_server.R": {
       "checksum": "38f756a0364520b64c0f74f098892e4d"
@@ -5517,55 +5663,52 @@
       "checksum": "acaafdff28afb30a50db03546c73157e"
     },
     "R/urban/urban_ui.R": {
-      "checksum": "a242ddde6d135a2ad7fc2b3b0458d0a5"
+      "checksum": "863b5362a908e2ce28989b682ea05d0c"
     },
     "R/utils.R": {
       "checksum": "39ca92bac55636262ef62d3b9403deed"
     },
     "R/wellness/cultural_server.R": {
-      "checksum": "1d3163d623da9594827305e90a9f6fd1"
+      "checksum": "a5ade6665e95f7dc2e5db8ce5a093825"
     },
     "R/wellness/cultural_ui.R": {
-      "checksum": "bbac1ab3bcb1b330ce5c70c0d76ad919"
+      "checksum": "ea0487afc29fadb197e7a4cfa0894855"
     },
     "R/wellness/economy_server.R": {
-      "checksum": "868f5b70ee93544a1acc60383cf1b860"
+      "checksum": "4dfb8d4ad8fa10a2641eb1b5324c2612"
     },
     "R/wellness/economy_ui.R": {
-      "checksum": "c0a2c1f1c61d9af34425464dec533493"
+      "checksum": "f052c9644f611f82765ef683f5caf363"
     },
     "R/wellness/environment_server.R": {
       "checksum": "c4db7c3e44479ed5ed6a0605dbf2f10b"
     },
     "R/wellness/environment_ui.R": {
-      "checksum": "922c203135ade15c87d30de1d3da25a3"
+      "checksum": "e628f03e46d80fa3ff23268eeecd2526"
     },
     "R/wellness/identity_server.R": {
-      "checksum": "a742cb9a9f4960068017f6797eb14aba"
+      "checksum": "ea4daafbcfab3e9bb78c21d525b36c78"
     },
     "R/wellness/identity_ui.R": {
-      "checksum": "ce960c08f3da3fef8666067589787a97"
+      "checksum": "a2996e64454da810a07b188c83e59ea1"
     },
     "R/wellness/wellness_server.R": {
-      "checksum": "a76a2d408ed9e58c2565c1c14eed0171"
+      "checksum": "af550707c15a7ae8eb41ee28aaf3827d"
     },
     "R/wellness/wellness_ui.R": {
-      "checksum": "79b59478ce8e6a898e3006339c96307b"
+      "checksum": "c83ee9cfd797849e01b3bc1448cf5ab2"
     },
     "README.md": {
       "checksum": "9343d232581bcc020ba4e595a406def6"
     },
     "renv.lock": {
-      "checksum": "47f0514b81cc418533036a26ed5bfc47"
+      "checksum": "d8dacd8f3ff0f3b7043117f952ce8303"
     },
     "www/css/styles.css": {
       "checksum": "a633a28b49d322071f6b3cd804955744"
     },
-    "www/logo.png": {
-      "checksum": "65096365da99f15bfef9e7d196ff3ef4"
-    },
-    "year_selector_demo.R": {
-      "checksum": "a6c9942525a44f37a978a7fa8403dbd3"
+    "www/logo_pej.png": {
+      "checksum": "5acf4e825b9faf68177932faa3d9e350"
     }
   },
   "users": null

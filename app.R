@@ -137,8 +137,7 @@ create_dashboard_footer <- function() {
 
 
 ui <- page_navbar(
-  # Title with properly aligned dropdown
-  title = div(
+    title = div(
     class = "navbar-title-container",
     # Use a div with display:flex for better alignment
     div(
@@ -168,8 +167,8 @@ ui <- page_navbar(
     )
   ),
   id = "navbar",
-  bg = "#0d6efd", 
   inverse = TRUE,
+  fluid = TRUE, 
   
   # Add these additional styles to fix alignment
   header = tags$head(
@@ -177,51 +176,6 @@ ui <- page_navbar(
     tags$link(rel = "stylesheet", href = "styles.css"),
     tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
     tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"),
-    
-    # Add these additional alignment styles
-    tags$style(HTML("
-      /* Navbar and title container */
-      .navbar {
-        min-height: 56px;
-        display: flex;
-        align-items: center;
-      }
-      
-      .navbar-title-container {
-        display: flex;
-        align-items: center;
-        height: 100%;
-        padding: 0;
-      }
-      
-      .navbar-brand-container {
-        display: flex;
-        align-items: center;
-        height: 100%;
-      }
-      
-      .navbar-brand {
-        margin: 0;
-        padding: 0;
-        font-weight: bold;
-        line-height: 1.5;
-      }
-      
-      /* Year dropdown vertical alignment */
-      .year-selector {
-        margin-left: 1rem;
-        display: flex;
-        align-items: center;
-        height: 100%;
-      }
-      
-      .year-dropdown-btn {
-        height: 38px;
-        display: flex;
-        align-items: center;
-        padding: 0 1rem;
-      }
-    ")),
     tags$script(HTML("
   $(document).ready(function() {
     // Update dropdown button text when year changes
@@ -260,106 +214,106 @@ tags$script(src = "custom.js")
     # Dashboard overview content
     div(
  
-      # Grid of category cards
+    # Grid of category cards
+div(
+  class = "row",
+  
+  # Bienestar Social y Económico
+  div(
+    class = "col-md-4 mb-4",
+    div(
+      class = "card h-100",
       div(
-        class = "row",
-        
-        # Bienestar Social y Económico
+        class = "card-body d-flex flex-column align-items-center text-center",
         div(
-          class = "col-md-4 mb-4",
-          div(
-            class = "card h-100",
-            div(
-              class = "card-body d-flex flex-column align-items-center text-center",
-              div(
-                class = "nav-card w-100",
-                id = "nav_wellness_card",
-                onclick = "Shiny.setInputValue('nav_target', 'wellness', {priority: 'event'})",
-                div(class = "nav-card-icon", icon("heart")),
-                h4(class = "nav-card-title", "Bienestar"),
-                p("Análisis de condiciones económicas, participación cultural y tendencias demográficas")
-              )
-            )
-          )
-        ),
-        
-        # Movilidad Urbana y Medio Ambiente
-        div(
-          class = "col-md-4 mb-4",
-          div(
-            class = "card h-100",
-            div(
-              class = "card-body d-flex flex-column align-items-center text-center",
-              div(
-                class = "nav-card w-100",
-                id = "nav_urban_card",
-                onclick = "Shiny.setInputValue('nav_target', 'urban', {priority: 'event'})",
-                div(class = "nav-card-icon", icon("bus-alt")),
-                h4(class = "nav-card-title", "Movilidad"),
-                p("Información sobre movilidad, transporte público y medio ambiente")
-              )
-            )
-          )
-        ),
-        
-        # Gobierno
-        div(
-          class = "col-md-4 mb-4",
-          div(
-            class = "card h-100",
-            div(
-              class = "card-body d-flex flex-column align-items-center text-center",
-              div(
-                class = "nav-card w-100",
-                id = "nav_government_card",
-                onclick = "Shiny.setInputValue('nav_target', 'government', {priority: 'event'})",
-                div(class = "nav-card-icon", icon("landmark")),
-                h4(class = "nav-card-title", "Gobierno"),
-                p("Análisis de desigualdad, rendición de cuentas, representación y confianza")
-              )
-            )
-          )
-        ),
-        
-        # Infraestructura y Servicios
-        div(
-          class = "col-md-6 mb-4",
-          div(
-            class = "card h-100",
-            div(
-              class = "card-body d-flex flex-column align-items-center text-center",
-              div(
-                class = "nav-card w-100",
-                id = "nav_infrastructure_card",
-                onclick = "Shiny.setInputValue('nav_target', 'infrastructure', {priority: 'event'})",
-                div(class = "nav-card-icon", icon("building")),
-                h4(class = "nav-card-title", "Infraestructura"),
-                p("Información sobre servicios públicos, educación, salud y vivienda")
-              )
-            )
-          )
-        ),
-        
-        # Participación Ciudadana
-        div(
-          class = "col-md-6 mb-4",
-          div(
-            class = "card h-100",
-            div(
-              class = "card-body d-flex flex-column align-items-center text-center",
-              div(
-                class = "nav-card w-100",
-                id = "nav_participation_card",
-                onclick = "Shiny.setInputValue('nav_target', 'participation', {priority: 'event'})",
-                div(class = "nav-card-icon", icon("users")),
-                h4(class = "nav-card-title", "Participación"),
-                p("Análisis de la participación cívica y comunitaria")
-              )
-            )
-          )
+          class = "nav-card nav-card-bienestar w-100",
+          id = "nav_wellness_card",
+          onclick = "Shiny.setInputValue('nav_target', 'wellness', {priority: 'event'})",
+          div(class = "nav-card-icon", icon("heart")),
+          h4(class = "nav-card-title", "Bienestar"),
+          p("Análisis de condiciones económicas, participación cultural y tendencias demográficas")
         )
       )
-    ),create_dashboard_footer()
+    )
+  ),
+  
+  # Movilidad Urbana y Medio Ambiente
+  div(
+    class = "col-md-4 mb-4",
+    div(
+      class = "card h-100",
+      div(
+        class = "card-body d-flex flex-column align-items-center text-center",
+        div(
+          class = "nav-card nav-card-movilidad w-100",
+          id = "nav_urban_card",
+          onclick = "Shiny.setInputValue('nav_target', 'urban', {priority: 'event'})",
+          div(class = "nav-card-icon", icon("bus-alt")),
+          h4(class = "nav-card-title", "Movilidad"),
+          p("Información sobre movilidad, transporte público y medio ambiente")
+        )
+      )
+    )
+  ),
+  
+  # Gobierno
+  div(
+    class = "col-md-4 mb-4",
+    div(
+      class = "card h-100",
+      div(
+        class = "card-body d-flex flex-column align-items-center text-center",
+        div(
+          class = "nav-card nav-card-gobierno w-100",
+          id = "nav_government_card",
+          onclick = "Shiny.setInputValue('nav_target', 'government', {priority: 'event'})",
+          div(class = "nav-card-icon", icon("landmark")),
+          h4(class = "nav-card-title", "Gobierno"),
+          p("Análisis de desigualdad, rendición de cuentas, representación y confianza")
+        )
+      )
+    )
+  ),
+  
+  # Infraestructura y Servicios
+  div(
+    class = "col-md-6 mb-4",
+    div(
+      class = "card h-100",
+      div(
+        class = "card-body d-flex flex-column align-items-center text-center",
+        div(
+          class = "nav-card nav-card-infraestructura w-100",
+          id = "nav_infrastructure_card",
+          onclick = "Shiny.setInputValue('nav_target', 'infrastructure', {priority: 'event'})",
+          div(class = "nav-card-icon", icon("building")),
+          h4(class = "nav-card-title", "Infraestructura"),
+          p("Información sobre servicios públicos, educación, salud y vivienda")
+        )
+      )
+    )
+  ),
+  
+  # Participación Ciudadana
+  div(
+    class = "col-md-6 mb-4",
+    div(
+      class = "card h-100",
+      div(
+        class = "card-body d-flex flex-column align-items-center text-center",
+        div(
+          class = "nav-card nav-card-participacion w-100",
+          id = "nav_participation_card",
+          onclick = "Shiny.setInputValue('nav_target', 'participation', {priority: 'event'})",
+          div(class = "nav-card-icon", icon("users")),
+          h4(class = "nav-card-title", "Participación"),
+          p("Análisis de la participación cívica y comunitaria")
+        )
+      )
+    )
+  )
+)
+),create_dashboard_footer()
   ),
   
   # ---- Bienestar Social y Económico ----
@@ -691,6 +645,31 @@ server <- function(input, output, session) {
       aboutServer("about_section")
     }
   })
+  # Add this to your app.R server function
+observeEvent(input$navbar, {
+  # Get current section
+  current_tab <- input$navbar
+  
+  # Remove all section classes
+  shinyjs::removeClass(selector = "body", class = "section-bienestar")
+  shinyjs::removeClass(selector = "body", class = "section-movilidad")
+  shinyjs::removeClass(selector = "body", class = "section-gobierno")
+  shinyjs::removeClass(selector = "body", class = "section-infraestructura")
+  shinyjs::removeClass(selector = "body", class = "section-participacion")
+  
+  # Add current section class
+  if (grepl("^wellness|^economic|^cultural|^identity|^environment", current_tab)) {
+    shinyjs::addClass(selector = "body", class = "section-bienestar")
+  } else if (grepl("^urban|^mobility|^transportation", current_tab)) {
+    shinyjs::addClass(selector = "body", class = "section-movilidad")
+  } else if (grepl("^government|^inequality|^accountability|^representation|^expectations|^trust", current_tab)) {
+    shinyjs::addClass(selector = "body", class = "section-gobierno")
+  } else if (grepl("^infrastructure|^public_services|^education|^healthcare|^housing", current_tab)) {
+    shinyjs::addClass(selector = "body", class = "section-infraestructura")
+  } else if (grepl("^participation|^civic|^community", current_tab)) {
+    shinyjs::addClass(selector = "body", class = "section-participacion")
+  }
+})
 }
 
 # Run the application

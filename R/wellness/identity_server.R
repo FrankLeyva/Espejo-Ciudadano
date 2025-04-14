@@ -281,4 +281,84 @@ identityServer <- function(input, output, session,current_theme = NULL) {
     # Return formatted text
     paste0(percentage, "%")
   })
+  # Add to identityServer function
+# Observer to track active tab for download
+observeEvent(input$neighborhood_tabs, {
+  # Store the active tab in a reactive value for the download handler
+  tab_value <- input$neighborhood_tabs
+})
+
+# Download handler that adapts based on active tab
+output$download_connection_map <- downloadHandler(
+  filename = function() {
+    # Get map type for filename based on active tab
+    map_type <- ifelse(input$neighborhood_tabs == "Vínculo con la colonia o fraccionamiento", 
+                      "colonia", "vecinos")
+    paste("mapa_vinculo_", map_type, "_", Sys.Date(), ".png", sep = "")
+  },
+  content = function(file) {
+    # Temporary file for the HTML content
+    tmp_html <- tempfile(fileext = ".html")
+    
+    # Create the appropriate map based on active tab
+    if(input$neighborhood_tabs == "Vínculo con la colonia o fraccionamiento") {
+      map <- create_interval_district_map(
+        neighborhood_connection_data(),
+        geo_data(),
+        selected_responses = c("4", "5"),
+        highlight_extremes = TRUE,
+        use_gradient = F,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Vínculo con la colonia o fraccionamiento"
+    } else {
+      map <- create_interval_district_map(
+        neighbors_connection_data(),
+        geo_data(),
+        selected_responses = c("4", "5"),
+        highlight_extremes = TRUE,
+        use_gradient = F,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Vínculo con los vecinos"
+    }
+    
+    # Add title and footer
+    map <- map %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                    title_text, 
+                    "</div>"),
+        position = "topright"
+      ) %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                    paste("Resultados de la encuesta de percepción y participación ciudadana y buen gobierno", selectedYear()),
+                    "</div>"),
+        position = "bottomright"
+      )
+    
+    # Save and convert
+    htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+    
+    pagedown::chrome_print(
+      input = tmp_html,
+      output = file,
+      options = list(
+        printBackground = TRUE,
+        scale = 2.0
+      ),
+      format = "png",
+      browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+    )
+    
+    # Clean up
+    if (file.exists(tmp_html)) {
+      file.remove(tmp_html)
+    }
+  }
+)
 }

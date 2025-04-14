@@ -3,16 +3,16 @@ wellnessUI <- function() {
   bienestar_theme <- get_section_theme("bienestar")
 
   page_fluid(
+    class = "section-bienestar",
     useShinyjs(),
     
     # Header
     layout_columns(
       fill = FALSE,
       card(
-        style = paste0("border-top: 4px solid ", bienestar_theme$colors$primary, ";"),
+        style = "border-top: 4px solid var(--bienestar-color);", 
         card_header(
-          h2("Bienestar", class = "text-center", 
-             style = paste0("color: ", bienestar_theme$colors$primary, ";"))
+          h2("Bienestar", class = "text-center")
         )
       )
     ),
@@ -23,10 +23,11 @@ wellnessUI <- function() {
       
       # Economy card
       div(
-        class = "nav-card",
+        class = "nav-card nav-card-economic",
         id = "nav_economic_card",
         onclick = "Shiny.setInputValue('nav_target', 'economic', {priority: 'event'})",
         card(
+          
           card_body(
             div(class = "text-center nav-card-icon text-primary", 
                 bsicons::bs_icon("cash-coin")),
@@ -86,8 +87,7 @@ wellnessUI <- function() {
       # Economic situation pie chart
       card(
         card_header(
-          "Percepción de situación económica personal",
-          class = "bg-light"
+          "Percepción de situación económica personal"
         ),
         plotlyOutput("economic_situation_pie", height = "450px"),
       ),
@@ -103,8 +103,7 @@ wellnessUI <- function() {
               icon = icon("download"), 
               class = "btn-sm"
             )
-          ),
-          class = "bg-light"
+          )
         ),
         leafletOutput("migration_intention_map", height = "450px"),
 
@@ -115,8 +114,7 @@ wellnessUI <- function() {
     layout_columns(
       card(
         card_header(
-          "Actividades realizadas en los últimos 3 meses",
-          class = "bg-light"
+          "Actividades realizadas en los últimos 3 meses"
         ),
         plotlyOutput("activities_chart", height = "550px")
       )

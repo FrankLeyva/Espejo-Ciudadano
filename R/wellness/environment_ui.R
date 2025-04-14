@@ -1,30 +1,10 @@
 # environmentUI.R
 environmentUI <- function() {
   page_fluid(
+    class = "section-bienestar", 
     useShinyjs(),
     
-    tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
-      tags$style(HTML("
-        .tab-content {
-          padding-top: 20px;
-        }
-        .nav-tabs .nav-link.active {
-          font-weight: bold;
-          border-top: 3px solid #0d6efd;
-        }
-      "))
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
-    ),
-    div(
+   div(
       class = "mb-4",
       tags$a(
         href = "#",
@@ -38,6 +18,7 @@ environmentUI <- function() {
     layout_columns(
       fill = FALSE,
       card(
+        style = "border-top: 4px solid var(--bienestar-color);", 
         card_header(
           h2("Medio Ambiente", class = "text-center")
         )
@@ -47,11 +28,7 @@ environmentUI <- function() {
     # Environmental satisfaction maps
     card(
       card_header(
-        div(
-          style = "background-color: transparent; border-bottom: none;",
           "Satisfacción con Aspectos Ambientales",
-          class = "h5 fw-bold"
-        )
       ),
       tabsetPanel(
         id = "env_satisfaction_tabs",
@@ -77,11 +54,8 @@ environmentUI <- function() {
     # Environmental problems bar chart
     card(
       card_header(
-        div(
-          style = "background-color: transparent; border-bottom: none;",
+
           "Principales Problemas Ambientales por Colonia",
-          class = "h5 fw-bold"
-        )
       ),
       plotlyOutput("env_problems_plot", height = "500px")
     ),

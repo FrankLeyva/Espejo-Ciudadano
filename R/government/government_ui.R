@@ -1,6 +1,7 @@
 # government_ui.R
 governmentUI <- function() {
   page_fluid(
+    class = "section-gobierno",
     useShinyjs(),
     
     tags$head(

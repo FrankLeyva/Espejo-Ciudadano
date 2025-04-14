@@ -924,7 +924,7 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
 
     # Create base map
     map <- leaflet(geo_data) %>%
-      addProviderTiles(providers$CartoDB.Positron) %>% 
+      addProviderTiles(providers$Stadia.StamenTonerLite) %>% 
       addPolygons(
         fillColor = ~fill_color,
         fillOpacity = 0.7,

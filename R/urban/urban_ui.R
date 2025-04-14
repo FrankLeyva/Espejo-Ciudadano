@@ -1,6 +1,7 @@
 # urbanUI.R
 urbanUI <- function() {
   page_fluid(
+    class = "section-movilidad",
     useShinyjs(),
     
     tags$head(
@@ -31,6 +32,7 @@ urbanUI <- function() {
     # Header
     layout_columns(
       fill = FALSE,
+      style = "border-top: 4px solid var(--movilidad-color);", 
       card(card_header(h2("Desarrollo Urbano", class = "text-center")))
     ),
     
@@ -40,8 +42,8 @@ urbanUI <- function() {
       
       # Mobility Dashboard Card
       div(
-        class = "nav-card",
-        id = "nav_mobility_card",
+        class = "nav-card nav-card-urban",
+        id = "nav_mobility_card ",
         onclick = "Shiny.setInputValue('nav_target', 'mobility', {priority: 'event'})",
         card(
           card_body(
@@ -54,8 +56,8 @@ urbanUI <- function() {
       
       # Public Transportation Card
       div(
-        class = "nav-card",
-        id = "nav_public_transport_card",
+        class = "nav-card nav-card-transportation",
+        id = "nav_trasnportation_card ",
         onclick = "Shiny.setInputValue('nav_target', 'transportation', {priority: 'event'})",
         card(
           card_body(
@@ -107,11 +109,7 @@ urbanUI <- function() {
     # Environmental quality plot
     card(
       card_header(
-        div(
-          style = "background-color: transparent; border-bottom: none;",
-          "Calidad Ambiental",
-          class = "h5 fw-bold"
-        )
+          "Satisfacción con aspectos ambientales"
       ),
       plotlyOutput("env_quality_plot", height = "500px")
     )

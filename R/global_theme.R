@@ -220,12 +220,12 @@ apply_plotly_theme <- function(p, title = "", xlab = "", ylab = "", custom_theme
         modeBarButtonsToAdd = list(
           list(
             name = "customDownload",
-            title = "Descargar con encabezado y pie de página",
+            title = "Descargar Imagen",
             icon = list(
-              path = "M4 5h16v16H4V5m16 14V7H6v12h14M17 9H7v2h10V9m0 4H7v2h10v-2z", 
-              transform = "matrix(1 0 0 -1 0 24)",
-              width = 24,
-              height = 24
+              path ="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z  M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5",
+              width =16,
+              height = 16,
+              viewBox = "0 0 16 16"
             ),
             click = htmlwidgets::JS("function(gd) { window.customPlotDownload(gd); }")
           )
@@ -515,3 +515,5 @@ apply_leaflet_theme <- function(map, title = NULL, custom_theme = NULL) {
     # Set view to Ciudad Juárez (approximate)
     setView(lng = -106.4245, lat = 31.6904, zoom = 11)
 }
+
+

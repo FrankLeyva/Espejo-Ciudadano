@@ -517,7 +517,7 @@ create_education_overview <- function(survey_data, geo_data, custom_theme = NULL
   
   # Create base map
   map <- leaflet(geo_data) %>%
-    addProviderTiles(providers$CartoDB.Positron) %>% 
+    addProviderTiles(providers$Stadia.StamenTonerLite) %>% 
     addPolygons(
       fillColor = ~fill_color,
       fillOpacity = 0.7,
@@ -709,14 +709,14 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
   # Check if we have data
   if (is.null(survey_data) || nrow(survey_data) == 0 || is.null(geo_data)) {
     return(leaflet() %>% 
-             addProviderTiles(providers$CartoDB.Positron) %>%
+             addProviderTiles(providers$Stadia.StamenTonerLite) %>%
              addControl("No hay datos suficientes para visualizar", position = "topright"))
   }
   
   # Check if Q25 exists in the dataset
   if (!"Q25" %in% names(survey_data)) {
     return(leaflet() %>% 
-             addProviderTiles(providers$CartoDB.Positron) %>%
+             addProviderTiles(providers$Stadia.StamenTonerLite) %>%
              addControl("Datos de satisfacción de vivienda no disponibles en esta encuesta", position = "topright"))
   }
   
@@ -742,7 +742,7 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
   # Make sure district_num column exists and is valid
   if (nrow(district_stats) == 0 || all(is.na(district_stats$district_num))) {
     return(leaflet() %>% 
-             addProviderTiles(providers$CartoDB.Positron) %>%
+             addProviderTiles(providers$Stadia.StamenTonerLite) %>%
              addControl("No se pudieron calcular estadísticas de vivienda por distrito", position = "topright"))
   }
   
@@ -920,7 +920,7 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
   
   # Create base map
   map <- leaflet(geo_data) %>%
-    addProviderTiles(providers$CartoDB.Positron) %>% 
+    addProviderTiles(providers$Stadia.StamenTonerLite) %>% 
     addPolygons(
       fillColor = ~fill_color,
       fillOpacity = 0.7,
@@ -1827,7 +1827,7 @@ create_env_quality_plot <- function(survey_data, custom_theme = NULL) {
     hovertext = ~paste0(Aspect, ": ", round(Average, 1), "/10")
   ) %>%
     apply_plotly_theme(
-      title = "Satisfacción con Aspectos Ambientales",
+      title = "",
       xlab = "",
       ylab = "Calificación Promedio (1-10)",
       custom_theme = custom_theme

@@ -2,20 +2,31 @@
 # identity_ui.R
 
 identityUI <- function() {
+
   page_fluid(
+    class = "section-bienestar",
+
     useShinyjs(),
-    
     tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      )
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
+      tags$style(HTML("
+        /* Override pill navigation styling for this page */
+        .bienestar-pills .nav-pills .nav-link:not(.active) {
+          background-color: rgba(240, 240, 240, 0.8);
+color: var(--bienestar-color) !important;
+            border: 1px solid rgba(30, 136, 229, 0.2);
+          font-weight: bold !important;
+        }
+        
+        .bienestar-pills .nav-pills .nav-link:hover:not(.active) {
+          background-color: rgba(30, 136, 229, 0.1);
+        }
+             .bienestar-pills .nav-pills .nav-link.active {
+          background-color: var(--bienestar-color) !important; /* Bienestar primary color */
+          color: white !important;
+          font-weight: bold !important;
+          border: none !important;
+        }
+      "))
     ),
     div(
       class = "mb-4",
@@ -27,59 +38,66 @@ identityUI <- function() {
         "Volver a Bienestar Social y Económico"
       )
     ),
-    # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
-          h2("Identidad y Pertenencia", class = "text-center")
+          h2("Identidad y Pertenencia", class = "text-center"),
         )
       )
     ),
     
-    # City monuments wordcloud and city pride pie chart
     layout_columns(
       col_widths = c(6, 6),
-      
-      # Wordcloud for city monuments
       card(
+
         card_header(
           "Monumentos importantes para la identidad juarense",
-          class = "bg-light"
         ),
         plotlyOutput("monuments_bar", height = "400px"),
-
       ),
       
       # City pride pie chart
+
       card(
+
         card_header(
           "Orgullo por vivir en Ciudad Juárez",
-          class = "bg-light"
         ),
         plotlyOutput("city_pride_pie", height = "400px"),
 
       )
     ),
-    
-    # Maps of neighborhood and neighbors connection
-    card(
-      card_header(
-        "Sentido de pertenencia",
-        class = "bg-light"
-      ),
-      tabsetPanel(
-        tabPanel(
-          "Vínculo con la colonia o fraccionamiento",
-          leafletOutput("neighborhood_connection_map", height = "500px"),
-            class = "mt-2 text-muted text-center")
-        ,
-        tabPanel(
-          "Vínculo con los vecinos",
-          leafletOutput("neighbors_connection_map", height = "500px"),
-            class = "mt-2 text-muted text-center")
-        )
+   # Add to identity_ui.R
+card(
+  card_header(
+    div(
+      class = "d-flex justify-content-between align-items-center",
+      "Sentido de pertenencia",
+      downloadButton(
+        "download_connection_map", 
+        "", 
+        icon = icon("download"), 
+        class = "btn-sm"
       )
+    )
+  ),
+  div(class = "bienestar-pills",
+    navset_pill(
+      id = "neighborhood_tabs",
+      nav_panel(
+        title = "Vínculo con la colonia o fraccionamiento",
+        icon = bsicons::bs_icon("house-fill"),
+        leafletOutput("neighborhood_connection_map", height = "500px")
+      ),
+      nav_panel(
+        title = "Vínculo con los vecinos",
+        icon = bsicons::bs_icon("people-fill"),
+        leafletOutput("neighbors_connection_map", height = "500px")
+      )
+    )
+  )
+)
     )
 
 }

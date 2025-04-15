@@ -2,29 +2,10 @@
 
 culturalUI <- function() {
   page_fluid(
+    class = "section-bienestar",
+
     useShinyjs(),
-    
-    tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
-      tags$style(HTML("
-        .info-box {
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 15px;
-          background-color: #f8f9fa;
-          border-left: 4px solid #0d6efd;
-        }
-      "))
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#1E88E5"
-    ),
+
     div(
       class = "mb-4",
       tags$a(
@@ -40,6 +21,7 @@ culturalUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--bienestar-color)",
           h2("Participación Cultural", class = "text-center")
         )
       )
@@ -82,7 +64,6 @@ culturalUI <- function() {
       card(
         card_header(
           "Asistencia a actividades culturales (últimos 3 meses)",
-          class = "bg-light"
         ),
         plotlyOutput("cultural_activities_plot", height = "500px"),
 
@@ -92,7 +73,6 @@ culturalUI <- function() {
       card(
         card_header(
           "Actividades de ocio y entretenimiento (últimos 3 meses)",
-          class = "bg-light"
         ),
         plotlyOutput("entertainment_activities_plot", height = "500px"),
       )

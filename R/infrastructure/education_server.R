@@ -227,6 +227,109 @@ educationServer <- function(input, output, session, current_theme = NULL) {
         ),
         margin = list(t = 100) # Espacio para la leyenda superior
       ) %>%
-      config(displayModeBar = FALSE) # Opcional: ocultar la barra de herramientas de plotly
+      apply_plotly_theme() # Opcional: ocultar la barra de herramientas de plotly
   })
+
+
+
+  observeEvent(input$education_tabs, {
+    # Store the active tab in a reactive value for the download handler
+    tab_value <- input$education_tabs
+  })
+
+  observeEvent(input$education_tabs, {
+    if(input$education_tabs == "Comparativa") {
+      shinyjs::hide("download_edu_satis_map")
+    } else {
+      shinyjs::show("download_edu_satis_map")
+    }
+  }, ignoreInit = FALSE) 
+# Download handler that adapts based on active tab
+output$download_environment_map <- downloadHandler(
+  filename = function() {
+    # Get map type for filename based on active tab
+    map_type <- if(input$education_tabs == "Educación Básica"){ 
+                      "Basica"} else if (input$education_tabs == "Educación Media Superior"){
+                        "Media_Superior" } else if (input$education_tabs == "Educación Superior"){
+                        "Superior" }else {
+                        ""
+                      }
+    paste("mapa_satisf_educacion_", map_type, "_", Sys.Date(), ".png", sep = "")
+  },
+  content = function(file) {
+    # Temporary file for the HTML content
+    tmp_html <- tempfile(fileext = ".html")
+    
+    # Create the appropriate map based on active tab
+    if(input$education_tabs == "Educación Básica") {
+      
+      map <- create_interval_district_map(
+        basic_edu_data(), 
+        geo_data(),
+        selected_responses = NULL,  # Para mostrar promedios en lugar de porcentajes específicos
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,       # Usar colores de distrito en lugar de gradiente
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con la Educación Básica"
+    } else if(input$education_tabs == "Educación Media Superior") {
+
+      map <- create_interval_district_map(
+        highschool_edu_data(), 
+        geo_data(),
+        selected_responses = NULL,
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con la Educación Media Superior"
+    } else if(input$education_tabs == "Educación Superior") {
+      map <-  create_interval_district_map(
+        college_edu_data(), 
+        geo_data(),
+        selected_responses = NULL,
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con la Educación Superior"
+  } 
+
+    
+    # Add title and footer
+    map <- map %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                    title_text, 
+                    "</div>"),
+        position = "topright"
+      ) %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                    paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                    "</div>"),
+        position = "bottomright"
+      )
+    
+    # Save and convert
+    htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+    
+    pagedown::chrome_print(
+      input = tmp_html,
+      output = file,
+      options = list(
+        printBackground = TRUE,
+        scale = 2.0
+      ),
+      format = "png",
+      browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+    )
+    
+    # Clean up
+    if (file.exists(tmp_html)) {
+      file.remove(tmp_html)
+    }
+  }
+)
 }

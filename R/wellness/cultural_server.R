@@ -235,7 +235,8 @@ output$entertainment_activities_plot <- renderPlotly({
     inverse=F
   ) %>%
   layout(title = "") %>%  # Remove title if not needed
-  hide_legend()
+  hide_legend() %>% 
+  apply_plotly_theme()
 })
 
 }

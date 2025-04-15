@@ -167,7 +167,7 @@ colors[top_indices] <- highlight_color
             size = if (!is.null(active_theme()$typography$sizes$text)) active_theme()$typography$sizes$text else 12
           )
         ) %>%
-        config(displayModeBar = FALSE)
+        apply_plotly_theme()
     }, error = function(e) {
       warning(paste("Error creating mechanisms plot:", e$message))
       return(plotly_empty() %>% 
@@ -276,11 +276,72 @@ colors[top_indices] <- highlight_color
             size = if (!is.null(active_theme()$typography$sizes$text)) active_theme()$typography$sizes$text else 12
           )
         ) %>%
-        config(displayModeBar = FALSE)
+          apply_plotly_theme()
     }, error = function(e) {
       warning(paste("Error creating requirements plot:", e$message))
       return(plotly_empty() %>% 
                layout(title = "Error generando visualización de requisitos"))
     })
   })
+
+  output$download_interest_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_interes_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      # We need to save the map to a temporary file first
+      tmp_html <- tempfile(fileext = ".html")
+      
+      # Get the map
+      map <-  create_interval_district_map(
+        data = interest_data(), 
+        geo_data = geo_data(),
+        # Select responses from "POCO" to "MUCHO" (2, 3, 4, 5)
+        selected_responses = c("2", "3", "4", "5"),
+        highlight_extremes = TRUE,
+        use_gradient = F,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      
+      # Add title and footer to the map directly
+      map <- map %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                      "Porcentaje que está Interesado en Participar en la Política Municipal", 
+                      "</div>"),
+          position = "topright"
+        ) %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                      paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                      "</div>"),
+          position = "bottomright"
+        )
+      
+      # Save the map to HTML
+      htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+      
+      # Use pagedown with Chrome headless
+      pagedown::chrome_print(
+        input = tmp_html,
+        output = file,
+        options = list(
+          printBackground = TRUE,
+          scale = 2.0
+        ),
+        format = "png",
+        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+      )
+      
+      # Clean up temporary files
+      if (file.exists(tmp_html)) {
+        file.remove(tmp_html)
+      }
+    }
+  )
+
+
+
 }

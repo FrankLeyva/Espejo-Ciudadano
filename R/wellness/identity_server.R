@@ -281,7 +281,7 @@ identityServer <- function(input, output, session,current_theme = NULL) {
     # Return formatted text
     paste0(percentage, "%")
   })
-  # Add to identityServer function
+ 
 # Observer to track active tab for download
 observeEvent(input$neighborhood_tabs, {
   # Store the active tab in a reactive value for the download handler
@@ -335,7 +335,7 @@ output$download_connection_map <- downloadHandler(
       ) %>%
       addControl(
         html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
-                    paste("Resultados de la encuesta de percepción y participación ciudadana y buen gobierno", selectedYear()),
+                    paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
                     "</div>"),
         position = "bottomright"
       )

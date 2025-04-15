@@ -1,6 +1,30 @@
 representationUI <- function() {
   page_fluid(
+    class = "section-gobierno",
+
     useShinyjs(),
+    tags$head(
+      tags$style(HTML("
+        /* Override pill navigation styling for this page */
+        .gobierno-pills .nav-pills .nav-link:not(.active) {
+          background-color: rgba(240, 240, 240, 0.8);
+color: var(--gobierno-color) !important;
+            border: 1px solid rgba(229, 126, 30, 0.2);
+          font-weight: bold !important;
+        }
+        
+        .gobierno-pills .nav-pills .nav-link:hover:not(.active) {
+          background-color: rgba(160, 115, 67, 0.1);
+        }
+             .gobierno-pills .nav-pills .nav-link.active {
+          background-color: var(--gobierno-color) !important; 
+          color: white !important;
+          font-weight: bold !important;
+          border: none !important;
+        }
+      "))
+    ),
+
     div(
       class = "mb-4",
       tags$a(
@@ -16,6 +40,8 @@ representationUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--gobierno-color)",
+
           h2("Representación Política", class = "text-center")
         )
       )
@@ -29,8 +55,18 @@ representationUI <- function() {
       div(
         # First tabset: Knowledge of representatives maps
         card(
-          card_header("Conocimiento de Representantes por Distrito"),
-          tabsetPanel(
+          card_header(
+          div(
+            class = "d-flex justify-content-between align-items-center",
+          "Conocimiento de Representantes por Distrito",
+          downloadButton(
+            "download_political_knowledge_map", 
+            "", 
+            icon = icon("download"), 
+            class = "btn-sm"
+          ))),
+          div(class = "gobierno-pills",
+          navset_pill(
             id = "knowledge_tabs",
             tabPanel("Regidor(a)", 
                      div(style = "height: 500px;", leafletOutput("regidor_knowledge_map"))),
@@ -41,12 +77,14 @@ representationUI <- function() {
             tabPanel("Diputado(a) Federal", 
                      div(style = "height: 500px;", leafletOutput("diputadof_knowledge_map")))
           )
+        )
         ),
         
         # Second tabset: Representative knowledge bar charts
         card(
           card_header("Conocimiento de Representantes Específicos"),
-          tabsetPanel(
+          div(class = "gobierno-pills",
+          navset_pill(
             id = "specific_knowledge_tabs",
             tabPanel("Regidores", 
                      div(style = "height: 500px;", plotlyOutput("regidores_knowledge_chart"))),
@@ -55,6 +93,7 @@ representationUI <- function() {
             tabPanel("Diputados Federales", 
                      div(style = "height: 500px;", plotlyOutput("diputados_federales_knowledge_chart")))
           )
+        )
         )
       ),
       

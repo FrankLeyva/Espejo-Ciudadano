@@ -128,7 +128,7 @@ colors[top_indices] <- highlight_color
             size = if (!is.null(active_theme()$typography$sizes$text)) active_theme()$typography$sizes$text else 12
           )
         ) %>%
-        config(displayModeBar = FALSE)
+        apply_plotly_theme()
     }, error = function(e) {
       warning(paste("Error creating organizations plot:", e$message))
       return(plotly_empty() %>% 
@@ -246,7 +246,7 @@ colors[top_indices] <- highlight_color
             size = if (!is.null(active_theme()$typography$sizes$text)) active_theme()$typography$sizes$text else 12
           )
         ) %>%
-        config(displayModeBar = FALSE)
+          apply_plotly_theme()
     }, error = function(e) {
       warning(paste("Error creating activities plot:", e$message))
       return(plotly_empty() %>% 

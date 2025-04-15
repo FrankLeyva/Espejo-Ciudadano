@@ -3,71 +3,55 @@ governmentUI <- function() {
   page_fluid(
     class = "section-gobierno",
     useShinyjs(),
-    
     tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
       tags$style(HTML("
-        /* Navigation card styles */
-        .nav-card {
-          transition: transform 0.3s, box-shadow 0.3s;
-          cursor: pointer;
-        }
-        .nav-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .nav-card-icon {
-          font-size: 2rem;
-          margin-bottom: 15px;
-        }
-        .nav-card-title {
-          font-weight: bold;
-          font-size: 1.2rem;
+        /* Override pill navigation styling for this page */
+        .gobierno-pills .nav-pills .nav-link:not(.active) {
+          background-color: rgba(240, 240, 240, 0.8);
+color: var(--gobierno-color) !important;
+            border: 1px solid rgba(229, 126, 30, 0.2);
+          font-weight: bold !important;
         }
         
-        /* Section headers */
-        .section-header {
-          margin-top: 20px;
-          margin-bottom: 15px;
-          padding-left: 10px;
-          border-left: 4px solid #0d6efd;
+        .gobierno-pills .nav-pills .nav-link:hover:not(.active) {
+          background-color: rgba(160, 115, 67, 0.1);
+        }
+             .gobierno-pills .nav-pills .nav-link.active {
+          background-color: var(--gobierno-color) !important; 
+          color: white !important;
+          font-weight: bold !important;
+          border: none !important;
         }
       "))
     ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
-    ),
-    
+
     # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
-          h2("Panorama general de gobierno", class = "text-center")
+          style = paste0("background-color: var(--gobierno-color) !important; 
+        color: white !important; 
+        font-weight: bolder !important; 
+        text-align: center !important; 
+        border-bottom: none !important;"),
+          h2("Percepción general de gobierno", class = "text-center")
         )
       )
     ),
-    
-    # Dashboard navigation section
-    h3(class = "section-header", "Dashboards específicos"),
-    
+       
     layout_columns(
       col_widths = c(4,4,4),
       
       # Inequality Dashboard Card
       div(
-        class = "nav-card",
         id = "nav_inequality_card",
         onclick = "Shiny.setInputValue('nav_target', 'inequality', {priority: 'event'})",
         card(
+          class = "nav-card-gobierno",
+
           card_body(
-            div(class = "text-center nav-card-icon text-primary", 
+            div(class = "text-center nav-card-icon", 
                 bsicons::bs_icon("slash-circle")),
             h4(class = "nav-card-title text-center", "Desigualdad"),
             p(class = "text-center", "Análisis de indicadores de desigualdad")
@@ -75,12 +59,14 @@ governmentUI <- function() {
         )
       ),
       div(
-        class = "nav-card",
+
         id = "nav_trust_card",
         onclick = "Shiny.setInputValue('nav_target', 'trust', {priority: 'event'})",
         card(
           card_body(
-            div(class = "text-center nav-card-icon text-primary", 
+            class = "nav-card-gobierno",
+
+            div(class = "text-center nav-card-icon", 
                 bsicons::bs_icon("bar-chart")),
             h4(class = "nav-card-title text-center", "Confianza"),
             p(class = "text-center", "Análisis de indicadores de confianza en las instituciones")
@@ -89,12 +75,14 @@ governmentUI <- function() {
       ),
       # Accountability Dashboard Card
       div(
-        class = "nav-card",
+
         id = "nav_accountability_card",
         onclick = "Shiny.setInputValue('nav_target', 'accountability', {priority: 'event'})",
         card(
+          class = "nav-card-gobierno",
+
           card_body(
-            div(class = "text-center nav-card-icon text-danger", 
+            div(class = "text-center nav-card-icon", 
                 bsicons::bs_icon("file-earmark-check")),
             h4(class = "nav-card-title text-center", "Rendición de Cuentas"),
             p(class = "text-center", "Estadísticas sobre transparencia y rendición")
@@ -104,14 +92,15 @@ governmentUI <- function() {
     ),
     layout_columns(
       col_widths = c(-2,4,4,-2),
-      # Political Representation Dashboard Card
       div(
-        class = "nav-card",
+
         id = "nav_political_card",
         onclick = "Shiny.setInputValue('nav_target', 'representation', {priority: 'event'})",
         card(
+          class = "nav-card-gobierno",
+
           card_body(
-            div(class = "text-center nav-card-icon text-success", 
+            div(class = "text-center nav-card-icon", 
                 bsicons::bs_icon("person-vcard")),
             h4(class = "nav-card-title text-center", "Representación Política"),
             p(class = "text-center", "Evaluación de la representación política")
@@ -121,12 +110,14 @@ governmentUI <- function() {
       
       # Government Expectations Dashboard Card
       div(
-        class = "nav-card",
+
         id = "nav_gov_expectations_card",
         onclick = "Shiny.setInputValue('nav_target', 'expectations', {priority: 'event'})",
         card(
+          class = "nav-card-gobierno",
+
           card_body(
-            div(class = "text-center nav-card-icon text-warning", 
+            div(class = "text-center nav-card-icon", 
                 bsicons::bs_icon("graph-up")),
             h4(class = "nav-card-title text-center", "Expectativas de Gobierno"),
             p(class = "text-center", "Análisis de las expectativas ciudadanas")
@@ -135,22 +126,20 @@ governmentUI <- function() {
       )
     ),
     
-    # Overview charts section
-    h3(class = "section-header mt-5", "Indicadores clave"),
-    
-    # First row of indicators
     layout_columns(
       col_widths = c(6, 6),
       
       # Card 1: Knowledge of officials (tabset with pie charts)
       card(
         card_header("Conocimiento de Funcionarios Públicos"),
-        tabsetPanel(
+        div(class = "gobierno-pills",
+        navset_pill(
           tabPanel("Regidor/a", plotlyOutput("officials_knowledge_regidor_plot", height = "400px")),
           tabPanel("Síndico/a", plotlyOutput("officials_knowledge_sindico_plot", height = "400px")),
           tabPanel("Diputado/a Local y/o Estatal", plotlyOutput("officials_knowledge_dipupadol_plot", height = "400px")),
           tabPanel("Diputado/a Federal", plotlyOutput("officials_knowledge_diputadof_plot", height = "400px"))
         )
+      )
       ),
       
       # Card 2: Perception of inequality

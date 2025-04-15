@@ -1,55 +1,9 @@
 # UI for Inequality Dashboard
 inequalityUI <- function() {
   page_fluid(
+    class = "section-gobierno",
+
     useShinyjs(),
-    
-    tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
-      tags$style(HTML("
-        .info-box {
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: flex-start;
-        }
-        
-        .info-box-icon {
-          margin-right: 15px;
-          font-size: 24px;
-          padding-top: 3px;
-        }
-        
-        .info-box-content {
-          flex-grow: 1;
-        }
-        
-        .info-box-title {
-          font-weight: bold;
-          margin-bottom: 10px;
-          font-size: 16px;
-        }
-        
-        .info-box-value {
-          font-size: 18px;
-          line-height: 1.4;
-        }
-        
-        .info-box-warning {
-          background-color: #fff3cd;
-          color: #856404;
-        }
-      "))
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
-    ),
     div(
       class = "mb-4",
       tags$a(
@@ -65,6 +19,8 @@ inequalityUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--gobierno-color)",
+
           h2("Desigualdad en Ciudad Juárez", class = "text-center")
         )
       )
@@ -76,14 +32,36 @@ inequalityUI <- function() {
       
       # Map for Q84 - Rights Violation
       card(
-        card_header("Violación de derechos por distrito"),
-        leafletOutput("rights_violation_map", height = "500px")
+        card_header(
+        div(
+          class = "d-flex justify-content-between align-items-center",
+        "Violación de derechos por distrito",
+        downloadButton(
+          "download_rights_violation_map", 
+          "", 
+          icon = icon("download"), 
+          class = "btn-sm"
+        ))),
+        leafletOutput("rights_violation_map", height = "500px"),
+
+      
+      
       ),
       
       # Map for Q87 - Inequality Perception
       card(
-        card_header("Percepción de la desigualdad por distrito"),
-        leafletOutput("inequality_perception_map", height = "500px")
+        card_header(
+        div(
+          class = "d-flex justify-content-between align-items-center",
+        "Percepción de la desigualdad por distrito",
+        downloadButton(
+          "download_inequality_map", 
+          "", 
+          icon = icon("download"), 
+          class = "btn-sm"
+        ))),
+        leafletOutput("inequality_perception_map", height = "500px"),
+       
       )
     ),
     

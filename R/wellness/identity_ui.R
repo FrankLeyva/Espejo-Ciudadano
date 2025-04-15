@@ -41,7 +41,9 @@ color: var(--bienestar-color) !important;
     layout_columns(
       fill = FALSE,
       card(
+
         card_header(
+          style="border-top: 4px solid var(--bienestar-color)",
           h2("Identidad y Pertenencia", class = "text-center"),
         )
       )
@@ -68,7 +70,6 @@ color: var(--bienestar-color) !important;
 
       )
     ),
-   # Add to identity_ui.R
 card(
   card_header(
     div(

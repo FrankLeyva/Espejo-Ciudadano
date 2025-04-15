@@ -1,45 +1,20 @@
 # UI para Dashboard de Participación
 participationUI <- function() {
   page_fluid(
+    class = "section-participacion",
+
     useShinyjs(),
       
-    tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
-      tags$style(HTML("
-        .nav-card {
-          transition: transform 0.3s, box-shadow 0.3s;
-          cursor: pointer;
-          height: 100%;
-        }
-        .nav-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .nav-card-icon {
-          font-size: 2rem;
-          margin-bottom: 15px;
-        }
-        .nav-card-title {
-          font-weight: bold;
-          font-size: 1.2rem;
-        }
-      "))
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
-    ),
-    
     # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
+          style = paste0("background-color: var(--participacion-color) !important; 
+          color: white !important; 
+          font-weight: bolder !important; 
+          text-align: center !important; 
+          border-bottom: none !important;"),
           h2("Participación Ciudadana", class = "text-center")
         )
       )
@@ -55,6 +30,7 @@ participationUI <- function() {
         id = "nav_civic_card",
         onclick = "Shiny.setInputValue('nav_target', 'civic', {priority: 'event'})",
         card(
+          class = "nav-card-participacion",
           card_body(
             div(class = "text-center nav-card-icon text-primary", 
                 bsicons::bs_icon("people")),
@@ -70,6 +46,7 @@ participationUI <- function() {
         id = "nav_community_card",
         onclick = "Shiny.setInputValue('nav_target', 'community', {priority: 'event'})",
         card(
+          class = "nav-card-participacion",
           card_body(
             div(class = "text-center nav-card-icon text-success", 
                 bsicons::bs_icon("building")),
@@ -87,13 +64,22 @@ participationUI <- function() {
         title = "Apoyo activo a movimientos sociales en 2024",
         value = textOutput("social_movement_support"),
         showcase = bsicons::bs_icon("megaphone-fill"),
-        theme = value_box_theme(bg = "#E76F51", fg = "white")
+        theme = value_box_theme(bg = "#8E24AA", fg = "white")
       )
     ),
     
     # Voting Map Section
     card(
-      card_header("Importancia del voto por distrito"),
+      card_header(
+        div(
+          class = "d-flex justify-content-between align-items-center",
+          "Importancia del voto por distrito",
+          downloadButton(
+            "download_voting_map", 
+            "", 
+            icon = icon("download"), 
+            class = "btn-sm"
+          ))),
       leafletOutput("voting_map", height = "500px")
     ),
     

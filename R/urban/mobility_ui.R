@@ -1,53 +1,28 @@
 mobilityUI <- function() {
   page_fluid(
+    class = "section-movilidad",
+
     useShinyjs(),
-    
     tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
       tags$style(HTML("
-        /* Card styling */
-        .info-box {
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: flex-start;
+        /* Override pill navigation styling for this page */
+        .movilidad-pills .nav-pills .nav-link:not(.active) {
+          background-color: rgba(240, 240, 240, 0.8);
+color: var(--movilidad-color) !important;
+            border: 1px solid rgba(30, 229, 57, 0.2);
+          font-weight: bold !important;
         }
         
-        .info-box-icon {
-          margin-right: 15px;
-          font-size: 24px;
-          padding-top: 3px;
+        .movilidad-pills .nav-pills .nav-link:hover:not(.active) {
+          background-color: rgba(67, 160, 71, 0.1);
         }
-        
-        .info-box-content {
-          flex-grow: 1;
-        }
-        
-        .info-box-title {
-          font-weight: bold;
-          margin-bottom: 10px;
-          font-size: 16px;
-        }
-        
-        .info-box-value {
-          font-size: 18px;
-          line-height: 1.4;
-        }
-        
-        .tab-content {
-          padding-top: 20px;
+             .movilidad-pills .nav-pills .nav-link.active {
+          background-color: var(--movilidad-color) !important; /* Bienestar primary color */
+          color: white !important;
+          font-weight: bold !important;
+          border: none !important;
         }
       "))
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
     ),
     div(
       class = "mb-4",
@@ -64,6 +39,8 @@ mobilityUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--movilidad-color)",
+
           h2("Movilidad Urbana", class = "text-center")
         )
       )
@@ -76,11 +53,7 @@ mobilityUI <- function() {
       # Bicycles card
       card(
         card_header(
-          div(
-            style = "background-color: transparent; border-bottom: none;",
             "Bicicletas por Hogar",
-            class = "h5 fw-bold"
-          )
         ),
         plotlyOutput("bicycles_pie", height = "400px")
       ),
@@ -88,11 +61,9 @@ mobilityUI <- function() {
       # Vehicles card
       card(
         card_header(
-          div(
-            style = "background-color: transparent; border-bottom: none;",
+
             "Vehículos Motorizados por Hogar",
-            class = "h5 fw-bold"
-          )
+          
         ),
         plotlyOutput("vehicles_pie", height = "400px")
       )
@@ -101,13 +72,10 @@ mobilityUI <- function() {
     # Transportation modes tabset panel
     card(
       card_header(
-        div(
-          style = "background-color: transparent; border-bottom: none;",
           "Modos de Transporte",
-          class = "h5 fw-bold"
-        )
       ),
-      tabsetPanel(
+      div(class = "movilidad-pills",
+      navset_pill(
         id = "transport_tabs",
         tabPanel(
           "Transporte al Trabajo",
@@ -119,7 +87,6 @@ mobilityUI <- function() {
         )
       )
     )
-    
-    
+    )
   )
 }

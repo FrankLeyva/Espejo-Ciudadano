@@ -3,37 +3,18 @@ urbanUI <- function() {
   page_fluid(
     class = "section-movilidad",
     useShinyjs(),
-    
-    tags$head(
-      tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
-      tags$style(HTML("
-        .stat-card {
-          transition: transform 0.3s, box-shadow 0.3s;
-          border-left: 4px solid #0d6efd;
-        }
-        .nav-card {
-          transition: transform 0.3s, box-shadow 0.3s;
-          cursor: pointer;
-        }
-        .nav-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .nav-card-icon {
-          font-size: 2rem;
-          margin-bottom: 15px;
-          color: #0d6efd;
-        }
-      "))
-    ),
-    
-    theme = bs_theme(version = 5, bootswatch = "litera", primary = "#0d6efd"),
-    
+   
     # Header
     layout_columns(
       fill = FALSE,
-      style = "border-top: 4px solid var(--movilidad-color);", 
-      card(card_header(h2("Desarrollo Urbano", class = "text-center")))
+
+      card(card_header(
+        style = paste0("background-color: var(--movilidad-color) !important; 
+        color: white !important; 
+        font-weight: bolder !important; 
+        text-align: center !important; 
+        border-bottom: none !important;"),
+        h2("Desarrollo Urbano", class = "text-center")))
     ),
     
     # Navigation cards
@@ -42,10 +23,10 @@ urbanUI <- function() {
       
       # Mobility Dashboard Card
       div(
-        class = "nav-card nav-card-urban",
         id = "nav_mobility_card ",
         onclick = "Shiny.setInputValue('nav_target', 'mobility', {priority: 'event'})",
         card(
+          class = "nav-card-movilidad",
           card_body(
             div(class = "text-center nav-card-icon", bsicons::bs_icon("bicycle")),
             h4(class = "text-center", "Movilidad"),
@@ -56,10 +37,10 @@ urbanUI <- function() {
       
       # Public Transportation Card
       div(
-        class = "nav-card nav-card-transportation",
         id = "nav_trasnportation_card ",
         onclick = "Shiny.setInputValue('nav_target', 'transportation', {priority: 'event'})",
         card(
+          class = "nav-card-movilidad",
           card_body(
             div(class = "text-center nav-card-icon", bsicons::bs_icon("bus-front")),
             h4(class = "text-center", "Transporte Público"),

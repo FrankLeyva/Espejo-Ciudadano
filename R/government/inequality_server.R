@@ -163,4 +163,128 @@ colors[top_indices] <- highlight_color
         custom_theme = active_theme()
       )
   })
+  output$download_rights_violation_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_derechos_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      # We need to save the map to a temporary file first
+      tmp_html <- tempfile(fileext = ".html")
+      
+      # Prepare binary data for Q84
+    rights_data <- prepare_binary_data(
+      data = survey_data()$responses,
+      question_id = "Q84",
+      metadata = survey_data()$metadata
+    )
+    
+    # Create binary district map
+    map <- create_binary_district_map(
+      rights_data,
+      geo_data(),
+      highlight_extremes = TRUE,
+      focus_on_true = TRUE,
+      custom_theme = active_theme()
+    )
+      
+      # Add title and footer to the map directly
+      map <- map %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                      "Porcentaje de encuestados que reporta haber tenido sus derechos violentados por distrito", 
+                      "</div>"),
+          position = "topright"
+        ) %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                      paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                      "</div>"),
+          position = "bottomright"
+        )
+      
+      # Save the map to HTML
+      htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+      
+      # Use pagedown with Chrome headless
+      pagedown::chrome_print(
+        input = tmp_html,
+        output = file,
+        options = list(
+          printBackground = TRUE,
+          scale = 2.0
+        ),
+        format = "png",
+        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+      )
+      
+      # Clean up temporary files
+      if (file.exists(tmp_html)) {
+        file.remove(tmp_html)
+      }
+    }
+  )
+  output$download_inequality_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_desigualdad_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      # We need to save the map to a temporary file first
+      tmp_html <- tempfile(fileext = ".html")
+      
+      # Prepare interval data for Q87
+    inequality_data <- prepare_interval_data(
+      data = survey_data()$responses,
+      question_id = "Q87",
+      metadata = survey_data()$metadata
+    )
+    
+    # Create interval district map
+    map <-create_interval_district_map(
+      inequality_data,
+      geo_data(),
+      selected_responses = NULL,  # Show mean values
+      highlight_extremes = TRUE,
+      use_gradient = F,
+      color_scale = "RdBu",
+      custom_theme = active_theme()
+    )
+      
+      # Add title and footer to the map directly
+      map <- map %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                      "Percepcion de la Desigualdad por Distrito, Escala 1-4", 
+                      "</div>"),
+          position = "topright"
+        ) %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                      paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                      "</div>"),
+          position = "bottomright"
+        )
+      
+      # Save the map to HTML
+      htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+      
+      # Use pagedown with Chrome headless
+      pagedown::chrome_print(
+        input = tmp_html,
+        output = file,
+        options = list(
+          printBackground = TRUE,
+          scale = 2.0
+        ),
+        format = "png",
+        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+      )
+      
+      # Clean up temporary files
+      if (file.exists(tmp_html)) {
+        file.remove(tmp_html)
+      }
+    }
+  )
 }

@@ -233,4 +233,118 @@ output$government_comparison_plot <- renderPlotly({
       margin = list(t = 100) # Add margin at the top for the legend
     )
 })
+observeEvent(input$expectations_tabs, {
+  # Store the active tab in a reactive value for the download handler
+  tab_value <- input$expectations_tabs
+})
+# Download handler that adapts based on active tab
+output$download_expectations_map <- downloadHandler(
+filename = function() {
+  # Get map type for filename based on active tab
+  map_type <- if(input$expectations_tabs == "Gobierno Municipal"){ 
+                    "Municipal"} else if (input$expectations_tabs == "Gobierno Estatal"){
+                      "Estatal" } else {
+                      "Federal"
+                    }
+  paste("mapa_expectativas_gobierno_", map_type, "_", Sys.Date(), ".png", sep = "")
+},
+content = function(file) {
+  # Temporary file for the HTML content
+  tmp_html <- tempfile(fileext = ".html")
+  
+  # Create the appropriate map based on active tab
+  if(input$expectations_tabs == "Gobierno Municipal") {
+    municipal_data <- prepare_interval_data(
+      data = survey_data()$responses,
+      question_id = "Q19",
+      metadata = survey_data()$metadata
+    )
+    
+    # Create interval district map
+    map <- create_interval_district_map(
+      municipal_data,
+      geo_data(),
+      selected_responses = NULL,  # Show mean values
+      highlight_extremes = TRUE,
+      use_gradient = F,
+      color_scale = "Blues",
+      custom_theme = active_theme()
+    )
+    title_text <- "Calificación de Expectativas Ciudadanas del Gobierno Municipal por Distrito"
+  } else if(input$expectations_tabs == "Gobierno Estatal") {
+    state_data <- prepare_interval_data(
+      data = survey_data()$responses,
+      question_id = "Q20",
+      metadata = survey_data()$metadata
+    )
+    
+    # Create interval district map
+    map <- create_interval_district_map(
+      state_data,
+      geo_data(),
+      selected_responses = NULL,  # Show mean values
+      highlight_extremes = TRUE,
+      use_gradient = F,
+      color_scale = "Purples",
+      custom_theme = active_theme()
+    )
+    title_text <- "Calificación de Expectativas Ciudadanas del Gobierno Estatal por Distrito"
+  }  else  {
+    federal_data <- prepare_interval_data(
+      data = survey_data()$responses,
+      question_id = "Q21",
+      metadata = survey_data()$metadata
+    )
+    
+    # Create interval district map
+    map <- create_interval_district_map(
+      federal_data,
+      geo_data(),
+      selected_responses = NULL,  # Show mean values
+      highlight_extremes = TRUE,
+      use_gradient = F,
+      color_scale = "Reds",
+      custom_theme = active_theme()
+    )
+  
+    title_text <- "Calificación de Expectativas Ciudadanas del Gobierno Federal por Distrito"
+}
+
+  
+  # Add title and footer
+  map <- map %>%
+    addControl(
+      html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                  title_text, 
+                  "</div>"),
+      position = "topright"
+    ) %>%
+    addControl(
+      html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                  paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                  "</div>"),
+      position = "bottomright"
+    )
+  
+  # Save and convert
+  htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+  
+  pagedown::chrome_print(
+    input = tmp_html,
+    output = file,
+    options = list(
+      printBackground = TRUE,
+      scale = 2.0
+    ),
+    format = "png",
+    browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+  )
+  
+  # Clean up
+  if (file.exists(tmp_html)) {
+    file.remove(tmp_html)
+  }
+}
+)
 }

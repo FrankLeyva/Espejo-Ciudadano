@@ -119,7 +119,60 @@ output$economic_improvement_map <- renderLeaflet({
     # Return formatted text
     paste0(percentage, "%")
   })
-  
+  output$download_economy_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_economia_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      tmp_html <- tempfile(fileext = ".html")
+      
+      map <-   create_interval_district_map(
+        economic_improvement_data(), 
+        geo_data(),
+        selected_responses = c("4", "5"),  # Values for "Mejorado algo" and "Mejorado mucho"
+        highlight_extremes = TRUE,
+        use_gradient = F,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      
+      # Add title and footer to the map directly
+      map <- map %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+          "Porcentaje de la población que considera que mejoró su economía en el 2024",
+                      "</div>"),
+          position = "topright"
+        ) %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                      paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                      "</div>"),
+          position = "bottomright"
+        )
+      
+      # Save the map to HTML
+      htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+      
+      # Use pagedown with Chrome headless
+      pagedown::chrome_print(
+        input = tmp_html,
+        output = file,
+        options = list(
+          printBackground = TRUE,
+          scale = 2.0
+        ),
+        format = "png",
+        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+      )
+      
+      # Clean up temporary files
+      if (file.exists(tmp_html)) {
+        file.remove(tmp_html)
+      }
+    }
+  )
   
 
 }

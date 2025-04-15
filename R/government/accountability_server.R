@@ -220,7 +220,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     # Calculate percentages
     pie_data$Percentage <- round(100 * pie_data$Count / sum(pie_data$Count), 1)
     
-      color_palette <- active_theme()$palettes$categorical
+      color_palette <- active_theme()$palettes$sequential
     
     # Create pie chart
     plot_ly(
@@ -266,7 +266,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     create_corruption_pie(
       values, 
       ""
-    )
+    ) %>% apply_plotly_theme()
   })
   
   # State Government - Q16.1
@@ -279,7 +279,7 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     create_corruption_pie(
       values, 
       ""
-    )
+    )%>% apply_plotly_theme()
   })
   
   # Federal Government - Q17.1
@@ -292,6 +292,6 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     create_corruption_pie(
       values, 
       "" 
-    )
+    )%>% apply_plotly_theme()
   })
 }

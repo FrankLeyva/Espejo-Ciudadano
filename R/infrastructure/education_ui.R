@@ -1,76 +1,29 @@
 # UI para Dashboard de Educación
 educationUI <- function() {
   page_fluid(
+    class = "section-infraestructura",
+
     useShinyjs(),
-      
     tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
       tags$style(HTML("
-        /* General styling */
-        .nav-tabs .nav-link.active {
-          font-weight: bold;
-          color: #0d6efd;
-          background-color: #f8f9fa;
-          border-bottom: 3px solid #0d6efd;
+        /* Override pill navigation styling for this page */
+        .infraestructura-pills .nav-pills .nav-link:not(.active) {
+          background-color: rgba(240, 240, 240, 0.8);
+color: var(--infraestructura-color) !important;
+            border: 1px solid rgba(229, 126, 30, 0.2);
+          font-weight: bold !important;
         }
         
-        .nav-tabs .nav-link {
-          color: #495057;
-          transition: all 0.3s ease;
+        .infraestructura-pills .nav-pills .nav-link:hover:not(.active) {
+          background-color: rgba(160, 115, 67, 0.1);
         }
-        
-        .nav-tabs .nav-link:hover {
-          background-color: #f1f1f1;
-        }
-        
-        /* Card styling */
-        .card {
-          margin-bottom: 20px;
-          border-radius: 5px;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        /* Info box */
-        .info-box {
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 15px;
-          background-color: #f8f9fa;
-        }
-        
-        .section-title {
-          font-weight: 600;
-          color: #495057;
-          margin-bottom: 15px;
-        }
-        
-        .badge-primary {
-          background-color: #0d6efd;
-          color: white;
-          padding: 5px 10px;
-          border-radius: 3px;
-          font-size: 0.9rem;
-        }
-        
-        .average-indicator {
-          background-color: #333333;
-          color: white;
-          padding: 6px 12px;
-          border-radius: 4px;
-          font-weight: bold;
-          display: inline-block;
-          margin-top: 10px;
+             .infraestructura-pills .nav-pills .nav-link.active {
+          background-color: var(--infraestructura-color) !important; 
+          color: white !important;
+          font-weight: bold !important;
+          border: none !important;
         }
       "))
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
     ),
     div(
       class = "mb-4",
@@ -87,6 +40,8 @@ educationUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--infraestructura-color)",
+
           h2("Educación", class = "text-center")
         )
       )
@@ -96,7 +51,16 @@ educationUI <- function() {
     # Primera sección: Hogares con estudiantes (Q6)
     card(
       card_header(
-        h4("Hogares con Estudiantes", class = "d-flex justify-content-between")
+        div(
+          class = "d-flex justify-content-between align-items-center",
+        "Hogares con Estudiantes",
+        downloadButton(
+          "download_students_map", 
+          "", 
+          icon = icon("download"), 
+          class = "btn-sm"
+        )
+      )
       ),
       leafletOutput("students_map", height = "500px")
     ),
@@ -104,10 +68,17 @@ educationUI <- function() {
     # Segunda sección: Satisfacción con niveles educativos (Q7, Q10, Q13)
     card(
       card_header(
-        h4("Satisfacción con Niveles Educativos", class = "section-title")
-      ),
-      
-      navset_tab(
+        div(
+          class = "d-flex justify-content-between align-items-center",
+"Satisfacción con Niveles Educativos",
+downloadButton(
+  "download_edu_satis_map", 
+  "", 
+  icon = icon("download"), 
+  class = "btn-sm"
+))),
+      div(class = "gobierno-pills",
+      navset_pill(
         id = "education_tabs",
         
         # Tab: Educación Básica (Q7)
@@ -152,6 +123,7 @@ educationUI <- function() {
             plotlyOutput("education_comparison_plot", height = "450px")          )
         )
       )
+    )
     ),
     
     # Pie de página

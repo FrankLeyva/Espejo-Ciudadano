@@ -138,15 +138,7 @@ colors[top_indices] <- highlight_color
       ),
       margin = list(l = 150, r = 30, t = 50, b = 50)  # More space for labels
     ) %>% 
-      config(
-        modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
-                                   "zoomIn2d", "zoomOut2d", "autoScale2d", 
-                                   "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
-        modeBarButtonsToAdd = c("resetScale2d", "toImage"),
-        displaylogo=FALSE,
-        locale = "es",
-        responsive = TRUE
-    )
+      apply_plotly_theme()
   }
   
   # Institution labels from the list provided

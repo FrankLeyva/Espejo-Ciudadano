@@ -1,64 +1,31 @@
 # UI for Government Expectations Dashboard
 expectationsUI <- function() {
   page_fluid(
+    class = "section-gobierno",
+
     useShinyjs(),
-    
     tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
       tags$style(HTML("
-        .nav-tabs .nav-link.active {
-          font-weight: bold;
-          border-bottom-color: #0d6efd;
+        /* Override pill navigation styling for this page */
+        .gobierno-pills .nav-pills .nav-link:not(.active) {
+          background-color: rgba(240, 240, 240, 0.8);
+color: var(--gobierno-color) !important;
+            border: 1px solid rgba(229, 126, 30, 0.2);
+          font-weight: bold !important;
         }
         
-        .tab-content {
-          padding-top: 20px;
+        .gobierno-pills .nav-pills .nav-link:hover:not(.active) {
+          background-color: rgba(160, 115, 67, 0.1);
         }
-        
-        .info-box {
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: flex-start;
-        }
-        
-        .info-box-icon {
-          margin-right: 15px;
-          font-size: 24px;
-          padding-top: 3px;
-        }
-        
-        .info-box-content {
-          flex-grow: 1;
-        }
-        
-        .info-box-title {
-          font-weight: bold;
-          margin-bottom: 10px;
-          font-size: 16px;
-        }
-        
-        .info-box-value {
-          font-size: 18px;
-          line-height: 1.4;
-        }
-        
-        .info-box-info {
-          background-color: #d1ecf1;
-          color: #0c5460;
+             .gobierno-pills .nav-pills .nav-link.active {
+          background-color: var(--gobierno-color) !important; 
+          color: white !important;
+          font-weight: bold !important;
+          border: none !important;
         }
       "))
     ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
-    ),
+
     div(
       class = "mb-4",
       tags$a(
@@ -74,6 +41,8 @@ expectationsUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--gobierno-color)",
+
           h2("Expectativas Ciudadanas en Gobiernos", class = "text-center")
         )
       )
@@ -81,10 +50,20 @@ expectationsUI <- function() {
     
     # Government expectations maps
     card(
-      card_header("Calificación de Expectativas Ciudadanas por Distrito"),
-      
-      # Create tabset for the three maps
-      navset_tab(
+      card_header(
+        div(
+        class = "d-flex justify-content-between align-items-center",
+      "Expectativas de los Ciudadanos sobre el Gobierno",
+      downloadButton(
+        "download_expectations_map", 
+        "", 
+        icon = icon("download"), 
+        class = "btn-sm"
+      ))),
+      div(class = "gobierno-pills",
+      navset_pill(
+        id = "expectations_tabs",
+
         nav_panel(
           title = "Gobierno Municipal",
           leafletOutput("municipal_expectations_map", height = "500px")
@@ -98,6 +77,7 @@ expectationsUI <- function() {
           leafletOutput("federal_expectations_map", height = "500px")
         )
       )
+    )
     ),
     
     # Comparison bar chart

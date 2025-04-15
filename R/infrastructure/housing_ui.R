@@ -1,79 +1,30 @@
 # UI para Dashboard de Vivienda
 housingUI <- function() {
   page_fluid(
+    class = "section-infraestructura",
+
     useShinyjs(),
       
     tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
       tags$style(HTML("
-        /* General styling */
-        .nav-tabs .nav-link.active {
-          font-weight: bold;
-          color: #0d6efd;
-          background-color: #f8f9fa;
-          border-bottom: 3px solid #0d6efd;
+        /* Override pill navigation styling for this page */
+        .infraestructura-pills .nav-pills .nav-link:not(.active) {
+          background-color: rgba(240, 240, 240, 0.8);
+color: var(--infraestructura-color) !important;
+            border: 1px solid rgba(229, 126, 30, 0.2);
+          font-weight: bold !important;
         }
         
-        .nav-tabs .nav-link {
-          color: #495057;
-          transition: all 0.3s ease;
+        .infraestructura-pills .nav-pills .nav-link:hover:not(.active) {
+          background-color: rgba(160, 115, 67, 0.1);
         }
-        
-        .nav-tabs .nav-link:hover {
-          background-color: #f1f1f1;
-        }
-        
-        /* Custom info box styles */
-        .info-box {
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: flex-start;
-        }
-        
-        .info-box-icon {
-          margin-right: 15px;
-          font-size: 24px;
-          padding-top: 3px;
-        }
-        
-        .info-box-content {
-          flex-grow: 1;
-        }
-        
-        .info-box-title {
-          font-weight: bold;
-          margin-bottom: 10px;
-          font-size: 16px;
-        }
-        
-        .info-box-value {
-          font-size: 18px;
-          line-height: 1.4;
-        }
-        
-        .info-box-info {
-          background-color: #d1ecf1;
-          color: #0c5460;
-        }
-        
-        .housing-intro {
-          background-color: #f8f9fa;
-          padding: 20px;
-          border-radius: 5px;
-          margin-bottom: 20px;
+             .infraestructura-pills .nav-pills .nav-link.active {
+          background-color: var(--infraestructura-color) !important; 
+          color: white !important;
+          font-weight: bold !important;
+          border: none !important;
         }
       "))
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
     ),
     div(
       class = "mb-4",
@@ -90,16 +41,28 @@ housingUI <- function() {
       fill = FALSE,
       card(
         card_header(
-          h2("Satisfacción con la Vivienda", class = "text-center")
+          style="border-top: 4px solid var(--infraestructura-color)",
+
+          h2("Vivienda", class = "text-center")
         )
       )
     ),
 
+    card(
     
-    # Pestañas para los diferentes aspectos de vivienda
-    navset_tab(
-      id = "housing_tabs",
-      
+      card_header(
+        div(
+          class = "d-flex justify-content-between align-items-center",
+"Satisfacción con Aspectos de la Vivienda",
+downloadButton(
+  "download_house_satis_map", 
+  "", 
+  icon = icon("download"), 
+  class = "btn-sm"
+))),
+div(class = "gobierno-pills",
+navset_pill(
+  id = "housing_tabs",
       # Pestaña: Calidad de materiales
       nav_panel(
         title = "Calidad de Materiales",
@@ -145,8 +108,8 @@ housingUI <- function() {
           plotlyOutput("comparison_plot", height = "500px")
         )
       )
-    ),
-    
-
+    )
+  )
+    )
   )
 }

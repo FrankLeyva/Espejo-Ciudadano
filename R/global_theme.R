@@ -19,8 +19,8 @@ theme_config <- list(
   palettes = list(
     district = c("#88BDBC", "#6E9887", "#BECC92", "#FDD692", "#F1BB87", 
                 "#F28A80", "#D1A5C6", "#9CADCE", "#B6C5D1", "#D3D9E0"),
-    gender = c("#FF69B4", "#4169E1"),
-    age_group = c("#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3", "#A6D854"),
+    gender = c("#81375D", "#03458C"),
+    age_group = c("#463285", "#553EA3", "#674EBC", "#816BC7", "#B7ABDF"),
     sequential = colorRampPalette(c("#F8F9FA", "#212529"))(9),
     diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#0D6EFD"))(11)
   ),
@@ -70,13 +70,13 @@ theme_config <- list(
       )
     ),
     gobierno = list(
-      primary = "#5E35B1",
-      secondary = "#B39DDB",
+      primary = "#423629",
+      secondary = "#8A8178",
       accent = "#FB8C00",
       palettes = list(
-        sequential = c("#CAB2D6", "#9E9AC8", "#756BB1", "#5E35B1", "#54278F", "#41236C", "#3A1E61"),
-        categorical = c("#5E35B1", "#7E57C2", "#B39DDB", "#FB8C00", "#FFA726", "#FFCC80"),
-        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#5E35B1"))(9)
+        sequential = c("#8A8178", "#756C62", "#605A4D", "#4B4238", "#423629", "#372D22", "#2C241C"),
+        categorical = c("#423629", "#605A4D", "#8A8178", "#FB8C00", "#FFA726", "#FFCC80"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#423629"))(9)
       )
     ),
     infraestructura = list(

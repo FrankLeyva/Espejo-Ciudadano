@@ -297,4 +297,101 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
       "No disponible"
     }
   })
+  
+  # Download handler for the service map
+  output$download_service_map <- downloadHandler(
+    filename = function() {
+      # Get service name for filename based on selected service
+      service_mapping <- c(
+        "Q29" = "Agua",
+        "Q30" = "Drenaje_y_Alcantarillado",
+        "Q35" = "CFE",
+        "Q40" = "Recoleccion_Basura",
+        "Q45" = "Alumbrado_Publico",
+        "Q51" = "Calles_y_Pavimentacion",
+        "Q55" = "Areas_Verdes",
+        "Q56" = "Unidades_Deportivas",
+        "Q58" = "Bibliotecas",
+        "Q59" = "Centros_Comunitarios",
+        "Q60" = "Espacios_Discapacidad",
+        "Q61" = "Parques",
+        "Q62" = "Transporte_Publico"
+      )
+      
+      service_name <- service_mapping[input$selected_service]
+      if (is.na(service_name)) service_name <- "Servicio"
+      
+      paste("mapa_servicio_", service_name, "_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      # Temporary file for the HTML content
+      tmp_html <- tempfile(fileext = ".html")
+      
+      # Service titles for the map caption
+      service_titles <- c(
+        "Q29" = "Satisfacción con los servicios de agua",
+        "Q30" = "Satisfacción con los servicios de drenaje y alcantarillado",
+        "Q35" = "Satisfacción con los servicios de CFE",
+        "Q40" = "Satisfacción con la recolección de basura",
+        "Q45" = "Satisfacción con el alumbrado público",
+        "Q51" = "Satisfacción con calles y pavimentación",
+        "Q55" = "Satisfacción con áreas verdes y espacios públicos",
+        "Q56" = "Satisfacción con unidades deportivas",
+        "Q58" = "Satisfacción con bibliotecas",
+        "Q59" = "Satisfacción con centros comunitarios",
+        "Q60" = "Satisfacción con espacios para personas con discapacidad",
+        "Q61" = "Satisfacción con parques",
+        "Q62" = "Satisfacción con transporte público"
+      )
+      
+      # Get title for the selected service
+      title_text <- service_titles[input$selected_service]
+      if (is.na(title_text)) title_text <- "Evaluación de servicios por distrito"
+      
+      # Create the map using the same function and data as the displayed map
+      map <- create_interval_district_map(
+        data = prepared_data(),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      
+      # Add title and footer
+      map <- map %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                      title_text, 
+                      "</div>"),
+          position = "topright"
+        ) %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                      paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                      "</div>"),
+          position = "bottomright"
+        )
+      
+      # Save and convert
+      htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+      
+      pagedown::chrome_print(
+        input = tmp_html,
+        output = file,
+        options = list(
+          printBackground = TRUE,
+          scale = 2.0
+        ),
+        format = "png",
+        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+      )
+      
+      # Clean up
+      if (file.exists(tmp_html)) {
+        file.remove(tmp_html)
+      }
+    }
+  )
 }

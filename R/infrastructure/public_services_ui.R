@@ -1,168 +1,10 @@
 # UI para Dashboard de Servicios Públicos
 publicServicesUI <- function() {
   page_fluid(
+    class = "section-infraestructura",
+
     useShinyjs(),
       
-    tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
-      tags$style(HTML("
-        /* General styling for sidebar options */
-        .form-check {
-          padding: 10px 15px;
-          margin-bottom: 5px;
-          border-radius: 4px;
-          transition: background-color 0.2s;
-        }
-        .form-check:hover {
-          background-color: #f8f9fa;
-        }
-        .form-check-input:checked ~ .form-check-label {
-          font-weight: bold;
-          color: #0d6efd;
-        }
-        
-        /* Service icons using CSS */
-        .service-list label[for$=Q29]:before {
-          content: '\\F143';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #3498db;
-        }
-        .service-list label[for$=Q30]:before {
-          content: '\\F168';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #2980b9;
-        }
-        .service-list label[for$=Q35]:before {
-          content: '\\F148';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #f39c12;
-        }
-        .service-list label[for$=Q40]:before {
-          content: '\\F151';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #2ecc71;
-        }
-        .service-list label[for$=Q45]:before {
-          content: '\\F140';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #f1c40f;
-        }
-        .service-list label[for$=Q51]:before {
-          content: '\\F16F';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #95a5a6;
-        }
-        .service-list label[for$=Q55]:before {
-          content: '\\F155';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #27ae60;
-        }
-        .service-list label[for$=Q56]:before {
-          content: '\\F156';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #e67e22;
-        }
-        .service-list label[for$=Q58]:before {
-          content: '\\F126';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #9b59b6;
-        }
-        .service-list label[for$=Q59]:before {
-          content: '\\F14E';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #34495e;
-        }
-        .service-list label[for$=Q60]:before {
-          content: '\\F602';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #8e44ad;
-        }
-        .service-list label[for$=Q61]:before {
-          content: '\\F3E7';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #16a085;
-        }
-        .service-list label[for$=Q62]:before {
-          content: '\\F131';
-          font-family: 'bootstrap-icons';
-          margin-right: 8px;
-          color: #e74c3c;
-        }
-        
-        /* Custom info box styles */
-        .info-box {
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: flex-start;
-        }
-        
-        .info-box-icon {
-          margin-right: 15px;
-          font-size: 24px;
-          padding-top: 3px;
-        }
-        
-        .info-box-content {
-          flex-grow: 1;
-        }
-        
-        .info-box-title {
-          font-weight: bold;
-          margin-bottom: 10px;
-          font-size: 16px;
-        }
-        
-        .info-box-value {
-          font-size: 18px;
-          line-height: 1.4;
-        }
-        
-        /* Blue for water */
-        .info-box-info {
-          background-color: #d1ecf1 !important;
-          color: #0c5460 !important;
-        }
-        
-        /* Yellow for electricity */
-        .info-box-warning, 
-        div.info-box.info-box-warning,
-        div[class*='info-box-warning'] {
-          background-color: #FFF3CD !important;
-          color: #856404 !important;
-        }
-        
-        /* Green for trash */
-        .info-box-success,
-        div.info-box.info-box-success,
-        div[class*='info-box-success'] {
-          background-color: #D4EDDA !important;
-          color: #155724 !important;
-        }
-      "))
-    ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
-    ),
     div(
       class = "mb-4",
       tags$a(
@@ -178,6 +20,8 @@ publicServicesUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--infraestructura-color)",
+
           h2("Servicios públicos e Infraestructura", class = "text-center")
         )      )
     ),
@@ -219,9 +63,14 @@ publicServicesUI <- function() {
         class = "border-0",  # Quitar bordes del card
         card_header(
           div(
-            style = "background-color: transparent; border-bottom: none;",
+            class = "d-flex justify-content-between align-items-center",
             textOutput("service_title"),  # Título dinámico
-            class = "h5 fw-bold"
+            downloadButton(
+              "download_service_map", 
+              "", 
+              icon = icon("download"), 
+              class = "btn-sm"
+            )
           )
         ),
         leafletOutput("service_map", height = "600px")

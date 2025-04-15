@@ -1,5 +1,7 @@
 trustUI <- function() {
   page_fluid(
+    class = "section-gobierno",
+
     useShinyjs(),
     div(
       class = "mb-4",
@@ -16,6 +18,8 @@ trustUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--gobierno-color)",
+
           h2("Confianza en las Instituciones", class = "text-center")
         )
       )
@@ -25,10 +29,8 @@ trustUI <- function() {
     # First bar plot: Institutions of popular election
     card(
       card_header(
-        div(
-          class = "d-flex justify-content-between align-items-center",
-          h4("Instituciones de Elección Popular", class = "m-0")
-        )
+          "Instituciones de Elección Popular"
+        
       ),
       card_body(
         plotlyOutput("popular_election_institutions_plot", height = "500px")
@@ -38,10 +40,7 @@ trustUI <- function() {
     # Second bar plot: Public institutions and media
     card(
       card_header(
-        div(
-          class = "d-flex justify-content-between align-items-center",
-          h4("Instituciones Públicas y Medios de Comunicación", class = "m-0")
-        )
+"Instituciones Públicas y Medios de Comunicación"
       ),
       card_body(
         plotlyOutput("public_institutions_media_plot", height = "500px")
@@ -51,10 +50,8 @@ trustUI <- function() {
     # Third bar plot: Public safety institutions
     card(
       card_header(
-        div(
-          class = "d-flex justify-content-between align-items-center",
-          h4("Instituciones de Seguridad Pública", class = "m-0")
-        )
+
+"Instituciones de Seguridad Pública"
       ),
       card_body(
         plotlyOutput("public_safety_institutions_plot", height = "500px")

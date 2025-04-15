@@ -215,6 +215,109 @@ output$comparison_plot <- renderPlotly({
       ),
       margin = list(t = 100) # Espacio para la leyenda superior
     ) %>%
-    config(displayModeBar = FALSE)
+    apply_plotly_theme()
 })
+
+
+
+observeEvent(input$housing_tabs, {
+  # Store the active tab in a reactive value for the download handler
+  tab_value <- input$housing_tabs
+})
+observeEvent(input$housing_tabs, {
+  if(input$housing_tabs == "Comparativa") {
+    shinyjs::hide("download_house_satis_map")
+  } else {
+    shinyjs::show("download_house_satis_map")
+  }
+}, ignoreInit = FALSE) 
+
+
+
+# Download handler that adapts based on active tab
+output$download_house_satis_map <- downloadHandler(
+  filename = function() {
+    # Get map type for filename based on active tab
+    map_type <- if(input$housing_tabs == "Calidad de Materiales"){ 
+                      "Materiales"} else if (input$housing_tabs == "Tamaño y Espacios"){
+                        "Espacios" } else if (input$housing_tabs == "Ubicación y Accesibilidad"){
+                        "Ubicación" }else {
+                        ""
+                      }
+    paste("mapa_vivienda_", map_type, "_", Sys.Date(), ".png", sep = "")
+  },
+  content = function(file) {
+    # Temporary file for the HTML content
+    tmp_html <- tempfile(fileext = ".html")
+    
+    # Create the appropriate map based on active tab
+    if(input$housing_tabs == "Calidad de Materiales") {
+      map <- create_interval_district_map(
+        data = housing_data_list[["materials"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con la Calidad de Materiales"
+    } else if(input$housing_tabs == "Tamaño y Espacios") {
+      map <- create_interval_district_map(
+        data = housing_data_list[["spaces"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con el Tamaño y Espacios"
+    } else if(input$housing_tabs == "Ubicación y Accesibilidad") {
+      map <- create_interval_district_map(
+        data = housing_data_list[["location"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con la Ubicación y Accesibilidad"
+    } 
+    
+    # Add title and footer
+    map <- map %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                    title_text, 
+                    "</div>"),
+        position = "topright"
+      ) %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                    paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                    "</div>"),
+        position = "bottomright"
+      )
+    
+    # Save and convert
+    htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+    
+    pagedown::chrome_print(
+      input = tmp_html,
+      output = file,
+      options = list(
+        printBackground = TRUE,
+        scale = 2.0
+      ),
+      format = "png",
+      browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+    )
+    
+    # Clean up
+    if (file.exists(tmp_html)) {
+      file.remove(tmp_html)
+    }
+  }
+)
+
 }

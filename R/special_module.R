@@ -495,7 +495,7 @@ create_education_overview <- function(survey_data, geo_data, custom_theme = NULL
       
       # Only add label if percent is not NA
       if (!is.na(percent_val)) {
-        geo_data$label_text[i] <- sprintf("Distrito %s<br>%s%%", dist_num, percent_val)
+        geo_data$label_text[i] <- sprintf("Distrito %s: %s%%", dist_num, percent_val)
         
         # Set background/text color based on if this is highest/lowest district
         if (as.character(dist_num) %in% highest_district) {
@@ -540,12 +540,12 @@ create_education_overview <- function(survey_data, geo_data, custom_theme = NULL
       # Create label HTML with consistent styling but enhanced for extremes
       if (geo_data$is_extreme[i]) {
         extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
-                              "Mayor porcentaje", 
-                              "Menor porcentaje")
+                              "Distrito mas alto", 
+                              "Distrito mas bajo")
         
         label_html <- sprintf(
-          '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %s</div>',
-          geo_data$label_bg[i], geo_data$label_color[i], extreme_text, geo_data$No_Distrit[i], geo_data$label_text[i]
+          '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>%s</div>',
+          geo_data$label_bg[i], geo_data$label_color[i], extreme_text, geo_data$label_text[i]
         )
       } else {
         # Standard label - consistent format for all
@@ -890,7 +890,7 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
       mean_val <- district_stats$mean_value[match_idx]
       
       geo_data$hover_label[i] <- sprintf(
-        "Distrito: %s<br>Satisfacción vivienda promedio: %.2f<br>N: %d",
+        "Distrito: %s<br>Promedio General: %.2f<br>N: %d",
         dist_num,
         mean_val,
         district_stats$n[match_idx]
@@ -943,8 +943,8 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
       # Create label HTML with consistent styling but enhanced for extremes
       if (geo_data$is_extreme[i]) {
         extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
-                              "Mayor satisfacción", 
-                              "Menor satisfacción")
+                              "Distrito mas alto", 
+                              "Distrito mas bajo")
         
         label_html <- sprintf(
           '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %s</div>',
@@ -1304,8 +1304,7 @@ colors[top_indices] <- highlight_color
         family = "Arial",
         size = 12
       )
-    ) %>%
-    config(displayModeBar = FALSE)
+    )
 }
 # Function to create bicycle distribution pie chart
 create_bicycle_distribution <- function(survey_data, custom_theme = NULL) {

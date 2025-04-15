@@ -205,8 +205,7 @@ output$activities_chart <- renderPlotly({
       yaxis = list(categoryorder = 'total ascending')
     )
 })
-  # Add this to the wellnessServer function
-# Add to the wellnessServer function in wellness_server.R
+
 output$download_migration_map <- downloadHandler(
   filename = function() {
     paste("mapa_migracion_", Sys.Date(), ".png", sep = "")
@@ -235,7 +234,7 @@ output$download_migration_map <- downloadHandler(
       ) %>%
       addControl(
         html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
-                    paste("Resultados de la encuesta de percepción y participación ciudadana y buen gobierno", selectedYear()),
+                    paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
                     "</div>"),
         position = "bottomright"
       )

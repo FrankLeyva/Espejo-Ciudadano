@@ -304,6 +304,131 @@ healthcareServer <- function(input, output, session, current_theme = NULL) {
           title = ""
         ),
         margin = list(l = 150)  # Más espacio para etiquetas de proveedores
-      )
+      ) %>%  apply_plotly_theme()
   })
+
+
+  observeEvent(input$healthcare_tabs, {
+    # Store the active tab in a reactive value for the download handler
+    tab_value <- input$healthcare_tabs
+  })
+# Download handler that adapts based on active tab
+output$download_healthcare_map <- downloadHandler(
+  filename = function() {
+    # Get map type for filename based on active tab
+    map_type <- if(input$healthcare_tabs == "Servicios en General"){ 
+                      "General"} else if (input$healthcare_tabs == "Instalaciones"){
+                        "Instalaciones" } else if (input$healthcare_tabs == "Tiempo de Atención"){
+                        "Tiempo" }else if (input$healthcare_tabs == "Medicamentos"){
+                          "Medicamentos" }else if (input$healthcare_tabs == "Calidad de Servicio"){
+                            "Servicio" }else {
+                        "Distancia"
+                      }
+    paste("mapa_serv_salud_", map_type, "_", Sys.Date(), ".png", sep = "")
+  },
+  content = function(file) {
+    # Temporary file for the HTML content
+    tmp_html <- tempfile(fileext = ".html")
+    
+    # Create the appropriate map based on active tab
+    if(input$healthcare_tabs == "Servicios en General") {
+      # Recreate map for health services using the same data
+      map <- create_interval_district_map(
+        data = health_data_list[["health_services"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con los Servicios Medicos en General"
+    } else if(input$healthcare_tabs == "Instalaciones") {
+      map <- create_interval_district_map(
+        data = health_data_list[["facilities"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con las Instalaciones de los Servicios Medicos"
+    } else if(input$healthcare_tabs == "Tiempo de Atención") {
+      map <- create_interval_district_map(
+        data = health_data_list[["attention_time"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con los Tiempos de Atencion de los Servicios Medicos"
+    } else if(input$healthcare_tabs == "Medicamentos") {
+      map <- create_interval_district_map(
+        data = health_data_list[["medication"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con los Medicamentos de los Servicios Medicos"
+    } else if(input$healthcare_tabs == "Calidad de Servicio") {
+      map <- create_interval_district_map(
+        data = health_data_list[["service_quality"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con la Calidad de Servicio de los Servicios Medicos"
+    } else {
+      map <- create_interval_district_map(
+        data = health_data_list[["distance"]](),
+        geo_data = geo_data(),
+        highlight_extremes = TRUE,
+        use_gradient = FALSE,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      title_text <- "Satisfacción con la Distancia de los Servicios Medicos"
+    }
+    
+    # Add title and footer
+    map <- map %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                    title_text, 
+                    "</div>"),
+        position = "topright"
+      ) %>%
+      addControl(
+        html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                    paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                    "</div>"),
+        position = "bottomright"
+      )
+    
+    # Save and convert
+    htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+    
+    pagedown::chrome_print(
+      input = tmp_html,
+      output = file,
+      options = list(
+        printBackground = TRUE,
+        scale = 2.0
+      ),
+      format = "png",
+      browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+    )
+    
+    # Clean up
+    if (file.exists(tmp_html)) {
+      file.remove(tmp_html)
+    }
+  }
+)
+
 }

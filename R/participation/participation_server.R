@@ -148,11 +148,74 @@ participationServer <- function(input, output, session,current_theme = NULL) {
             x = 0.5,
             y = -0.1
           )
-        )
+        ) %>% apply_plotly_theme()
     }, error = function(e) {
       warning(paste("Error creating interest pie chart:", e$message))
       return(plotly_empty() %>% 
                layout(title = "Error al generar gráfico de interés político"))
     })
   })
+
+
+  output$download_voting_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_voto_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      # We need to save the map to a temporary file first
+      tmp_html <- tempfile(fileext = ".html")
+      voting_data <- prepare_interval_data(
+        data = survey_data()$responses,
+        question_id = "Q139",
+        metadata = survey_data()$metadata
+      )
+      # Get the map
+      map <- create_interval_district_map(
+        data = voting_data, 
+        geo_data = geo_data(),
+        # Select responses for "Importante" and "Poco importante" (1 and 2)
+        selected_responses = c("1", "2"),
+        highlight_extremes = TRUE,
+        use_gradient = F,
+        color_scale = "Blues",
+        custom_theme = active_theme()
+      )
+      
+      # Add title and footer to the map directly
+      map <- map %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
+                      "Porcentaje que considera que votar es importante", 
+                      "</div>"),
+          position = "topright"
+        ) %>%
+        addControl(
+          html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
+                      paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
+                      "</div>"),
+          position = "bottomright"
+        )
+      
+      # Save the map to HTML
+      htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
+      
+      # Use pagedown with Chrome headless
+      pagedown::chrome_print(
+        input = tmp_html,
+        output = file,
+        options = list(
+          printBackground = TRUE,
+          scale = 2.0
+        ),
+        format = "png",
+        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
+      )
+      
+      # Clean up temporary files
+      if (file.exists(tmp_html)) {
+        file.remove(tmp_html)
+      }
+    }
+  )
 }

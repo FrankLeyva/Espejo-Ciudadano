@@ -24,13 +24,13 @@ mobilityServer <- function(input, output, session,current_theme = NULL) {
   # Create bicycle distribution pie chart
   output$bicycles_pie <- renderPlotly({
     req(survey_data())
-    create_bicycle_distribution(survey_data()$responses, active_theme())
+    create_bicycle_distribution(survey_data()$responses, active_theme())%>% apply_plotly_theme()
   })
   
   # Create vehicle distribution pie chart
   output$vehicles_pie <- renderPlotly({
     req(survey_data())
-    create_vehicle_distribution(survey_data()$responses, active_theme())
+    create_vehicle_distribution(survey_data()$responses, active_theme())%>% apply_plotly_theme()
   })
   
   # Create work transportation mode plot
@@ -40,7 +40,7 @@ mobilityServer <- function(input, output, session,current_theme = NULL) {
       survey_data()$responses, 
       mode_type = "work", 
       custom_theme = active_theme()
-    )
+    ) 
   })
   
   # Create general transportation mode plot

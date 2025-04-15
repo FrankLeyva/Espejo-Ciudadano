@@ -1,94 +1,32 @@
 # UI for Accountability Dashboard
 accountabilityUI <- function() {
   page_fluid(
+    class = "section-gobierno",
+
     useShinyjs(),
     
     tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
       tags$style(HTML("
-        .nav-tabs .nav-link.active {
-          font-weight: bold;
-          border-bottom-color: #0d6efd;
+        /* Override pill navigation styling for this page */
+        .gobierno-pills .nav-pills .nav-link:not(.active) {
+          background-color: rgba(240, 240, 240, 0.8);
+color: var(--gobierno-color) !important;
+            border: 1px solid rgba(229, 126, 30, 0.2);
+          font-weight: bold !important;
         }
         
-        .tab-content {
-          padding-top: 20px;
+        .gobierno-pills .nav-pills .nav-link:hover:not(.active) {
+          background-color: rgba(160, 115, 67, 0.1);
         }
-        
-        .info-box {
-          padding: 15px;
-          border-radius: 5px;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: flex-start;
-        }
-        
-        .info-box-icon {
-          margin-right: 15px;
-          font-size: 24px;
-          padding-top: 3px;
-        }
-        
-        .info-box-content {
-          flex-grow: 1;
-        }
-        
-        .info-box-title {
-          font-weight: bold;
-          margin-bottom: 10px;
-          font-size: 16px;
-        }
-        
-        .info-box-value {
-          font-size: 18px;
-          line-height: 1.4;
-        }
-        
-        .info-box-info {
-          background-color: #d1ecf1;
-          color: #0c5460;
-        }
-        
-        .info-box-warning {
-          background-color: #fff3cd;
-          color: #856404;
-        }
-        
-        .justice-callout {
-          background-color: #6969B3;
-          color: white;
-          padding: 20px;
-          border-radius: 5px;
-          margin-bottom: 20px;
-        }
-        
-        .justice-callout-title {
-          font-size: 20px;
-          font-weight: bold;
-          margin-bottom: 10px;
-        }
-        
-        .justice-callout-value {
-          font-size: 28px;
-          font-weight: bold;
-          margin-bottom: 10px;
-        }
-        
-        .justice-callout-subtitle {
-          font-size: 16px;
-          opacity: 0.9;
+             .gobierno-pills .nav-pills .nav-link.active {
+          background-color: var(--gobierno-color) !important; 
+          color: white !important;
+          font-weight: bold !important;
+          border: none !important;
         }
       "))
     ),
-    
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#0d6efd"
-    ),
+
     div(
       class = "mb-4",
       tags$a(
@@ -104,6 +42,8 @@ accountabilityUI <- function() {
       fill = FALSE,
       card(
         card_header(
+          style="border-top: 4px solid var(--gobierno-color)",
+
           h2("Rendición de Cuentas", class = "text-center")
         )
       )
@@ -129,8 +69,8 @@ accountabilityUI <- function() {
     # Tabset for histograms: Corruption punishment (Q123, Q124, Q125)
     card(
       card_header("Percepción sobre Castigo a Servidores Públicos Corruptos"),
-      
-      navset_tab(
+      div(class = "gobierno-pills",
+      navset_pill(
         nav_panel(
           title = "Gobierno Municipal",
           plotlyOutput("municipal_punishment_hist", height = "400px")
@@ -144,13 +84,14 @@ accountabilityUI <- function() {
           plotlyOutput("federal_punishment_hist", height = "400px")
         )
       )
+    )
     ),
     
     # Tabset for pie charts: Corruption acts (Q15.1, Q16.1, Q17.1)
     card(
       card_header("Percepción sobre Actos de Corrupción en el Gobierno"),
-      
-      navset_tab(
+      div(class = "gobierno-pills",
+      navset_pill(
         nav_panel(
           title = "Gobierno Municipal",
           plotlyOutput("municipal_corruption_pie", height = "400px")
@@ -164,6 +105,7 @@ accountabilityUI <- function() {
           plotlyOutput("federal_corruption_pie", height = "400px")
         )
       )
+    )
     )
     
     

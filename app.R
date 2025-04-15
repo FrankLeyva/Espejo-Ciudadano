@@ -167,8 +167,9 @@ ui <- page_navbar(
     )
   ),
   id = "navbar",
-  inverse = TRUE,
-  fluid = TRUE, 
+  navbar_options = navbar_options(
+    theme = "dark"  # Instead of inverse = TRUE
+  ),
   
   # Add these additional styles to fix alignment
   header = tags$head(

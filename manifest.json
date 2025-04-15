@@ -3762,7 +3762,7 @@
         "Maintainer": "Kevin Ushey <kevin@rstudio.com>",
         "Repository": "CRAN",
         "Date/Publication": "2025-03-18 10:50:02 UTC",
-        "Built": "R 4.4.3; ; 2025-04-10 22:11:46 UTC; windows"
+        "Built": "R 4.4.3; ; 2025-04-15 18:21:15 UTC; windows"
       }
     },
     "reprex": {
@@ -5366,10 +5366,10 @@
       "checksum": "dcb240655dcbf79b8706d11c8c2a169c"
     },
     ".Rprofile": {
-      "checksum": "75c6750849a95643869ba8484b6952c4"
+      "checksum": "c12e069532b495aa529a13acdbaf93dc"
     },
     "app.R": {
-      "checksum": "6c7c9fb88551e5ef0ecaa0411824cb81"
+      "checksum": "179063e59f661b5b8605fdae75f48673"
     },
     "config.yml": {
       "checksum": "d41d8cd98f00b204e9800998ecf8427e"
@@ -5537,76 +5537,76 @@
       "checksum": "3997f4c10b4b3b38ffa2eab253dae60a"
     },
     "R/global_theme.R": {
-      "checksum": "ef69297cafe64ba4c35df4a66984bc1d"
+      "checksum": "dc24538c83bee4e0b73402e263f3748e"
     },
     "R/government/accountability_server.R": {
-      "checksum": "76a9357a873eec84739eb8dd88d94ea2"
+      "checksum": "b44d175dd2a0433c131fd55840abce7d"
     },
     "R/government/accountability_ui.R": {
-      "checksum": "0d7fb724286e87811d096bcf02a5e4cd"
+      "checksum": "5ec6f66a58c85eeacde016ea82a89535"
     },
     "R/government/expectations_server.R": {
-      "checksum": "a85d7a807a8d91f93949dd4791e1b257"
+      "checksum": "49fac938ee4708bd5b53c4e865630757"
     },
     "R/government/expectations_ui.R": {
-      "checksum": "f8b94a1a66afbea5945a33bbd640412c"
+      "checksum": "e6d31a6fb9d597df46a241617466e516"
     },
     "R/government/government_server.R": {
-      "checksum": "163d53dfb18f3e867713f2aaa6009819"
+      "checksum": "ecba2e855d40780c92e23f6b38bb65aa"
     },
     "R/government/government_ui.R": {
-      "checksum": "09c1fc2ccefb24a68b8cc2790dd514cf"
+      "checksum": "5ca955bbcfc1cc44a01544611a58f4f6"
     },
     "R/government/inequality_server.R": {
-      "checksum": "9e6da0f23b0bf4fcca442c3a72056354"
+      "checksum": "13893a119c7b289bfe3e4c06aadb8543"
     },
     "R/government/inequality_ui.R": {
-      "checksum": "88c7d446819db85aa21ea0371b822e96"
+      "checksum": "8014991f35c657224faa19e330dd556f"
     },
     "R/government/representation_server.R": {
-      "checksum": "456a62bd3f3b4812ca5567f927326b96"
+      "checksum": "72883bf82b39ce913f67dd1dbb089508"
     },
     "R/government/representation_ui.R": {
-      "checksum": "506fe89a9ad858dbdd67f01ee925a23f"
+      "checksum": "71eef1647dfe489c6c8cec8f273ac517"
     },
     "R/government/trust_server.R": {
-      "checksum": "5885aa4e3e723038c4b7a8bdfe162432"
+      "checksum": "9949ceb7fbaa7d039c86f8c776fd7b95"
     },
     "R/government/trust_ui.R": {
-      "checksum": "0549c87f1c245664c0c03910659bdbcf"
+      "checksum": "b4e78e3b13410cb2827563a09486558f"
     },
     "R/infrastructure/education_server.R": {
-      "checksum": "eb079ec6bb52fb070122f47417a888ec"
+      "checksum": "aa9a30d78cdcd4773441b19a9db87998"
     },
     "R/infrastructure/education_ui.R": {
-      "checksum": "5a406a61b8c7f86f5b4c176cfff34098"
+      "checksum": "be5a93fc01867821e9cfb37e1822ee0b"
     },
     "R/infrastructure/healthcare_server.R": {
-      "checksum": "e353d4b85f433dba82a7922f48f696ac"
+      "checksum": "d48086706ebe8a39967327bc565545c5"
     },
     "R/infrastructure/healthcare_ui.R": {
-      "checksum": "d8bda2d9440bd68e81807b0186e7c05d"
+      "checksum": "883d46d7ac8840b7634b699d6eb3a223"
     },
     "R/infrastructure/housing_server.R": {
-      "checksum": "5c6340ccc8945ce9fe329b7b3ffdb1e0"
+      "checksum": "9ccdb97fe6c2c4f0798b2af684bdd4d8"
     },
     "R/infrastructure/housing_ui.R": {
-      "checksum": "fb49a2a9c7b6a8d5720df038e23c6686"
+      "checksum": "cd9c8737880a4647d10b7147996f6ce3"
     },
     "R/infrastructure/infrastructure_server.R": {
-      "checksum": "3f3d57bc18c4d59d35afa4860a815574"
+      "checksum": "fbcf3b6c561fefe20ef23a2e5426f079"
     },
     "R/infrastructure/infrastructure_ui.R": {
-      "checksum": "5fd30fa67dac2ad59cbc65fa12df21d2"
+      "checksum": "7dce372fb8cdeed18fdf2addaca98146"
     },
     "R/infrastructure/public_services_server.R": {
-      "checksum": "7f599ef89bf45d68dd073795beac5381"
+      "checksum": "62a6c3bbffe2c04b34f57a0da2cc9569"
     },
     "R/infrastructure/public_services_ui.R": {
-      "checksum": "ce232f1a7ce34ca3d7006811d1a6706b"
+      "checksum": "3b5c771d4baea32591d590753c7e89ac"
     },
     "R/interval_module.R": {
-      "checksum": "b796e5d71fbecb6cbd2cce22128b69d2"
+      "checksum": "0acf1d2f9fb3c82a8ad377c9169c6c47"
     },
     "R/nominal_module.R": {
       "checksum": "899e477e1b148bf4bd390f5ddc6f0bdd"
@@ -5615,22 +5615,22 @@
       "checksum": "9b6091da838f282cf21074656f078eba"
     },
     "R/participation/civic_server.R": {
-      "checksum": "0a445790bd46eef577a02e4f6ef8db60"
+      "checksum": "6cdb686631175e45dad0bc3c724a9692"
     },
     "R/participation/civic_ui.R": {
-      "checksum": "79151748c7c78a1fb9616f80225437f8"
+      "checksum": "76f6c7a890360e002142551df7a99a2b"
     },
     "R/participation/community_server.R": {
-      "checksum": "140c8257fb37cebef95c6e54ca080266"
+      "checksum": "43f3948ddb7728b4178edf08d9444d54"
     },
     "R/participation/community_ui.R": {
-      "checksum": "6e549387e8ee60a3e43ef96cab58d29e"
+      "checksum": "0893fbdf2909b4236f96e6d66d68ddf0"
     },
     "R/participation/participation_server.R": {
-      "checksum": "7a8663e15b32d39410da345a6ac3ae45"
+      "checksum": "fe16e33f72c86a3aff95bf0cd587f09c"
     },
     "R/participation/participation_ui.R": {
-      "checksum": "5b918442d68307ab2201191ced6037ca"
+      "checksum": "dea2791d929c7cbdc41ce49bcb285c31"
     },
     "R/question_classifier.R": {
       "checksum": "30e2eb244c5488dd5f07e5751984efeb"
@@ -5639,7 +5639,7 @@
       "checksum": "88a54a4e17e44cacc9739b9aaa2cd067"
     },
     "R/special_module.R": {
-      "checksum": "2a7d86a96009b013dd1f6afc71cef3b4"
+      "checksum": "87c27b59722a87b2bd46a0314a6453c5"
     },
     "R/survey_config.R": {
       "checksum": "d3e2708881f9fea0c3dd8ee9aaca4261"
@@ -5648,55 +5648,55 @@
       "checksum": "97a0eca87eef88767a9a17b96e5e8a40"
     },
     "R/urban/mobility_server.R": {
-      "checksum": "ef4dad24817994a4f3af7016e2ab6744"
+      "checksum": "4447b97be14c1867de54af97c242cf2c"
     },
     "R/urban/mobility_ui.R": {
-      "checksum": "1053c9169363e1edb1c0c1c78e322a95"
+      "checksum": "17fa10c7203d2947cf390cb3f99b1233"
     },
     "R/urban/transportation_server.R": {
-      "checksum": "38f756a0364520b64c0f74f098892e4d"
+      "checksum": "9affa1f28a46ed983581b27520bee161"
     },
     "R/urban/transportation_ui.R": {
-      "checksum": "a06ce713b530c85874d17bdf910bd8c3"
+      "checksum": "217f2e7eede23f406564cf7da8a035e5"
     },
     "R/urban/urban_server.R": {
       "checksum": "acaafdff28afb30a50db03546c73157e"
     },
     "R/urban/urban_ui.R": {
-      "checksum": "863b5362a908e2ce28989b682ea05d0c"
+      "checksum": "f06ea8d3f1bc68c4e41a0e66922db37f"
     },
     "R/utils.R": {
       "checksum": "39ca92bac55636262ef62d3b9403deed"
     },
     "R/wellness/cultural_server.R": {
-      "checksum": "a5ade6665e95f7dc2e5db8ce5a093825"
+      "checksum": "61e087b44555670fd4fb2e6d3cd05c35"
     },
     "R/wellness/cultural_ui.R": {
-      "checksum": "ea0487afc29fadb197e7a4cfa0894855"
+      "checksum": "55d75c42181d58ae9a86ad3f96e3e9ee"
     },
     "R/wellness/economy_server.R": {
-      "checksum": "4dfb8d4ad8fa10a2641eb1b5324c2612"
+      "checksum": "2391e11762c04b6b4e6ba472a719effc"
     },
     "R/wellness/economy_ui.R": {
-      "checksum": "f052c9644f611f82765ef683f5caf363"
+      "checksum": "853c4678f703b6495c434fb7462c2108"
     },
     "R/wellness/environment_server.R": {
-      "checksum": "c4db7c3e44479ed5ed6a0605dbf2f10b"
+      "checksum": "07d559afc404a43a0a58fb59c11c28c2"
     },
     "R/wellness/environment_ui.R": {
-      "checksum": "e628f03e46d80fa3ff23268eeecd2526"
+      "checksum": "d1822fa2e75e4ba1051eb6e38846805e"
     },
     "R/wellness/identity_server.R": {
-      "checksum": "ea4daafbcfab3e9bb78c21d525b36c78"
+      "checksum": "8a40cc7952e2e33885868906c18b980a"
     },
     "R/wellness/identity_ui.R": {
-      "checksum": "a2996e64454da810a07b188c83e59ea1"
+      "checksum": "89d45e72432269f92a0c61d76ae243f6"
     },
     "R/wellness/wellness_server.R": {
-      "checksum": "af550707c15a7ae8eb41ee28aaf3827d"
+      "checksum": "4865008efa30999053c312fb8c18883f"
     },
     "R/wellness/wellness_ui.R": {
-      "checksum": "c83ee9cfd797849e01b3bc1448cf5ab2"
+      "checksum": "cbd2c6d1f20cca9d6f5c33dcb64426d6"
     },
     "README.md": {
       "checksum": "9343d232581bcc020ba4e595a406def6"
@@ -5704,11 +5704,14 @@
     "renv.lock": {
       "checksum": "d8dacd8f3ff0f3b7043117f952ce8303"
     },
-    "www/css/styles.css": {
-      "checksum": "a633a28b49d322071f6b3cd804955744"
+    "www/custom.js": {
+      "checksum": "4c1287ebed1dfa1bc13e145c8376847e"
     },
     "www/logo_pej.png": {
       "checksum": "5acf4e825b9faf68177932faa3d9e350"
+    },
+    "www/styles.css": {
+      "checksum": "2696f98d6abdbc3934f9ad62985d866f"
     }
   },
   "users": null

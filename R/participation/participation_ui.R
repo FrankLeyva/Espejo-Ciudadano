@@ -32,7 +32,7 @@ participationUI <- function() {
         card(
           class = "nav-card-participacion",
           card_body(
-            div(class = "text-center nav-card-icon text-primary", 
+            div(class = "text-center nav-card-icon", 
                 bsicons::bs_icon("people")),
             h4(class = "nav-card-title text-center", "Participación Cívica"),
             p(class = "text-center", "Análisis de interés político, conocimiento de mecanismos y factores necesarios para participar")
@@ -48,7 +48,7 @@ participationUI <- function() {
         card(
           class = "nav-card-participacion",
           card_body(
-            div(class = "text-center nav-card-icon text-success", 
+            div(class = "text-center nav-card-icon", 
                 bsicons::bs_icon("building")),
             h4(class = "nav-card-title text-center", "Participación Comunitaria"),
             p(class = "text-center", "Análisis de participación en organizaciones y actividades para resolución de problemas")

@@ -665,7 +665,7 @@ calculate_student_presence <- function(survey_data) {
   return(result_df)
 }
 
-create_education_overview <- function(survey_data, geo_data, custom_theme = NULL) {
+create_education_overview <- function(survey_data, geo_data, custom_theme = NULL, disable_mobile_pan  = TRUE) {
   # Check if we have data
   if (is.null(survey_data) || nrow(survey_data) == 0 || is.null(geo_data)) {
     return(leaflet() %>% 
@@ -908,7 +908,27 @@ create_education_overview <- function(survey_data, geo_data, custom_theme = NULL
       ),
       label = ~lapply(hover_label, HTML)
     )
-  
+    if (disable_mobile_pan) {
+      map <- map %>% setView(lng = -106.4245, lat = 31.6904, zoom = 11) %>%
+        htmlwidgets::onRender("
+          function(el, x) {
+            var myMap = this;
+            
+            // Function to detect if user is on mobile device
+            function isMobileDevice() {
+              return (typeof window.orientation !== 'undefined') || 
+                     (navigator.userAgent.indexOf('IEMobile') !== -1) ||
+                     (window.innerWidth <= 768); // Common mobile breakpoint
+            }
+            
+            // Disable dragging only on mobile
+            if (isMobileDevice()) {
+              myMap.dragging.disable();
+              console.log('Map panning disabled on mobile device');
+            }
+          }
+        ")
+    }
   # Add district labels with enhanced styling and adjusted positions
   for (i in 1:nrow(geo_data)) {
     if (geo_data$label_text[i] != "") {
@@ -1080,7 +1100,7 @@ colors[top_indices] <- highlight_color
     )
 }
 
-create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) {
+create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL, disable_mobile_pan = TRUE) {
   # Check if we have data
   if (is.null(survey_data) || nrow(survey_data) == 0 || is.null(geo_data)) {
     return(leaflet() %>% 
@@ -1311,7 +1331,27 @@ create_housing_overview <- function(survey_data, geo_data, custom_theme = NULL) 
       ),
       label = ~lapply(hover_label, HTML)
     )
-  
+    if (disable_mobile_pan) {
+      map <- map %>% setView(lng = -106.4245, lat = 31.6904, zoom = 11) %>%
+        htmlwidgets::onRender("
+          function(el, x) {
+            var myMap = this;
+            
+            // Function to detect if user is on mobile device
+            function isMobileDevice() {
+              return (typeof window.orientation !== 'undefined') || 
+                     (navigator.userAgent.indexOf('IEMobile') !== -1) ||
+                     (window.innerWidth <= 768); // Common mobile breakpoint
+            }
+            
+            // Disable dragging only on mobile
+            if (isMobileDevice()) {
+              myMap.dragging.disable();
+              console.log('Map panning disabled on mobile device');
+            }
+          }
+        ")
+    }
   # Add district labels with enhanced styling and adjusted positions
   for (i in 1:nrow(geo_data)) {
     if (!is.na(geo_data$label_text[i]) && geo_data$label_text[i] != "") {

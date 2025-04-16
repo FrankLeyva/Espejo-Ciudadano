@@ -1,8 +1,11 @@
 # UI para Dashboard de Metodología y Descarga de Datos
 methodologyUI <- function() {
+  # The color from the about_ui.R appears to be a dark charcoal/gray
   header_color <- "#2d2d2d"
+  
   page_fluid(
     useShinyjs(),
+      
     tags$head(
       tags$link(
         rel = "stylesheet", 
@@ -18,7 +21,7 @@ methodologyUI <- function() {
         .methodology-section h3 {
           margin-top: 25px;
           margin-bottom: 15px;
-          color: #0d6efd;
+          color: #2d2d2d;
           font-weight: 600;
           border-bottom: 2px solid #eaecef;
           padding-bottom: 8px;
@@ -53,7 +56,7 @@ methodologyUI <- function() {
           font-family: Consolas, Monaco, 'Courier New', monospace;
           text-align: center;
           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-          border-left: 4px solid #0d6efd;
+          border-left: 4px solid #2d2d2d;
         }
         
         .download-card {
@@ -68,7 +71,7 @@ methodologyUI <- function() {
         
         .download-icon {
           font-size: 2.5rem;
-          color: #0d6efd;
+          color: #2d2d2d;
           margin-bottom: 15px;
         }
         
@@ -92,8 +95,8 @@ methodologyUI <- function() {
         }
         
         .callout-info {
-          border-left-color: #5bc0de;
-          background-color: #f4f8fa;
+          border-left-color: #2d2d2d;
+          background-color: #f4f4f4;
         }
         
         .callout-warning {
@@ -110,68 +113,47 @@ methodologyUI <- function() {
         }
         
         .year-tabs .nav-link.active {
-          background-color: #0d6efd;
+          background-color: #2d2d2d;
           color: white;
-          border-color: #0d6efd;
+          border-color: #2d2d2d;
           box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
         }
         
-        /* Data table styling */
-        .dataTables_wrapper {
-          font-size: 14px;
-        }
-        
-        .dataTables_wrapper .dataTables_length, 
-        .dataTables_wrapper .dataTables_filter {
-          margin-bottom: 15px;
-        }
-        
-        .dataTables_wrapper .dataTable th {
-          background-color: #f8f9fa;
-          font-weight: 600;
-        }
-        
-        /* Card styling */
-        .card {
-          border-radius: 8px;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-          margin-bottom: 20px;
-          overflow: hidden;
-        }
-        
-        /* Modified to match about_ui.R */
-        .card-header {
+        /* Button styling */
+        .btn-primary {
           background-color: #2d2d2d;
-          color: white;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          border-color: #2d2d2d;
+          transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+          background-color: #444444;
+          border-color: #444444;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
         /* Page title styling */
         .page-title {
           font-weight: 700;
-          color: white;
+          color: #2d2d2d;
           margin-bottom: 20px;
         }
         
-        /* Button styling */
-        .btn-primary {
-          transition: all 0.2s;
+        /* Extra section header styling */
+        .extra-section-header {
+          background-color: #2d2d2d !important;
+          color: white !important;
+          border-bottom: none !important;
         }
         
-        .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        /* Extra section link styling */
+        .nav-link-extra {
+          color: #2d2d2d;
         }
         
-        /* Modal styling */
-        .modal-header {
-          background-color: #f8f9fa;
-          border-bottom: 2px solid #eaecef;
-        }
-        
-        .modal-title {
-          font-weight: 600;
-          color: #0d6efd;
+        .nav-link-extra:hover {
+          color: #444444;
         }
       "))
     ),
@@ -179,7 +161,7 @@ methodologyUI <- function() {
     theme = bs_theme(
       version = 5,
       bootswatch = "litera",
-      primary = "#0d6efd"
+      primary = "#2d2d2d"
     ),
     
     # Encabezado
@@ -193,9 +175,10 @@ methodologyUI <- function() {
       )
     ),
     
+    # Sección de descargas (al principio para facilitar acceso)
     card(
       card_header(
-        h3("Descargar Datos de Encuestas", class = "m-0 fw-bold"),
+        h3("Descargar Datos de Encuestas", class = "m-0"),
         style = paste0("background-color: ", header_color, "; color: white;")
       ),
       card_body(
@@ -233,7 +216,7 @@ methodologyUI <- function() {
                         actionLink(
                           "view_per_2024_metadata", 
                           "Ver diccionario de datos",
-                          class = "text-center mt-2"
+                          class = "text-center mt-2 nav-link-extra"
                         )
                       )
                     )
@@ -260,7 +243,7 @@ methodologyUI <- function() {
                         actionLink(
                           "view_par_2024_metadata", 
                           "Ver diccionario de datos",
-                          class = "text-center mt-2"
+                          class = "text-center mt-2 nav-link-extra"
                         )
                       )
                     )
@@ -296,7 +279,7 @@ methodologyUI <- function() {
                         actionLink(
                           "view_per_2023_metadata", 
                           "Ver diccionario de datos",
-                          class = "text-center mt-2"
+                          class = "text-center mt-2 nav-link-extra"
                         )
                       )
                     )
@@ -323,7 +306,7 @@ methodologyUI <- function() {
                         actionLink(
                           "view_par_2023_metadata", 
                           "Ver diccionario de datos",
-                          class = "text-center mt-2"
+                          class = "text-center mt-2 nav-link-extra"
                         )
                       )
                     )
@@ -353,7 +336,8 @@ methodologyUI <- function() {
     # Explicación de metodología
     card(
       card_header(
-        h3("Metodología de las Encuestas", class = "m-0")
+        h3("Metodología de las Encuestas", class = "m-0"),
+        style = paste0("background-color: ", header_color, "; color: white;")
       ),
       card_body(
         div(

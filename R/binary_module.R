@@ -505,7 +505,7 @@ create_binary_pie <- function(data, title = "Distribución de Respuestas", custo
     )
 }
 
-create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE, focus_on_true = TRUE, custom_theme = NULL) {
+create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE, focus_on_true = TRUE, custom_theme = NULL,disable_mobile_pan = TRUE) {
   # Check if we have data
   if (is.null(data) || nrow(data) == 0 || is.null(geo_data)) {
     return(plotly_empty() %>% 
@@ -755,7 +755,27 @@ create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE
       ),
       label = ~lapply(hover_label, HTML)
     )
-
+    if (disable_mobile_pan) {
+      map <- map %>% setView(lng = -106.4245, lat = 31.6904, zoom = 11) %>%
+        htmlwidgets::onRender("
+          function(el, x) {
+            var myMap = this;
+            
+            // Function to detect if user is on mobile device
+            function isMobileDevice() {
+              return (typeof window.orientation !== 'undefined') || 
+                     (navigator.userAgent.indexOf('IEMobile') !== -1) ||
+                     (window.innerWidth <= 768); // Common mobile breakpoint
+            }
+            
+            // Disable dragging only on mobile
+            if (isMobileDevice()) {
+              myMap.dragging.disable();
+              console.log('Map panning disabled on mobile device');
+            }
+          }
+        ")
+    }
   # Add district labels with enhanced styling and adjusted positions
   for (i in 1:nrow(geo_data)) {
     if (geo_data$label_text[i] != "") {

@@ -371,7 +371,7 @@ create_interval_histogram <- function(data, bins = 30, title = "Distribución",
 }
 
 create_interval_district_map <- function(data, geo_data, selected_responses = NULL, highlight_extremes = TRUE, 
-  use_gradient = FALSE, color_scale = "Blues", custom_theme = NULL) {
+  use_gradient = FALSE, color_scale = "Blues", custom_theme = NULL,disable_mobile_pan = TRUE) {
   # Check if we have data
   if (is.null(data) || nrow(data) == 0 || is.null(geo_data)) {
     return(plotly_empty() %>% 
@@ -699,7 +699,27 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
         ),
         label = ~lapply(hover_label, HTML)
       )
-
+      if (disable_mobile_pan) {
+        map <- map %>% setView(lng = -106.4245, lat = 31.6904, zoom = 11) %>%
+          htmlwidgets::onRender("
+            function(el, x) {
+              var myMap = this;
+              
+              // Function to detect if user is on mobile device
+              function isMobileDevice() {
+                return (typeof window.orientation !== 'undefined') || 
+                       (navigator.userAgent.indexOf('IEMobile') !== -1) ||
+                       (window.innerWidth <= 768); // Common mobile breakpoint
+              }
+              
+              // Disable dragging only on mobile
+              if (isMobileDevice()) {
+                myMap.dragging.disable();
+                console.log('Map panning disabled on mobile device');
+              }
+            }
+          ")
+      }
     # Add legend if using gradient
     if (use_gradient && !is.null(palette_function)) {
       map <- map %>% addLegend(
@@ -951,7 +971,27 @@ create_interval_district_map <- function(data, geo_data, selected_responses = NU
         opacity = 0.7
       )
     }
-
+    if (disable_mobile_pan) {
+      map <- map %>% setView(lng = -106.4245, lat = 31.6904, zoom = 11) %>%
+        htmlwidgets::onRender("
+          function(el, x) {
+            var myMap = this;
+            
+            // Function to detect if user is on mobile device
+            function isMobileDevice() {
+              return (typeof window.orientation !== 'undefined') || 
+                     (navigator.userAgent.indexOf('IEMobile') !== -1) ||
+                     (window.innerWidth <= 768); // Common mobile breakpoint
+            }
+            
+            // Disable dragging only on mobile
+            if (isMobileDevice()) {
+              myMap.dragging.disable();
+              console.log('Map panning disabled on mobile device');
+            }
+          }
+        ")
+    }
     # Add district labels with enhanced styling and adjusted for position
     for (i in 1:nrow(geo_data)) {
       if (geo_data$label_text[i] != "") {

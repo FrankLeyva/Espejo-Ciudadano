@@ -646,7 +646,7 @@ server <- function(input, output, session) {
       aboutServer("about_section")
     }
   })
-  # Add this to your app.R server function
+ # Add this to the observeEvent(input$navbar) in app.R
 observeEvent(input$navbar, {
   # Get current section
   current_tab <- input$navbar
@@ -657,6 +657,7 @@ observeEvent(input$navbar, {
   shinyjs::removeClass(selector = "body", class = "section-gobierno")
   shinyjs::removeClass(selector = "body", class = "section-infraestructura")
   shinyjs::removeClass(selector = "body", class = "section-participacion")
+  shinyjs::removeClass(selector = "body", class = "section-extras")
   
   # Add current section class
   if (grepl("^wellness|^economic|^cultural|^identity|^environment", current_tab)) {
@@ -669,6 +670,8 @@ observeEvent(input$navbar, {
     shinyjs::addClass(selector = "body", class = "section-infraestructura")
   } else if (grepl("^participation|^civic|^community", current_tab)) {
     shinyjs::addClass(selector = "body", class = "section-participacion")
+  } else if (grepl("^methodology|^about", current_tab)) {
+    shinyjs::addClass(selector = "body", class = "section-extras")
   }
 })
 }

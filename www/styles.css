@@ -19,6 +19,7 @@
     --gobierno-color: #423629;
     --participacion-color: #F57C00;
     --infraestructura-color: #8E24AA;
+    --extras-color: #2d2d2d;
     
     /* Navbar */
     --navbar-bg: #2D2D2D;
@@ -289,6 +290,13 @@
   .section-participacion .nav-pills .nav-link:not(.active) {
     color: var(--participacion-color);
   }
+
+  .section-extras .nav-pills .nav-link.active {
+    background-color: var(--extras-color);
+  }
+  .section-extras .nav-pills .nav-link:not(.active) {
+    color: var(--extras-color);
+  }
   
   .nav-pills .nav-link .bs-icon {
     margin-right: 8px;
@@ -343,6 +351,11 @@
   .section-participacion .nav-tabs .nav-link.active {
     color: var(--participacion-color);
     border-bottom-color: var(--participacion-color);
+  }
+
+  .section-extras .nav-tabs .nav-link.active {
+    color: var(--extras-color);
+    border-bottom-color: var(--extras-color);
   }
   
   /* ==============================
@@ -422,6 +435,48 @@
   .section-participacion .card-header {
     background-color: rgba(245, 124, 0, 0.1);
     border-bottom: 4px solid var(--participacion-color);
+  }
+
+  /* Extras section-specific styling */
+  .section-extras .card-header {
+    background-color: var(--extras-color) !important;
+    color: white !important;
+    border-bottom: none !important;
+  }
+  
+  .section-extras .btn-primary {
+    background-color: var(--extras-color);
+    border-color: var(--extras-color);
+  }
+  
+  .section-extras .btn-primary:hover {
+    background-color: #444444;
+    border-color: #444444;
+  }
+  
+  .section-extras .callout-info {
+    border-left-color: var(--extras-color);
+  }
+  
+  .section-extras .formula-box {
+    border-left-color: var(--extras-color);
+  }
+  
+  .section-extras .download-icon {
+    color: var(--extras-color);
+  }
+  
+  .section-extras .year-tabs .nav-link.active {
+    background-color: var(--extras-color);
+    border-color: var(--extras-color);
+  }
+  
+  .section-extras a:not(.btn):not(.nav-link) {
+    color: var(--extras-color);
+  }
+  
+  .section-extras a:not(.btn):not(.nav-link):hover {
+    color: #444444;
   }
   
   /* Value box hover effect */

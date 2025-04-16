@@ -79,7 +79,7 @@ theme_config <- list(
         diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#423629"))(9)
       )
     ),
-    infraestructura = list(
+    participacion = list(
       primary = "#F57C00",  # Changed from E64A19 to be more distinct from danger color
       secondary = "#FFCC80",
       accent = "#039BE5",
@@ -89,7 +89,7 @@ theme_config <- list(
         diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#F57C00"))(9)
       )
     ),
-    participacion = list(
+     infraestructura= list(
       primary = "#8E24AA",
       secondary = "#CE93D8",
       accent = "#00ACC1",

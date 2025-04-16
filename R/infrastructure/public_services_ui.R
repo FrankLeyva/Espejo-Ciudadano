@@ -161,7 +161,7 @@ publicServicesUI <- function() {
     ),
     card(
       card_header("Reportes de Servicios Públicos"),
-      plotlyOutput("report_statistics_plot", height = "450px")
+      uiOutput("report_statistics_plot")  # Changed from plotlyOutput to uiOutput
     )
   )
 }

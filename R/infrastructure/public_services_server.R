@@ -169,10 +169,10 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
     )
   })
   
-  output$report_statistics_plot <- renderPlotly({
+  output$report_statistics_plot <- renderUI({
     req(survey_data())
     
-    # Create the report statistics visualization
+    # Create the responsive report statistics visualization
     create_report_statistics(survey_data()$responses)
   })
   

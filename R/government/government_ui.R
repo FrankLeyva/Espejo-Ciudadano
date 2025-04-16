@@ -35,7 +35,7 @@ color: var(--gobierno-color) !important;
         font-weight: bolder !important; 
         text-align: center !important; 
         border-bottom: none !important;"),
-          h2("Percepción general de gobierno", class = "text-center")
+          h2("Percepción General del Gobierno", class = "text-center")
         )
       )
     ),

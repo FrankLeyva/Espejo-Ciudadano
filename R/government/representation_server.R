@@ -99,7 +99,7 @@ representationServer <- function(input, output, session,current_theme = NULL) {
   # SPECIFIC REPRESENTATIVE KNOWLEDGE BAR CHARTS
   
   # Helper function to create bar chart for specific questions with labels
-  c# Helper function to create bar chart for specific questions with labels
+  # Improved helper function to create bar chart for specific questions with labels
   create_representative_knowledge_chart <- function(data, question_prefix, count, labels = NULL, custom_theme = NULL, x_range = c(0, 6)) {
     # Initialize vectors for counts and percentages
     ids_vector <- character(0)
@@ -170,11 +170,16 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       # Highlight all those rows
       colors[top_indices] <- highlight_color
       
+      # Determine optimal height based on number of entries
+      # Calculate a reasonable height - 40px per entry with a minimum of 400px
+      optimal_height <- max(400, nrow(results_df) * 40)
+      
       # Create bar chart
       plot_ly(
         data = results_df,
         y = ~Representative,
         x = ~Percentage,
+        height = optimal_height,  # Dynamic height based on data points
         type = "bar",
         orientation = "h",
         marker = list(color = colors),
@@ -187,13 +192,14 @@ representationServer <- function(input, output, session,current_theme = NULL) {
         title = "",
         xaxis = list(
           title = "Porcentaje que conoce",
-          range = x_range  # Use the provided range parameter
+          range = x_range
         ),
         yaxis = list(
           title = "",
-          categoryorder = 'total ascending'
+          categoryorder = 'total ascending',
+          automargin = TRUE  # Automatically adjust margin to fit labels
         ),
-        margin = list(l = 150)  # More space for labels
+        margin = list(l = 250)  # Increase left margin for longer names
       )
     } else {
       # Return empty plot if no data
@@ -201,6 +207,10 @@ representationServer <- function(input, output, session,current_theme = NULL) {
         layout(title = "No hay datos disponibles")
     }
   }
+
+
+
+  
   if (selectedYear() == '2024') {
 
   # Define actual labels for representatives from metadata

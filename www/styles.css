@@ -17,8 +17,8 @@
     --bienestar-color: #1E88E5;
     --movilidad-color: #43A047;
     --gobierno-color: #423629;
-    --infraestructura-color: #F57C00;
-    --participacion-color: #8E24AA;
+    --participacion-color: #F57C00;
+    --infraestructura-color: #8E24AA;
     
     /* Navbar */
     --navbar-bg: #2D2D2D;
@@ -211,7 +211,7 @@
     color: var(--infraestructura-color);
   }
   .nav-card-infraestructura:hover {
-    background-color: rgba(245, 124, 0, 0.05);
+    background-color: rgba(142, 36, 170, 0.05);
     border-top: 3px solid var(--infraestructura-color);
   }
   
@@ -219,7 +219,7 @@
     color: var(--participacion-color);
   }
   .nav-card-participacion:hover {
-    background-color: rgba(142, 36, 170, 0.05);
+    background-color: rgba(245, 124, 0, 0.05);
     border-top: 3px solid var(--participacion-color);
   }
   
@@ -415,12 +415,12 @@
   }
   
   .section-infraestructura .card-header {
-    background-color: rgba(245, 124, 0, 0.1);
+    background-color: rgba(142, 36, 170, 0.1);
     border-bottom: 4px solid var(--infraestructura-color);
   }
   
   .section-participacion .card-header {
-    background-color: rgba(142, 36, 170, 0.1);
+    background-color: rgba(245, 124, 0, 0.1);
     border-bottom: 4px solid var(--participacion-color);
   }
   

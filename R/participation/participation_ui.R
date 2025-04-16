@@ -64,7 +64,7 @@ participationUI <- function() {
         title = "Apoyo activo a movimientos sociales en 2024",
         value = textOutput("social_movement_support"),
         showcase = bsicons::bs_icon("megaphone-fill"),
-        theme = value_box_theme(bg = "#8E24AA", fg = "white")
+        theme = value_box_theme(bg = "#F57C00", fg = "white")
       )
     ),
     

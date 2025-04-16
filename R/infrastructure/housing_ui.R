@@ -11,12 +11,12 @@ housingUI <- function() {
         .infraestructura-pills .nav-pills .nav-link:not(.active) {
           background-color: rgba(240, 240, 240, 0.8);
 color: var(--infraestructura-color) !important;
-            border: 1px solid rgba(229, 126, 30, 0.2);
+            border: 1px solid rgba(142, 36, 170, 0.2);
           font-weight: bold !important;
         }
         
         .infraestructura-pills .nav-pills .nav-link:hover:not(.active) {
-          background-color: rgba(160, 115, 67, 0.1);
+          background-color: rgba(142, 36, 170, 0.1);
         }
              .infraestructura-pills .nav-pills .nav-link.active {
           background-color: var(--infraestructura-color) !important; 

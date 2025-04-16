@@ -1,3 +1,4 @@
+# Enhanced report statistics function with responsive design
 create_report_statistics <- function(survey_data) {
   # Define services and questions
   services <- c(
@@ -18,7 +19,7 @@ create_report_statistics <- function(survey_data) {
     "#6969B3",  # Purple for Alumbrado público
     "#2A9D8F",  # Teal for Baches
     "#E86486",  # Pink for Energía eléctrica
-    "#DAA520" #Yellow for Recolección de basura
+    "#DAA520"   # Yellow for Recolección de basura
   )
   
   # Initialize data frames to store results
@@ -76,100 +77,474 @@ create_report_statistics <- function(survey_data) {
     color = service_colors
   )
   
-  # Create a clean basic plot
-  p <- plot_ly() %>%
-    add_bars(
-      data = plot_data,
-      y = ~service,
-      x = ~report,
-      orientation = "h",
-      marker = list(color = ~color),
-      name = "Reporte",
-      text = ~paste0(round(report, 1), "%"),
-      textposition = "inside",
-      insidetextfont = list(color = "white", size = 14),
-      hoverinfo = "none",
-      hovertext = ~paste0(service, ": ", round(report, 1), "%")
-    )
-  
-  # Add annotations for addressed percentages with boxes and labels
-  annotations <- list()
-  
-  # Create annotation index counter
-  annot_idx <- 1
-  
-  for (i in 1:nrow(plot_data)) {
-    # Position for boxes and annotations
-    x_pos <- plot_data$report[i] + 0.5
-    y_pos <- i-1  # plotly uses 0-based indices for categorical axes
+  # Create the desktop version of the visualization (original with annotations)
+  desktop_plot <- function() {
+    p <- plot_ly() %>%
+      add_bars(
+        data = plot_data,
+        y = ~service,
+        x = ~report,
+        orientation = "h",
+        marker = list(color = ~color),
+        name = "Reporte",
+        text = ~paste0(round(report, 1), "%"),
+        textposition = "inside",
+        insidetextfont = list(color = "white", size = 14),
+        hoverinfo = "none",
+        hovertext = ~paste0(service, ": ", round(report, 1), "%")
+      )
     
-    # Add "% atendido" label above box
-    annotations[[annot_idx]] <- list(
-      x = x_pos,
-      y = y_pos - 0.3,  # Position slightly above
-      text = "% atendido",
-      showarrow = FALSE,
-      font = list(size = 10, color = "#555555"),
-      xanchor = "center",
-      yanchor = "bottom"
-    )
-    annot_idx <- annot_idx + 1
+    # Add annotations for addressed percentages with boxes and labels
+    annotations <- list()
     
-    # Add percentage in box
-    annotations[[annot_idx]] <- list(
-      x = x_pos,
-      y = y_pos,
-      text = paste0("<b>", round(plot_data$addressed[i], 1), "%</b>"),
-      showarrow = FALSE,
-      font = list(size = 14, color = "#333333"),
-      bgcolor = "#F9F9F9",
-      bordercolor = "#DDDDDD",
-      borderwidth = 2,
-      borderpad = 5,
-      xanchor = "center"
+    # Create annotation index counter
+    annot_idx <- 1
+    
+    for (i in 1:nrow(plot_data)) {
+      # Position for boxes and annotations - improved spacing
+      x_pos <- plot_data$report[i] + 1.8  # Increased spacing for better separation
+      y_pos <- i-1  # plotly uses 0-based indices for categorical axes
+      
+      # Add "% atendido" label above box
+      annotations[[annot_idx]] <- list(
+        x = x_pos,
+        y = y_pos - 0.23,  # Position slightly above the percentage box
+        text = "% atendido",
+        showarrow = FALSE,
+        font = list(size = 10, color = "#555555"),
+        xanchor = "center",
+        yanchor = "bottom"
+      )
+      annot_idx <- annot_idx + 1
+      
+      # Add percentage in box
+      annotations[[annot_idx]] <- list(
+        x = x_pos,
+        y = y_pos,
+        text = paste0("<b>", round(plot_data$addressed[i], 1), "%</b>"),
+        showarrow = FALSE,
+        font = list(size = 14, color = "#333333"),
+        bgcolor = "#F9F9F9",
+        bordercolor = "#DDDDDD",
+        borderwidth = 2,
+        borderpad = 5,
+        xanchor = "center"
+      )
+      annot_idx <- annot_idx + 1
+    }
+    
+    # Clean up the layout
+    p <- p %>% layout(
+      title = list(
+        text = "",
+        font = list(size = 16)
+      ),
+      xaxis = list(
+        title = "",
+        range = c(0, 20),  # Increased range to accommodate annotations
+        showgrid = FALSE,
+        zeroline = TRUE,
+        showticklabels = TRUE,
+        tickvals = c(0, 15),
+        ticktext = c("0", "15")
+      ),
+      yaxis = list(
+        title = "",
+        autorange = "reversed"
+      ),
+      showlegend = FALSE,
+      legend = list(
+        orientation = "h",
+        xanchor = "center",
+        x = 0.5,
+        y = -0.2
+      ),
+      margin = list(l = 180, r = 180, t = 80, b = 80),
+      annotations = annotations
     )
-    annot_idx <- annot_idx + 1
+    
+    # Custom download configuration for this specific plot
+    p <- p %>% config(
+      modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+                               "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                               "hoverClosestCartesian", "hoverCompareCartesian",
+                               "hoverClosestPie", "toImage"),
+      modeBarButtonsToAdd = list(
+        list(
+          name = "customDownload",
+          title = "Descargar Imagen",
+          icon = list(
+            path = "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5",
+            width = 16,
+            height = 16,
+            viewBox = "0 0 16 16"
+          ),
+          click = htmlwidgets::JS("function(gd) { customReportStatsDownload(gd); }")
+        )
+      ),
+      displaylogo = FALSE,
+      locale = "es",
+      responsive = TRUE
+    )
+    
+    return(p)
   }
   
-  # Clean up the layout
-  p <- p %>% layout(
-    title = list(
-      text = "",
-      font = list(size = 16)
-    ),
-    xaxis = list(
-      title = "",
-      range = c(0, 15),  # Changed to 15 as requested
-      showgrid = FALSE,
-      zeroline = TRUE,
-      showticklabels = TRUE,
-      tickvals = c(0, 15),
-      ticktext = c("0", "15")
-    ),
-    yaxis = list(
-      title = "",
-      autorange = "reversed"
-    ),
-    showlegend = FALSE,
-    legend = list(
+  # Create the mobile version with two separate bar charts
+  mobile_plot_reports <- function() {
+    # Sort data by report percentage (descending)
+    sorted_data <- plot_data[order(-plot_data$report), ]
+    
+    # Create bar chart for report percentages
+    plot_ly(
+      data = sorted_data,
+      y = ~service,
+      x = ~report,
+      type = "bar",
       orientation = "h",
-      xanchor = "center",
-      x = 0.5,
-      y = -0.2
-    ),
-    margin = list(l = 180, r = 180, t = 80, b = 80),
-    annotations = annotations
-  )
-  p <- p %>% config(
-    modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+      marker = list(color = ~color),
+      text = ~paste0(round(report, 1), "%"),
+      textposition = "auto",
+      hoverinfo = "text",
+      hovertext = ~paste0(service, ": ", round(report, 1), "%"),
+      height = 300
+    ) %>%
+    layout(
+      title = list(
+        text = "Ciudadanos que hicieron reportes",
+        font = list(size = 14)
+      ),
+      xaxis = list(
+        title = "Porcentaje",
+        range = c(0, 15),
+        showgrid = TRUE
+      ),
+      yaxis = list(
+        title = "",
+        automargin = TRUE
+      ),
+      margin = list(l = 10, r = 10, t = 40, b = 40),
+
+    ) %>%
+    config(
+      modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
                                "zoomIn2d", "zoomOut2d", "autoScale2d", 
-                               "hoverClosestCartesian", "hoverCompareCartesian","hoverClosestPie"),
-    modeBarButtonsToAdd = c("resetScale2d", "toImage"),
-    displaylogo=FALSE,
-    locale = "es",
-    responsive = TRUE
-)
-  return(p)
+                               "hoverClosestCartesian", "hoverCompareCartesian", 
+                               "hoverClosestPie", "toImage"),
+      modeBarButtonsToAdd = list(
+        list(
+          name = "customDownload",
+          title = "Descargar Imagen",
+          icon = list(
+            path = "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5",
+            width = 16,
+            height = 16,
+            viewBox = "0 0 16 16"
+          ),
+          click = htmlwidgets::JS("function(gd) { customReportsPlotDownload(gd); }")
+        )
+      ),
+      displaylogo = FALSE,
+      locale = "es",
+      responsive = TRUE
+    )
+  }
+  
+  mobile_plot_addressed <- function() {
+    # Sort data by addressed percentage (descending)
+    sorted_data <- plot_data[order(-plot_data$addressed), ]
+    
+    # Create bar chart for addressed percentages
+    plot_ly(
+      data = sorted_data,
+      y = ~service,
+      x = ~addressed,
+      type = "bar",
+      orientation = "h",
+      marker = list(color = ~color),
+      text = ~paste0(round(addressed, 1), "%"),
+      textposition = "auto",
+      hoverinfo = "text",
+      hovertext = ~paste0(service, ": ", round(addressed, 1), "%"),
+      height = 300
+    ) %>%
+    layout(
+      title = list(
+        text = "Reportes que fueron atendidos",
+        font = list(size = 14)
+      ),
+      xaxis = list(
+        title = "Porcentaje",
+        range = c(0, 100),
+        showgrid = TRUE
+      ),
+      yaxis = list(
+        title = "",
+        automargin = TRUE
+      ),
+      margin = list(l = 10, r = 10, t = 40, b = 40),
+    ) %>%
+    config(
+      modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
+                               "zoomIn2d", "zoomOut2d", "autoScale2d", 
+                               "hoverClosestCartesian", "hoverCompareCartesian",
+                               "hoverClosestPie", "toImage"),
+      modeBarButtonsToAdd = list(
+        list(
+          name = "customDownload",
+          title = "Descargar Imagen",
+          icon = list(
+            path = "M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5",
+            width = 16,
+            height = 16,
+            viewBox = "0 0 16 16"
+          ),
+          click = htmlwidgets::JS("function(gd) { customAttendedPlotDownload(gd); }")
+        )
+      ),
+      displaylogo = FALSE,
+      locale = "es",
+      responsive = TRUE
+    )
+  }
+  
+  # Return a list of plots with JS to handle responsive display
+  return(
+    tagList(
+      tags$script(HTML("
+        $(document).ready(function() {
+          // Function to check if device is mobile (screen width < 768px)
+          function isMobile() {
+            return window.innerWidth < 768;
+          }
+          
+          // Function to handle visibility
+          function handleVisibility() {
+            if (isMobile()) {
+              $('.desktop-plot').hide();
+              $('.mobile-plots').show();
+            } else {
+              $('.desktop-plot').show();
+              $('.mobile-plots').hide();
+            }
+          }
+          
+          // Set initial visibility
+          handleVisibility();
+          
+          // Update on resize
+          $(window).resize(function() {
+            handleVisibility();
+          });
+          
+          // Custom download function for report stats
+          window.customReportStatsDownload = function(gd) {
+            var year = window.currentSelectedYear || new Date().getFullYear().toString();
+            var width = 1000;
+            var height = 600;
+            
+            Plotly.toImage(gd, {format: 'png', width: width, height: height})
+              .then(function(dataUrl) {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                
+                var headerHeight = Math.round(width * 0.09);
+                var footerHeight = Math.round(width * 0.06);
+                var totalHeight = headerHeight + height + footerHeight;
+                
+                canvas.width = width;
+                canvas.height = totalHeight;
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                var plotImg = new Image();
+                plotImg.onload = function() {
+                  // Draw header
+                  var headerText = 'Porcentaje de Ciudadanos que Realizaron un Reporte y Fueron Atendidos';
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(0, 0, width, headerHeight);
+                  ctx.fillStyle = '#000000';
+                  ctx.font = 'bold 22px Arial';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText(headerText, width / 2, headerHeight / 2);
+                  
+                  // Draw the plot
+                  ctx.drawImage(plotImg, 0, headerHeight, width, height);
+                  
+                  // Draw footer
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(0, headerHeight + height, width, footerHeight);
+                  ctx.fillStyle = '#000000';
+                  ctx.font = '16px Arial';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText('Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno ' + year, 
+                             width / 2, headerHeight + height + (footerHeight / 2));
+                  
+                  var link = document.createElement('a');
+                  link.href = canvas.toDataURL('image/png');
+                  link.download = 'Reportes_Servicios_Publicos.png';
+                  link.click();
+                };
+                
+                plotImg.onerror = function() {
+                  console.error('Error loading plot image into canvas');
+                  alert('Error creating the download. Please try again.');
+                };
+                
+                plotImg.src = dataUrl;
+              })
+              .catch(function(error) {
+                console.error('Error generating plot image:', error);
+                alert('Error creating the download. Please try again.');
+              });
+          };
+          
+          // Custom download function for mobile reports plot
+          window.customReportsPlotDownload = function(gd) {
+            var year = window.currentSelectedYear || new Date().getFullYear().toString();
+            var width = 800;
+            var height = 450;
+            
+            Plotly.toImage(gd, {format: 'png', width: width, height: height})
+              .then(function(dataUrl) {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                
+                var headerHeight = Math.round(width * 0.09);
+                var footerHeight = Math.round(width * 0.06);
+                var totalHeight = headerHeight + height + footerHeight;
+                
+                canvas.width = width;
+                canvas.height = totalHeight;
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                var plotImg = new Image();
+                plotImg.onload = function() {
+                  // Draw header
+                  var headerText = 'Porcentaje de Ciudadanos que Realizaron un Reporte';
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(0, 0, width, headerHeight);
+                  ctx.fillStyle = '#000000';
+                  ctx.font = 'bold 22px Arial';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText(headerText, width / 2, headerHeight / 2);
+                  
+                  // Draw the plot
+                  ctx.drawImage(plotImg, 0, headerHeight, width, height);
+                  
+                  // Draw footer
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(0, headerHeight + height, width, footerHeight);
+                  ctx.fillStyle = '#000000';
+                  ctx.font = '16px Arial';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText('Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno ' + year, 
+                             width / 2, headerHeight + height + (footerHeight / 2));
+                  
+                  var link = document.createElement('a');
+                  link.href = canvas.toDataURL('image/png');
+                  link.download = 'Reportes_Realizados.png';
+                  link.click();
+                };
+                
+                plotImg.onerror = function() {
+                  console.error('Error loading plot image into canvas');
+                  alert('Error creating the download. Please try again.');
+                };
+                
+                plotImg.src = dataUrl;
+              })
+              .catch(function(error) {
+                console.error('Error generating plot image:', error);
+                alert('Error creating the download. Please try again.');
+              });
+          };
+          
+          // Custom download function for mobile attended reports plot
+          window.customAttendedPlotDownload = function(gd) {
+            var year = window.currentSelectedYear || new Date().getFullYear().toString();
+            var width = 800;
+            var height = 450;
+            
+            Plotly.toImage(gd, {format: 'png', width: width, height: height})
+              .then(function(dataUrl) {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                
+                var headerHeight = Math.round(width * 0.09);
+                var footerHeight = Math.round(width * 0.06);
+                var totalHeight = headerHeight + height + footerHeight;
+                
+                canvas.width = width;
+                canvas.height = totalHeight;
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                var plotImg = new Image();
+                plotImg.onload = function() {
+                  // Draw header
+                  var headerText = 'Porcentaje de Ciudadanos que Realizaron un Reporte y Fueron Atendidos';
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(0, 0, width, headerHeight);
+                  ctx.fillStyle = '#000000';
+                  ctx.font = 'bold 22px Arial';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText(headerText, width / 2, headerHeight / 2);
+                  
+                  // Draw the plot
+                  ctx.drawImage(plotImg, 0, headerHeight, width, height);
+                  
+                  // Draw footer
+                  ctx.fillStyle = '#ffffff';
+                  ctx.fillRect(0, headerHeight + height, width, footerHeight);
+                  ctx.fillStyle = '#000000';
+                  ctx.font = '16px Arial';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText('Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno ' + year, 
+                             width / 2, headerHeight + height + (footerHeight / 2));
+                  
+                  var link = document.createElement('a');
+                  link.href = canvas.toDataURL('image/png');
+                  link.download = 'Reportes_Atendidos.png';
+                  link.click();
+                };
+                
+                plotImg.onerror = function() {
+                  console.error('Error loading plot image into canvas');
+                  alert('Error creating the download. Please try again.');
+                };
+                
+                plotImg.src = dataUrl;
+              })
+              .catch(function(error) {
+                console.error('Error generating plot image:', error);
+                alert('Error creating the download. Please try again.');
+              });
+          };
+        });
+      ")),
+      
+      # Desktop plot container
+      div(class = "desktop-plot", desktop_plot()),
+      
+      # Mobile plots container
+      div(class = "mobile-plots", style = "display: none;",
+          div(class = "mobile-plot-reports", mobile_plot_reports()),
+          tags$div(class = "mt-4"),  # Add space between the plots
+          div(class = "mobile-plot-addressed", mobile_plot_addressed())
+      )
+    )
+  )
 }
 
 # Special functions for the overview dashboard

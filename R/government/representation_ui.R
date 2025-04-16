@@ -22,6 +22,21 @@ color: var(--gobierno-color) !important;
           font-weight: bold !important;
           border: none !important;
         }
+          /* Allow chart containers to dynamically resize */
+    .chart-container {
+      min-height: 400px;
+      height: auto !important;
+    }
+    
+    /* Make sure the plotly chart takes up available space */
+    .chart-container .plotly {
+      height: 100% !important;
+    }
+    
+    /* Fix for long labels in horizontal bar charts */
+    .ytick text {
+      text-anchor: end !important;
+    }
       "))
     ),
 
@@ -35,7 +50,39 @@ color: var(--gobierno-color) !important;
         "Volver a Gobierno"
       )
     ),
-    # Header
+    layout_columns(
+      col_widths = c(3, 3,3,3), 
+      value_box(
+        title = "Regidores: Representación de Intereses Ciudadanos",
+        value = textOutput("regidores_rating"),
+        showcase = bsicons::bs_icon("person-check-fill"),
+        theme = value_box_theme(bg = "#423629", fg = "white")
+      ),
+      
+      # Value box 2: Síndico representation rating
+      value_box(
+        title = "Síndico(a): Representación de Intereses Ciudadanos",
+        value = textOutput("sindico_rating"),
+        showcase = bsicons::bs_icon("person-check-fill"),
+        theme = value_box_theme(bg = "#8A8178", fg = "black")
+      ),
+      
+      # Value box 3: Local deputy representation rating
+      value_box(
+        title = "Diputado(a) Local: Representación de Intereses Ciudadanos",
+        value = textOutput("diputado_local_rating"),
+        showcase = bsicons::bs_icon("person-check-fill"),
+        theme = value_box_theme(bg = "#423629", fg = "white")
+      ),
+      
+      # Value box 4: Federal deputy representation rating
+      value_box(
+        title = "Diputado(a) Federal: Representación de Intereses Ciudadanos",
+        value = textOutput("diputado_federal_rating"),
+        showcase = bsicons::bs_icon("person-check-fill"),
+        theme = value_box_theme(bg = "#8A8178", fg = "black")
+      )
+    ),
     layout_columns(
       fill = FALSE,
       card(
@@ -49,11 +96,7 @@ color: var(--gobierno-color) !important;
     
     # Main layout with side-by-side columns
     layout_columns(
-      col_widths = c(8, 4),  # 8/12 for main content, 4/12 for value boxes
-      
-      # Main content column (left side)
-      div(
-        # First tabset: Knowledge of representatives maps
+      col_widths = c(6, 6),  
         card(
           card_header(
           div(
@@ -69,13 +112,13 @@ color: var(--gobierno-color) !important;
           navset_pill(
             id = "knowledge_tabs",
             tabPanel("Regidor(a)", 
-                     div(style = "height: 500px;", leafletOutput("regidor_knowledge_map"))),
+                     div(class = "chart-container", leafletOutput("regidor_knowledge_map"))),
             tabPanel("Síndico(a)", 
-                     div(style = "height: 500px;", leafletOutput("sindico_knowledge_map"))),
+                     div(class = "chart-container", leafletOutput("sindico_knowledge_map"))),
             tabPanel("Diputado(a) Local y/o Estatal", 
-                     div(style = "height: 500px;", leafletOutput("diputadol_knowledge_map"))),
+                     div(class = "chart-container", leafletOutput("diputadol_knowledge_map"))),
             tabPanel("Diputado(a) Federal", 
-                     div(style = "height: 500px;", leafletOutput("diputadof_knowledge_map")))
+                     div(class = "chart-container", leafletOutput("diputadof_knowledge_map")))
           )
         )
         ),
@@ -87,50 +130,16 @@ color: var(--gobierno-color) !important;
           navset_pill(
             id = "specific_knowledge_tabs",
             tabPanel("Regidores", 
-                     div(style = "height: 500px;", plotlyOutput("regidores_knowledge_chart"))),
+                     div(class = "chart-container", plotlyOutput("regidores_knowledge_chart", height ="auto"))),
             tabPanel("Diputados Locales", 
-                     div(style = "height: 500px;", plotlyOutput("diputados_locales_knowledge_chart"))),
+                     div(class = "chart-container", plotlyOutput("diputados_locales_knowledge_chart", height ="auto"))),
             tabPanel("Diputados Federales", 
-                     div(style = "height: 500px;", plotlyOutput("diputados_federales_knowledge_chart")))
+                     div(class = "chart-container", plotlyOutput("diputados_federales_knowledge_chart", height ="auto")))
           )
         )
         )
-      ),
-      
-      # Value boxes column (right side)
-      div(
-        # Value box 1: Regidores representation rating
-        value_box(
-          title = "Regidores: Representación de Intereses Ciudadanos",
-          value = textOutput("regidores_rating"),
-          showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#5E35B1", fg = "white")
-        ),
-        
-        # Value box 2: Síndico representation rating
-        value_box(
-          title = "Síndico(a): Representación de Intereses Ciudadanos",
-          value = textOutput("sindico_rating"),
-          showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#B39DDB", fg = "black")
-        ),
-        
-        # Value box 3: Local deputy representation rating
-        value_box(
-          title = "Diputado(a) Local: Representación de Intereses Ciudadanos",
-          value = textOutput("diputado_local_rating"),
-          showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#5E35B1", fg = "white")
-        ),
-        
-        # Value box 4: Federal deputy representation rating
-        value_box(
-          title = "Diputado(a) Federal: Representación de Intereses Ciudadanos",
-          value = textOutput("diputado_federal_rating"),
-          showcase = bsicons::bs_icon("person-check-fill"),
-          theme = value_box_theme(bg = "#B39DDB", fg = "black")
-        )
       )
-    )
+      
+    
   )
 }

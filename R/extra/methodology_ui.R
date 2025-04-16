@@ -1,8 +1,8 @@
 # UI para Dashboard de Metodología y Descarga de Datos
 methodologyUI <- function() {
+  header_color <- "#2d2d2d"
   page_fluid(
     useShinyjs(),
-      
     tags$head(
       tags$link(
         rel = "stylesheet", 
@@ -139,15 +139,17 @@ methodologyUI <- function() {
           overflow: hidden;
         }
         
+        /* Modified to match about_ui.R */
         .card-header {
-          background-color: rgba(13, 110, 253, 0.05);
-          border-bottom: 1px solid rgba(13, 110, 253, 0.1);
+          background-color: #2d2d2d;
+          color: white;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         /* Page title styling */
         .page-title {
           font-weight: 700;
-          color: #0d6efd;
+          color: white;
           margin-bottom: 20px;
         }
         
@@ -185,15 +187,16 @@ methodologyUI <- function() {
       fill = FALSE,
       card(
         card_header(
-          h2("Metodología y Descarga de Datos", class = "text-center page-title")
+          h2("Metodología y Descarga de Datos", class = "text-center page-title"),
+          style = paste0("background-color: ", header_color, "; color: white;")
         )
       )
     ),
     
-    # Sección de descargas (al principio para facilitar acceso)
     card(
       card_header(
-        h3("Descargar Datos de Encuestas", class = "m-0")
+        h3("Descargar Datos de Encuestas", class = "m-0 fw-bold"),
+        style = paste0("background-color: ", header_color, "; color: white;")
       ),
       card_body(
         # Add class to the container div instead

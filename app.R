@@ -178,6 +178,37 @@ ui <- page_navbar(
     tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
     tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"),
     tags$script(HTML("
+    $(document).ready(function() {
+      // Global click handler for any element with 'nav-card' class anywhere in the app
+      $(document).on('click', '[class*=\"nav-card\"]', function() {
+        // Wait for navigation to complete
+        setTimeout(function() {
+          // Close any expanded navbar dropdown
+          $('.navbar-collapse.show').collapse('hide');
+          
+          // Also handle dropdown menus
+          $('.dropdown-menu.show').removeClass('show');
+          $('.nav-item.dropdown.show').removeClass('show');
+          $('[aria-expanded=true]').attr('aria-expanded', 'false');
+        }, 500); // 300ms delay
+      });
+      
+      // Also handle any element that sets nav_target input
+      $(document).on('click', '[onclick*=\"nav_target\"]', function() {
+        // Wait for navigation to complete
+        setTimeout(function() {
+          // Close any expanded navbar dropdown
+          $('.navbar-collapse.show').collapse('hide');
+          
+          // Also handle dropdown menus
+          $('.dropdown-menu.show').removeClass('show');
+          $('.nav-item.dropdown.show').removeClass('show');
+          $('[aria-expanded=true]').attr('aria-expanded', 'false');
+        }, 500); // 300ms delay
+      });
+    });
+  ")),
+    tags$script(HTML("
   $(document).ready(function() {
     // Update dropdown button text when year changes
     Shiny.addCustomMessageHandler('updateYearDropdown', function(year) {

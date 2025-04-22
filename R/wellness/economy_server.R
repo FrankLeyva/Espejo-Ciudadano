@@ -86,7 +86,7 @@ output$economic_improvement_map <- renderLeaflet({
       inverse = TRUE,
       truncate_labels = T
     ) %>% 
-      layout(title="")
+      layout(title="") %>% apply_plotly_theme()
   })
   
   # Calculate income sufficiency percentage (options 1 and 2)
@@ -163,7 +163,7 @@ output$economic_improvement_map <- renderLeaflet({
           scale = 2.0
         ),
         format = "png",
-        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        browser = "/usr/bin/google-chrome",
         extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
       )
       

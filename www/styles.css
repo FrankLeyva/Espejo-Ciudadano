@@ -61,6 +61,43 @@
     overflow: visible !important;
   }
   
+  /* Ensure navbar text is white in all sections */
+  .navbar-nav .nav-link,
+  .navbar .dropdown-toggle,
+  .navbar-brand,
+  .navbar .navbar-toggler-icon {
+    color: white !important;
+  }
+  
+  /* Make active/selected items in navbar have proper emphasis */
+  .navbar-nav .nav-item.active .nav-link,
+  .navbar-nav .active > .nav-link,
+  .navbar-nav .nav-link.active {
+    color: white !important;
+    font-weight: bold !important;
+    opacity: 1 !important;
+  }
+  
+  /* Fix for dropdown menu items */
+  .navbar .dropdown-menu .dropdown-item {
+    color: white !important;
+  }
+  
+  /* Override any section-specific styling that might affect navbar */
+  .section-extras .navbar .nav-link,
+  .section-extras .navbar .dropdown-toggle,
+  .section-extras .navbar .navbar-brand,
+  .section-extras .navbar .nav-item.active .nav-link,
+  .section-extras .navbar .active > .nav-link,
+  .section-extras .navbar .nav-link.active {
+    color: white !important;
+  }
+  
+  /* Ensure the dropdown menu has proper background color */
+  .navbar .dropdown-menu {
+    background-color: var(--navbar-bg) !important;
+  }
+  
   .navbar-title-container {
     display: flex;
     align-items: center;
@@ -132,6 +169,11 @@
   .navbar-collapse {
     padding: 0;
     overflow: visible !important;
+  }
+  
+  /* For the extras subsection buttons in dropdown */
+  .navbar .dropdown-menu .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
   }
   
   /* ==============================

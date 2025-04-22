@@ -1,176 +1,47 @@
-# UI para Dashboard de Metodología y Descarga de Datos
+# methodology_ui.R
+
 methodologyUI <- function() {
-  # The color from the about_ui.R appears to be a dark charcoal/gray
-  header_color <- "#2d2d2d"
-  
   page_fluid(
+    class = "section-extras",
     useShinyjs(),
-      
+    
+    # Add custom CSS to fix navbar text color
     tags$head(
-      tags$link(
-        rel = "stylesheet", 
-        href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      ),
       tags$style(HTML("
-        /* General styling */
-        .methodology-section {
-          font-size: 16px;
-          line-height: 1.6;
-        }
-        
-        .methodology-section h3 {
-          margin-top: 25px;
-          margin-bottom: 15px;
-          color: #2d2d2d;
-          font-weight: 600;
-          border-bottom: 2px solid #eaecef;
-          padding-bottom: 8px;
-        }
-        
-        .methodology-section h4 {
-          margin-top: 20px;
-          margin-bottom: 10px;
-          font-weight: 600;
-          color: #495057;
-        }
-        
-        .methodology-section p {
-          margin-bottom: 15px;
-          text-align: justify;
-        }
-        
-        .methodology-section ol, .methodology-section ul {
-          padding-left: 22px;
-          margin-bottom: 15px;
-        }
-        
-        .methodology-section li {
-          margin-bottom: 5px;
-        }
-        
-        .formula-box {
-          background-color: #f8f9fa;
-          padding: 15px;
-          border-radius: 8px;
-          margin: 20px 0;
-          font-family: Consolas, Monaco, 'Courier New', monospace;
-          text-align: center;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-          border-left: 4px solid #2d2d2d;
-        }
-        
-        .download-card {
-          transition: transform 0.3s, box-shadow 0.3s;
-          height: 100%;
-        }
-        
-        .download-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .download-icon {
-          font-size: 2.5rem;
-          color: #2d2d2d;
-          margin-bottom: 15px;
-        }
-        
-        .methodology-diagram {
-          text-align: center;
-          margin: 20px 0;
-          padding: 20px;
-          background-color: #f8f9fa;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        /* Custom callout styles */
-        .callout {
-          padding: 20px;
-          margin: 20px 0;
-          border: 1px solid #eee;
-          border-left-width: 5px;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-        }
-        
-        .callout-info {
-          border-left-color: #2d2d2d;
-          background-color: #f4f4f4;
-        }
-        
-        .callout-warning {
-          border-left-color: #f0ad4e;
-          background-color: #faf8f4;
-        }
-        
-        /* Year tabs styling */
-        .year-tabs .nav-link {
-          padding: 10px 20px;
-          border-radius: 8px 8px 0 0;
-          font-weight: 600;
-          transition: all 0.2s;
-        }
-        
-        .year-tabs .nav-link.active {
-          background-color: #2d2d2d;
-          color: white;
-          border-color: #2d2d2d;
-          box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-        }
-        
-        /* Button styling */
-        .btn-primary {
-          background-color: #2d2d2d;
-          border-color: #2d2d2d;
-          transition: all 0.2s;
-        }
-        
-        .btn-primary:hover {
-          background-color: #444444;
-          border-color: #444444;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        /* Page title styling */
-        .page-title {
-          font-weight: 700;
-          color: #2d2d2d;
-          margin-bottom: 20px;
-        }
-        
-        /* Extra section header styling */
-        .extra-section-header {
-          background-color: #2d2d2d !important;
+        /* Ensure navbar text remains white in extras section */
+        .navbar-nav .nav-link,
+        .navbar .dropdown-toggle,
+        .navbar-brand {
           color: white !important;
-          border-bottom: none !important;
         }
         
-        /* Extra section link styling */
-        .nav-link-extra {
-          color: #2d2d2d;
+        /* Active/selected navbar items */
+        .navbar-nav .nav-item.active .nav-link,
+        .navbar-nav .active > .nav-link {
+          color: white !important;
+          font-weight: bold !important;
         }
         
-        .nav-link-extra:hover {
-          color: #444444;
+        /* Fix for dropdown items */
+        .navbar .dropdown-menu .dropdown-item {
+          color: white !important;
+        }
+        
+        /* Specific extras section fix */
+        .section-extras .navbar .nav-link,
+        .section-extras .navbar .dropdown-toggle,
+        .section-extras .navbar .navbar-brand {
+          color: white !important;
         }
       "))
     ),
     
-    theme = bs_theme(
-      version = 5,
-      bootswatch = "litera",
-      primary = "#2d2d2d"
-    ),
-    
-    # Encabezado
+    # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
-          h2("Metodología y Descarga de Datos", class = "text-center page-title"),
-          style = paste0("background-color: ", header_color, "; color: white;")
+          h2("Metodología y Descarga de Datos", class = "text-center")
         )
       )
     ),
@@ -178,14 +49,12 @@ methodologyUI <- function() {
     # Sección de descargas (al principio para facilitar acceso)
     card(
       card_header(
-        h3("Descargar Datos de Encuestas", class = "m-0"),
-        style = paste0("background-color: ", header_color, "; color: white;")
+        h3("Descargar Datos de Encuestas", class = "m-0")
       ),
       card_body(
-        # Add class to the container div instead
+        # Tabs for switching between years
         div(
           class = "year-tabs",
-          # Tabs for switching between years - removing the class parameter
           navset_pill(
             id = "download_year_tabs",
             
@@ -336,8 +205,7 @@ methodologyUI <- function() {
     # Explicación de metodología
     card(
       card_header(
-        h3("Metodología de las Encuestas", class = "m-0"),
-        style = paste0("background-color: ", header_color, "; color: white;")
+        h3("Metodología de las Encuestas", class = "m-0")
       ),
       card_body(
         div(
@@ -370,12 +238,13 @@ methodologyUI <- function() {
           
           p("Para determinar el tamaño de la muestra, se emplea la ecuación estadística para proporciones poblacionales, que se presenta a continuación:"),
           
-          # Fórmula en un recuadro estilizado - actualizada según la imagen proporcionada
+          # Fórmula en un recuadro estilizado
           div(
             class = "formula-box",
             withMathJax(),
             "$$n = \\frac{Z^2(p*q)}{e^2 + \\frac{Z^2(p*q)}{N}}$$"
           ),
+          
           # Definición de variables en la fórmula
           p("Donde:"),
           tags$ul(
@@ -396,7 +265,7 @@ methodologyUI <- function() {
           
           p("El número de cuestionarios por AGEB se determinó en función del peso proporcional de la población. En cada semilla, se eligió un punto de partida y, siguiendo el recorrido de las manecillas del reloj, se encuestó una vivienda por manzana, saltando al menos dos viviendas entre cada entrevistada y limitando las entrevistas a un máximo de cinco por manzana. Se permitió la sustitución en caso de no poder completar el cuestionario o si quedaba incompleto."),
           
-          # Diagrama visual mejorado del método de muestreo por semillas estilo profesional
+          # Diagrama visual del método de muestreo por semillas
           div(
             class = "methodology-diagram",
             tags$strong("Metodología de Muestreo por Semillas"),

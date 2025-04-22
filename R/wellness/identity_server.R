@@ -351,7 +351,7 @@ output$download_connection_map <- downloadHandler(
         scale = 2.0
       ),
       format = "png",
-      browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      browser = "/usr/bin/google-chrome",
       extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
     )
     

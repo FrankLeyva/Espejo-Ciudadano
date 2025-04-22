@@ -442,7 +442,7 @@ educationServer <- function(input, output, session, current_theme = NULL) {
           scale = 2.0
         ),
         format = "png",
-        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        browser = "/usr/bin/google-chrome",
         extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
       )
       
@@ -536,7 +536,7 @@ educationServer <- function(input, output, session, current_theme = NULL) {
           scale = 2.0
         ),
         format = "png",
-        browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        browser = "/usr/bin/google-chrome",
         extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
       )
       

@@ -83,7 +83,23 @@ color: var(--gobierno-color) !important;
     # Comparison bar chart
     card(
       card_header("Comparación de Percepción Ciudadana por Nivel de Gobierno"),
-      plotlyOutput("government_comparison_plot", height = "500px")
+      div(class = "gobierno-pills",
+        navset_pill(
+          id = "perception_tabs",
+          nav_panel(
+            title = "Toma en cuenta a ciudadanos",
+            plotlyOutput("gov_comparison_plot1", height = "500px")
+          ),
+          nav_panel(
+            title = "Cumple compromisos y metas",
+            plotlyOutput("gov_comparison_plot2", height = "500px")
+          ),
+          nav_panel(
+            title = "Aplica la ley de manera imparcial",
+            plotlyOutput("gov_comparison_plot3", height = "500px")
+          )
+        )
+      )
     )
   )
 }

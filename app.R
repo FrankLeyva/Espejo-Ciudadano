@@ -95,44 +95,10 @@ source("R/extra/methodology_ui.R")
 source("R/extra/methodology_server.R")
 source("R/extra/about_ui.R")
 source("R/extra/about_server.R")
+source("R/extra/explorer_ui.R")
+source("R/extra/explorer_server.R")
 
 
-# Header component function
-create_dashboard_header <- function(title, subtitle = NULL) {
-  div(
-    class = "dashboard-header mb-4",
-    div(
-      class = "container-fluid",  # Use fluid container for full width
-      div(
-        class = "row align-items-center",
-        div(
-          class = "col",
-          h1(class = "display-5 fw-bold text-primary", title),
-          if (!is.null(subtitle)) {
-            p(class = "lead text-muted", subtitle)
-          }
-        ),
-        # Only include logo if you have one
-        # div(
-        #   class = "col-auto",
-        #   img(src = "logo.png", height = "60px", alt = "Logo")
-        # )
-      )
-    )
-  )
-}
-
-# Footer component function
-create_dashboard_footer <- function() {
-  div(
-    class = "border-top mt-5 pt-4 pb-4 text-center text-muted",
-    div(
-      class = "container-fluid",
-      p("Dashboard creado por Plan Estratégico de Juárez", class = "mb-1"),
-      p("Datos actualizados: Marzo 2025", class = "mb-0 small")
-    )
-  )
-}
 
 
 
@@ -142,7 +108,7 @@ ui <- page_navbar(
     # Use a div with display:flex for better alignment
     div(
       class = "navbar-brand-container",
-      span("Dashboard AEJ", class = "navbar-brand")
+      span("Espejo Ciudadano", class = "navbar-brand")
     ),
     # Custom styled dropdown
     div(
@@ -546,6 +512,13 @@ div(
     #    p("Esta sección le permitirá generar reportes personalizados según sus necesidades específicas.")
    #   )
  #   ),
+
+ nav_panel(
+  title = "Explorador de Encuesta",
+  icon = icon("search"),
+  value = "explorer",
+  explorerUI("survey_explorer")
+),
     nav_panel(
       title = "Metodología",
       icon = icon("download"),
@@ -675,7 +648,9 @@ server <- function(input, output, session) {
       methodologyServer(input, output, session, current_theme)
     } else if (current_tab == "about") {
       aboutServer("about_section")
-    }
+    } else if (current_tab == "explorer") {
+      explorerServer("survey_explorer")
+    } 
   })
  # Add this to the observeEvent(input$navbar) in app.R
 observeEvent(input$navbar, {

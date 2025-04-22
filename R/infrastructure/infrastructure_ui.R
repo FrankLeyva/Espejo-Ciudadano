@@ -98,7 +98,7 @@ infrastructureUI <- function() {
             class = "d-flex justify-content-between align-items-center",
             "Educación: Hogares con estudiantes por distrito",
             downloadButton(
-              "download_students_map", 
+              "download_gen_students_map", 
               "", 
               icon = icon("download"), 
               class = "btn-sm"

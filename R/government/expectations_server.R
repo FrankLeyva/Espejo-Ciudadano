@@ -74,7 +74,125 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
       custom_theme = active_theme()
     )
   })
-  
+  create_gov_comparison_plot <- function(data, question_index, question_label, active_theme) {
+    # Define the questions we want to compare (using index to get corresponding questions)
+    question_ids <- list(
+      municipal = paste0("Q16.", question_index),
+      state = paste0("Q17.", question_index),
+      federal = paste0("Q18.", question_index)
+    )
+    
+    # Define the answer scale
+    answer_scale <- c(
+      "1" = "Nunca",
+      "2" = "Poco",
+      "3" = "Algo", 
+      "4" = "Mucho"
+      # Removed NS/NC (5) since we'll filter it out
+    )
+    
+    # Initialize data frame for frequencies
+    freq_data <- data.frame(
+      Answer = character(),
+      Government = character(),
+      Count = integer(),
+      Percentage = numeric(),
+      stringsAsFactors = FALSE
+    )
+    
+    # Calculate frequencies for each government level
+    for (gov_level in names(question_ids)) {
+      gov_name <- switch(gov_level,
+                         "municipal" = "Municipal",
+                         "state" = "Estatal",
+                         "federal" = "Federal")
+      
+      q_id <- question_ids[[gov_level]]
+      
+      # Get values and convert to numeric
+      values <- as.numeric(data$responses[[q_id]])
+      
+      # Remove NS/NC (value 5)
+      values <- values[!is.na(values) & values != 5]
+      
+      # Calculate frequencies
+      value_table <- table(values)
+      value_counts <- as.data.frame(value_table)
+      colnames(value_counts) <- c("Value", "Count")
+      value_counts$Value <- as.character(value_counts$Value)
+      
+      # Add percentage
+      value_counts$Percentage <- 100 * value_counts$Count / sum(value_counts$Count)
+      
+      # Add answer labels and government level
+      value_counts$Answer <- answer_scale[value_counts$Value]
+      value_counts$Government <- gov_name
+      
+      # Add to main data frame
+      freq_data <- rbind(
+        freq_data,
+        data.frame(
+          Answer = value_counts$Answer,
+          Value = as.numeric(value_counts$Value),
+          Government = value_counts$Government,
+          Count = value_counts$Count,
+          Percentage = value_counts$Percentage,
+          stringsAsFactors = FALSE
+        )
+      )
+    }
+    
+    # Ensure the answers are ordered correctly
+    freq_data$Answer <- factor(freq_data$Answer, 
+                              levels = answer_scale, 
+                              ordered = TRUE)
+    
+    # Get colors from theme
+    gov_colors <- active_theme$palettes$categorical
+    
+    # Create grouped bar chart
+    plot_ly(
+      data = freq_data,
+      x = ~Answer,
+      y = ~Percentage,
+      color = ~Government,
+      colors = gov_colors,
+      type = "bar",
+      # Add text that will appear on hover
+      hoverinfo = "text",
+      hovertext = ~paste0(
+        Government, " - ", Answer, "<br>",
+        "Frecuencia: ", Count, "<br>",
+        "Porcentaje: ", round(Percentage, 1), "%"
+      ),
+      # Add text labels to be displayed on the bars
+      text = ~paste0(round(Percentage, 0), "%"),
+      textposition = "inside",
+      insidetextanchor = "middle",
+      textfont = list(
+        color = "white",
+        size = 12
+      )
+    ) %>%
+      apply_plotly_theme(
+        title = paste("Percepción:", question_label),
+        xlab = "Respuesta",
+        ylab = "Porcentaje (%)",
+        custom_theme = active_theme
+      ) %>%
+      layout(
+        barmode = "group",
+        yaxis = list(range = c(0, 60)),  # Scale from 0 to 100%
+        showlegend = TRUE,
+        legend = list(
+          orientation = "h",
+          xanchor = "center",
+          x = 0.5,
+          y = 1.1
+        ),
+        margin = list(t = 100) # Add margin at the top for the legend
+      )
+  }
   # Federal Expectations Map (Q20)
   output$federal_expectations_map <- renderLeaflet({
     req(survey_data(), geo_data())
@@ -98,141 +216,35 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
     )
   })
   
-# Government Comparison Bar Chart
-output$government_comparison_plot <- renderPlotly({
-  req(survey_data())
-  
-  # Define the questions we want to compare
-  question_ids <- list(
-    municipal = c("Q16.2", "Q16.3", "Q16.4"),
-    state = c("Q17.2", "Q17.3", "Q17.4"),
-    federal = c("Q18.2", "Q18.3", "Q18.4")
-  )
-  
-  # Labels for the questions
-  question_labels <- c(
-    "Toma en cuenta a ciudadanos",
-    "Cumple compromisos y metas",
-    "Aplica la ley de manera imparcial"
-  )
-  
-  # Define the answer scale
-  answer_scale <- c(
-    "1" = "Nunca",
-    "2" = "Poco",
-    "3" = "Algo", 
-    "4" = "Mucho",
-    "5" = "NS/NC"
-  )
-  
-  # Initialize data frame to store results
-  comparison_data <- data.frame(
-    Question = character(),
-    Government = character(),
-    Mean = numeric(),
-    Mode = character(),
-    ModeValue = numeric(),
-    stringsAsFactors = FALSE
-  )
-  
-  # Helper function to calculate mode
-  find_mode <- function(x) {
-    # Remove NA values
-    x <- x[!is.na(x)]
-    if(length(x) == 0) return(NA)
-    
-    # Calculate frequencies
-    freq_table <- table(x)
-    # Find the value with highest frequency
-    mode_val <- as.numeric(names(freq_table)[which.max(freq_table)])
-    return(mode_val)
-  }
-  
-  # Calculate means and modes for each question and government level
-  for (gov_level in names(question_ids)) {
-    gov_name <- switch(gov_level,
-                       "municipal" = "Municipal",
-                       "state" = "Estatal",
-                       "federal" = "Federal")
-    
-    for (i in 1:length(question_ids[[gov_level]])) {
-      q_id <- question_ids[[gov_level]][i]
-      q_label <- question_labels[i]
-      
-      # Get values and convert to numeric
-      values <- as.numeric(survey_data()$responses[[q_id]])
-      
-      # Remove NS/NC (value 5)
-      values <- values[!is.na(values) & values != 5]
-      
-      # Calculate mean
-      mean_val <- mean(values, na.rm = TRUE)
-      
-      # Calculate mode
-      mode_val <- find_mode(values)
-      # Get mode label
-      mode_label <- answer_scale[as.character(mode_val)]
-      
-      # Add to data frame
-      comparison_data <- rbind(
-        comparison_data,
-        data.frame(
-          Question = q_label,
-          Government = gov_name,
-          Mean = mean_val,
-          Mode = mode_label,
-          ModeValue = mode_val,
-          stringsAsFactors = FALSE
-        )
-      )
-    }
-  }
-  
-  # Get colors from theme
-  gov_colors <- active_theme()$palettes$categorical
-  
-  # Create grouped bar chart
-  plot_ly(
-    data = comparison_data,
-    x = ~Question,
-    y = ~Mean,
-    color = ~Government,
-    colors = gov_colors,
-    type = "bar",
-    # Add text that will appear on hover
-    hoverinfo = "text",
-    hovertext = ~paste0(
-      Government, "<br>",
-      "Respuesta más común: ", Mode
-    ),
-    # Add text labels to be displayed on the bars
-    text = ~paste0(round(Mean, 2)),
-    textposition = "outside", # Options: "inside", "outside", "auto", "none"
-    insidetextanchor = "middle",
-    textfont = list(
-      color = "black",
-      size = 12
+  output$gov_comparison_plot1 <- renderPlotly({
+    req(survey_data())
+    create_gov_comparison_plot(
+      survey_data(), 
+      "2", 
+      "Toma en cuenta a ciudadanos",
+      active_theme()
     )
-  ) %>%
-    apply_plotly_theme(
-      title = "Percepción de los tres niveles de gobierno",
-      xlab = "",
-      ylab = "Promedio (1-4)",
-      custom_theme = active_theme()
-    ) %>%
-    layout(
-      barmode = "group",
-      yaxis = list(range = c(1, 4)),  # Scale from 1 to 4
-      showlegend = TRUE,
-      legend = list(
-        orientation = "h",
-        xanchor = "center",
-        x = 0.5,
-        y = 1.1
-      ),
-      margin = list(t = 100) # Add margin at the top for the legend
+  })
+  
+  output$gov_comparison_plot2 <- renderPlotly({
+    req(survey_data())
+    create_gov_comparison_plot(
+      survey_data(), 
+      "3", 
+      "Cumple compromisos y metas",
+      active_theme()
     )
-})
+  })
+  
+  output$gov_comparison_plot3 <- renderPlotly({
+    req(survey_data())
+    create_gov_comparison_plot(
+      survey_data(), 
+      "4", 
+      "Aplica la ley de manera imparcial",
+      active_theme()
+    )
+  })
 observeEvent(input$expectations_tabs, {
   # Store the active tab in a reactive value for the download handler
   tab_value <- input$expectations_tabs
@@ -337,7 +349,7 @@ content = function(file) {
       scale = 2.0
     ),
     format = "png",
-    browser = "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    browser = "/usr/bin/google-chrome",
     extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
   )
   

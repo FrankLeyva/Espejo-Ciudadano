@@ -1,4 +1,39 @@
+# Header component function
+create_dashboard_header <- function(title, subtitle = NULL) {
+  div(
+    class = "dashboard-header mb-4",
+    div(
+      class = "container-fluid",  # Use fluid container for full width
+      div(
+        class = "row align-items-center",
+        div(
+          class = "col",
+          h1(class = "display-5 fw-bold text-primary", title),
+          if (!is.null(subtitle)) {
+            p(class = "lead text-muted", subtitle)
+          }
+        ),
+        # Only include logo if you have one
+        # div(
+        #   class = "col-auto",
+        #   img(src = "logo.png", height = "60px", alt = "Logo")
+        # )
+      )
+    )
+  )
+}
 
+# Footer component function
+create_dashboard_footer <- function() {
+  div(
+    class = "border-top mt-5 pt-4 pb-4 text-center text-muted",
+    div(
+      class = "container-fluid",
+      p("Dashboard creado por Plan Estratégico de Juárez", class = "mb-1"),
+      p("Datos actualizados: Marzo 2025", class = "mb-0 small")
+    )
+  )
+}
 get_question_label <- function(question_id, metadata) {
   # Find the metadata entry for this question
   question_meta <- metadata %>%

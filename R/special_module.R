@@ -223,7 +223,7 @@ create_report_statistics <- function(survey_data) {
         title = "",
         automargin = TRUE
       ),
-      margin = list(l = 10, r = 10, t = 40, b = 40),
+      margin = list(l = 10, r = 10, t = 40, b = 40)
 
     ) %>%
     config(
@@ -282,7 +282,7 @@ create_report_statistics <- function(survey_data) {
         title = "",
         automargin = TRUE
       ),
-      margin = list(l = 10, r = 10, t = 40, b = 40),
+      margin = list(l = 10, r = 10, t = 40, b = 40)
     ) %>%
     config(
       modeBarButtonsToRemove = c("zoom2d", "pan2d", "select2d", "lasso2d", 
@@ -994,9 +994,9 @@ create_healthcare_overview <- function(survey_data, custom_theme = NULL) {
   }
   
   line_color <- if (!is.null(custom_theme)) {
-    custom_theme$colors$neutral
+    custom_theme$colors$accent
   } else {
-    theme_config$colors$neutral
+    theme_config$colors$accent
   }
   
   # Create histogram

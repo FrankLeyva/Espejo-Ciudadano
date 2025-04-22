@@ -1,4 +1,89 @@
-# R/extra/dashboard_map_server.R
+# R/extra/simplified_dashboard_map.R
+# A highly simplified implementation that works with minimal dependencies
+
+# UI function
+dashboardMapUI <- function(id) {
+  ns <- NS(id)
+  
+  page_fluid(
+    class = "section-extras",
+    useShinyjs(),
+    
+    # Header
+    layout_columns(
+      fill = FALSE,
+      card(
+        card_header(
+          h2("Mapa del Dashboard", class = "text-center")
+        )
+      )
+    ),
+    
+    # Introduction text
+    card(
+      card_body(
+        div(
+          class = "text-center mb-4",
+          p("Este mapa proporciona una visión general de todos los contenidos disponibles en el dashboard Espejo Ciudadano."),
+          p("Seleccione una sección para ver su contenido.")
+        )
+      )
+    ),
+    
+    # Simple section selection with nicer UI
+    card(
+      card_header(
+        div(
+          style = "display: flex; align-items: center; justify-content: space-between;",
+          h3("Navegación del Dashboard", style = "margin: 0; font-size: 1.25rem;"),
+          div(
+            style = "background-color: #f8f9fa; padding: 5px 10px; border-radius: 4px; font-size: 0.85rem;",
+            "Seleccione una sección para ver su contenido"
+          )
+        )
+      ),
+      card_body(
+        div(
+          style = "margin-bottom: 20px;",
+          selectInput(
+            ns("selected_section"),
+            label = div(
+              style = "font-weight: bold; font-size: 1.1rem; margin-bottom: 8px;",
+              "Seleccionar Sección del Dashboard:"
+            ),
+            choices = c(
+              "Bienestar Social y Económico" = "bienestar",
+              "Movilidad Urbana" = "movilidad",
+              "Gobierno" = "gobierno",
+              "Infraestructura" = "infraestructura",
+              "Participación" = "participacion",
+              "Extras" = "extras"
+            ),
+            width = "100%",
+            selectize = TRUE
+          )
+        ),
+        uiOutput(ns("section_contents"))
+      )
+    ),
+    
+    # Footer with a link to return to home
+    div(
+      class = "d-flex justify-content-center mt-5",
+      actionButton(
+        inputId = ns("go_to_home"),
+        label = "Volver a Inicio",
+        class = "btn btn-outline-primary",
+        onclick = "Shiny.setInputValue('nav_target', 'overview', {priority: 'event'})"
+      )
+    ),
+    
+    # Generic dashboard footer
+    create_dashboard_footer()
+  )
+}
+
+# Server function
 dashboardMapServer <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -6,12 +91,10 @@ dashboardMapServer <- function(id) {
     # Create dashboard structure
     dashboard_structure <- reactive({
       # This structure represents the entire dashboard hierarchy
-      # It could be dynamically generated but for now we'll define it manually
       structure <- list(
         bienestar = list(
           title = "Bienestar Social y Económico",
-          icon = "heart",
-          color = "var(--bienestar-color)",
+          color = "#1E88E5",
           sections = list(
             list(
               title = "Vista General",
@@ -67,8 +150,7 @@ dashboardMapServer <- function(id) {
         ),
         movilidad = list(
           title = "Movilidad Urbana",
-          icon = "bus-alt",
-          color = "var(--movilidad-color)",
+          color = "#43A047",
           sections = list(
             list(
               title = "Vista General",
@@ -105,8 +187,7 @@ dashboardMapServer <- function(id) {
         ),
         gobierno = list(
           title = "Gobierno",
-          icon = "landmark",
-          color = "var(--gobierno-color)",
+          color = "#E57C00",
           sections = list(
             list(
               title = "Vista General",
@@ -168,8 +249,7 @@ dashboardMapServer <- function(id) {
         ),
         infraestructura = list(
           title = "Infraestructura",
-          icon = "building",
-          color = "var(--infraestructura-color)",
+          color = "#F57C00",
           sections = list(
             list(
               title = "Vista General",
@@ -234,8 +314,7 @@ dashboardMapServer <- function(id) {
         ),
         participacion = list(
           title = "Participación",
-          icon = "users",
-          color = "var(--participacion-color)",
+          color = "#7E57C2",
           sections = list(
             list(
               title = "Vista General",
@@ -267,7 +346,6 @@ dashboardMapServer <- function(id) {
         ),
         extras = list(
           title = "Extras",
-          icon = "ellipsis-h",
           color = "#6c757d",
           sections = list(
             list(
@@ -311,137 +389,70 @@ dashboardMapServer <- function(id) {
       return(structure)
     })
     
-    # Render dashboard map
-    output$dashboard_map <- renderUI({
-      div("Test output")
-
-    })
-    
-    # Implement search functionality
-    observeEvent(input$search_input, {
-      search_term <- tolower(input$search_input)
-      
-      if (nchar(search_term) < 3) {
-        shinyjs::hide("search_results")
-        return()
-      }
-      
-      # Search through structure for matches
+    # Render section contents based on selection
+    output$section_contents <- renderUI({
+      req(input$selected_section)
       structure <- dashboard_structure()
-      results <- list()
+      section_key <- input$selected_section
+      section <- structure[[section_key]]
       
-      for (section_key in names(structure)) {
-        section <- structure[[section_key]]
-        
-        # Check section title
-        if (grepl(search_term, tolower(section$title))) {
-          results[[length(results) + 1]] <- list(
-            type = "section",
-            title = section$title,
-            path = section_key,
-            value = section_key
-          )
-        }
-        
-        # Check subsections
-        for (subsection in section$sections) {
-          # Check subsection title
-          if (grepl(search_term, tolower(subsection$title))) {
-            results[[length(results) + 1]] <- list(
-              type = "subsection",
-              title = paste0(section$title, " > ", subsection$title),
-              path = paste0(section_key, "/", subsection$value),
-              value = subsection$value
-            )
-          }
-          
-          # Check visualizations
-          for (viz in subsection$visualizations) {
-            if (grepl(search_term, tolower(viz))) {
-              results[[length(results) + 1]] <- list(
-                type = "visualization",
-                title = paste0(section$title, " > ", subsection$title, " > ", viz),
-                path = paste0(section_key, "/", subsection$value, "/", gsub(" ", "-", tolower(viz))),
-                value = subsection$value
+      # Create a card for each subsection
+      subsection_cards <- lapply(section$sections, function(subsection) {
+        card(
+          style = paste0("border-left: 4px solid ", section$color, "; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"),
+          card_header(
+            style = paste0("background-color: rgba(", 
+                         paste(col2rgb(section$color), collapse = ","),
+                         ", 0.1); border-bottom: 1px solid rgba(", 
+                         paste(col2rgb(section$color), collapse = ","),
+                         ", 0.2);"),
+            div(
+              style = "display: flex; justify-content: space-between; align-items: center;",
+              h4(subsection$title, class = "m-0"),
+              actionButton(
+                inputId = ns(paste0("goto_", subsection$value)),
+                label = div(
+                  style = "display: flex; align-items: center;",
+                  "Ir a sección ", 
+                  tags$span(HTML("&nbsp;&#8594;"), style = "margin-left: 4px;")
+                ),
+                class = "btn btn-sm btn-link",
+                style = "padding: 2px 8px; color: #0275d8; text-decoration: none; font-size: 0.85rem; border: none;",
+                onclick = sprintf("window.scrollTo(0, 0); Shiny.setInputValue('nav_target', '%s', {priority: 'event'});", 
+                                subsection$value)
               )
-            }
-          }
-        }
-      }
+            )
+          ),
+          card_body(
+            style = "padding: 15px;",
+            h5("Visualizaciones:", style = "font-size: 1rem; margin-bottom: 10px; color: #555;"),
+            tags$ul(
+              style = "margin-bottom: 0; padding-left: 20px;",
+              lapply(subsection$visualizations, function(viz) {
+                tags$li(viz, style = "margin-bottom: 5px;")
+              })
+            )
+          )
+        )
+      })
       
-      # Display results
-      if (length(results) > 0) {
-        result_html <- lapply(results, function(result) {
-          icon_class <- switch(result$type,
-                       "section" = "folder",
-                       "subsection" = "folder-symlink",
-                       "visualization" = "graph-up")
-          
+      div(
+        style = paste0("border-top: 4px solid ", section$color, "; background-color: #fff; padding: 20px; border-radius: 5px;"),
+        class = "mt-4",
+        div(
+          style = paste0("display: flex; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid ", 
+                       "rgba(", paste(col2rgb(section$color), collapse = ","), ", 0.3);"),
           div(
-            class = "search-result-item",
-            tags$a(
-              href = "#",
-              class = "search-result-link",
-              onclick = sprintf("Shiny.setInputValue('nav_target', '%s', {priority: 'event'}); return false;", result$value),
-              div(
-                class = "d-flex align-items-center",
-                bsicons::bs_icon(icon_class, class = "me-2"),
-                div(
-                  class = "search-result-text",
-                  p(class = "mb-0 search-result-title", result$title),
-                  p(class = "mb-0 search-result-path text-muted small", result$path)
-                )
-              )
-            )
-          )
-        })
-        
-        output$search_results <- renderUI({
-          div(
-            class = "search-results-container",
-            div(
-              class = "search-results-header d-flex justify-content-between",
-              p(class = "mb-2", paste0("Resultados (", length(results), "):")),
-              tags$a(
-                href = "#",
-                class = "clear-results",
-                onclick = "$('#search_input').val(''); $(document).trigger('search-cleared'); return false;",
-                "Limpiar"
-              )
-            ),
-            div(
-              class = "search-results-list",
-              result_html
-            )
-          )
-        })
-        
-        shinyjs::show("search_results")
-      } else {
-        output$search_results <- renderUI({
-          div(
-            class = "search-results-container",
-            div(
-              class = "search-results-header d-flex justify-content-between",
-              p(class = "mb-2", "No se encontraron resultados")
-            )
-          )
-        })
-        
-        shinyjs::show("search_results")
-      }
-    })
-    
-    # Hide search results when search is cleared
-    observeEvent(input$clear_search, {
-      shinyjs::hide("search_results")
-    })
-    
-    # Also hide search results when input is cleared manually
-    observeEvent(input$search_input, {
-      if (input$search_input == "") {
-        shinyjs::hide("search_results")
-      }
+            style = paste0("width: 10px; height: 40px; background-color: ", section$color, "; margin-right: 15px; border-radius: 3px;")
+          ),
+          h3(section$title, 
+             style = paste0("color: ", section$color, "; margin: 0; font-weight: 600;"))
+        ),
+        div(
+          class = "subsection-list",
+          subsection_cards
+        )
+      )
     })
   })
 }

@@ -97,6 +97,7 @@ source("R/extra/about_ui.R")
 source("R/extra/about_server.R")
 source("R/extra/explorer_ui.R")
 source("R/extra/explorer_server.R")
+source("R/extra/dashboard_map.R")
 
 
 
@@ -143,6 +144,8 @@ ui <- page_navbar(
     tags$link(rel = "stylesheet", href = "styles.css"),
     tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"),
     tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"),
+    tags$link(rel = "stylesheet", href = "dashboard-map.css"),
+
     tags$script(HTML("
     $(document).ready(function() {
       // Global click handler for any element with 'nav-card' class anywhere in the app
@@ -519,6 +522,12 @@ div(
   value = "explorer",
   explorerUI("survey_explorer")
 ),
+nav_panel(
+  title = "Mapa del Dashboard",
+  icon = icon("sitemap"),
+  value = "dashboard_map",
+  dashboardMapUI("dashboard_map")
+),
     nav_panel(
       title = "Metodología",
       icon = icon("download"),
@@ -650,7 +659,9 @@ server <- function(input, output, session) {
       aboutServer("about_section")
     } else if (current_tab == "explorer") {
       explorerServer("survey_explorer")
-    } 
+    } else if (current_tab == "dashboard_map") {
+      dashboardMapServer("dashboard_map")
+    }
   })
  # Add this to the observeEvent(input$navbar) in app.R
 observeEvent(input$navbar, {

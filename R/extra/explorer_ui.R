@@ -1,120 +1,202 @@
-# R/extra/explorer_ui.R
-
 explorerUI <- function(id) {
   ns <- NS(id)
   
   tagList(
+    # CSS for the warning banner
+    tags$style(HTML("
+      .warning-banner {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+      }
+      .warning-banner p {
+        margin: 0;
+        color: #856404;
+      }
+      
+      /* Improve filter panel styling */
+      .filter-panel {
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      
+      /* Custom styling for search box */
+      .search-box {
+        border-radius: 20px;
+        border: 1px solid #ced4da;
+        padding: 10px 15px;
+        transition: box-shadow 0.3s;
+      }
+      .search-box:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        border-color: #80bdff;
+      }
+      
+      /* Better visualization selector */
+      .viz-selector {
+        margin-top: 15px;
+      }
+      
+      /* Custom card with shadow */
+      .custom-card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      
+      /* Improve download button styling */
+      .download-btn {
+        margin-top: 10px;
+      }
+    ")),
+    
     div(
       class = "container-fluid mt-4",
       
-      # Title and description
+      # Header and description
       div(
         class = "row",
         div(
           class = "col-12",
-          create_dashboard_header("Explorador de Encuesta", 
-                                "Herramienta para exploración interactiva de preguntas de la encuesta")
+          h1("Explorador de Encuestas", class = "mb-3"),
+          p("Esta herramienta le permite explorar los datos de las encuestas de manera interactiva. Seleccione los parámetros de interés y visualice los resultados.", class = "lead")
         )
       ),
       
+      # Warning banner
       div(
         class = "row",
         div(
           class = "col-12",
-          # Main interface using the layout_sidebar component
-          layout_sidebar(
-            sidebar = sidebar(
-              width = 300,
+          div(
+            class = "warning-banner",
+            p(icon("exclamation-triangle"), " Las conclusiones derivadas de las visualizaciones generadas por esta herramienta NO son representativas de Plan Estratégico de Juárez y deben ser interpretadas cuidadosamente. Este es solo un explorador de datos básico para referencia.")
+          )
+        )
+      ),
+      
+      # Main content
+      div(
+        class = "row",
+        
+        # Left sidebar with controls
+        div(
+          class = "col-md-4",
+          div(
+            class = "custom-card",
+            div(
+              class = "card-body",
               
-              # Module selection
-              selectInput(
-                ns("module_type"),
-                "Tipo de Pregunta",
-                choices = c(
-                  "Razón" = "razon",
-                  "Intervalo" = "intervalo",
-                  "Ordinal" = "ordinal",
-                  "Categórico" = "categorico",
-                  "Binaria" = "binaria",
-                  "Nominal" = "nominal"
-                ),
-                selected = "razon"
-              ),
-              
-              # Theme filtering
-              selectInput(
-                ns("theme_filter"),
-                "Filtrar por Tema:",
-                choices = c("Todos" = "all")  # Will be populated in server
-              ),
-              
-              # Subtheme filtering
-              selectInput(
-                ns("subtheme_filter"),
-                "Filtrar por Subtema:",
-                choices = c("Todos" = "all")  # Will be populated in server
-              ),
-              
-              # Question selection - with improved styling
+              # Survey and year selection
+              h4("Selección de Encuesta", class = "card-title mb-3"),
               div(
-                style = "margin-bottom: 15px;",
+                class = "filter-panel",
+                div(
+                  class = "row mb-3",
+                  div(
+                    class = "col-sm-6",
+                    selectInput(
+                      ns("survey_type"),
+                      "Tipo de Encuesta:",
+                      choices = c(
+                        "Percepción Ciudadana" = "PER",
+                        "Participación Ciudadana y Buen Gobierno" = "PAR"
+                      ),
+                      selected = "PER"
+                    )
+                  ),
+                  div(
+                    class = "col-sm-6",
+                    selectInput(
+                      ns("survey_year"),
+                      "Año:",
+                      choices = c("2023", "2024"),
+                      selected = "2024"
+                    )
+                  )
+                )
+              ),
+              
+              # Search and filter
+              h4("Búsqueda de Preguntas", class = "card-title mt-4 mb-3"),
+              div(
+                class = "filter-panel",
+                textInput(
+                  ns("search_query"),
+                  "Buscar:",
+                  placeholder = "Ingrese palabras clave...",
+                  width = "100%"
+                ),
+                div(class = "mb-2"),
                 selectInput(
-                  ns("selected_question"),
+                  ns("theme_filter"),
+                  "Filtrar por Tema:",
+                  choices = c("Todos" = "all"),
+                  selected = "all"
+                ),
+                div(class = "mb-2"),
+                selectInput(
+                  ns("subtheme_filter"),
+                  "Filtrar por Subtema:",
+                  choices = c("Todos" = "all"),
+                  selected = "all"
+                ),
+                div(class = "mb-3"),
+                selectInput(
+                  ns("question_select"),
                   "Seleccionar Pregunta:",
                   choices = NULL,
                   width = "100%"
                 )
               ),
               
-              # Question info box
+              # Visualization options
+              h4("Opciones de Visualización", class = "card-title mt-4 mb-3"),
               div(
-                class = "question-info-box",
-                style = "margin-top: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;",
-                h5("Información de la Pregunta:"),
-                div(
-                  style = "font-style: italic; margin-bottom: 10px;",
-                  textOutput(ns("question_label"))
-                ),
-                hr(),
-                uiOutput(ns("question_theme_info"))
-              ),
-              
-              # Help text
-              div(
-                class = "mt-4 small text-muted",
-                p("Seleccione un tipo de pregunta, tema y pregunta específica para explorar datos de la encuesta."),
-                p("Las visualizaciones y controles se adaptarán automáticamente al tipo de pregunta seleccionada."),
-                p("Utilice los filtros de tema y subtema para encontrar preguntas más fácilmente.")
+                class = "filter-panel viz-selector",
+                uiOutput(ns("viz_options")),
+                
+                # Filter options (hidden until a question is selected)
+                conditionalPanel(
+                  condition = sprintf("input['%s'] != null", ns("question_select")),
+                  hr(),
+                  h5("Filtros"),
+                  selectInput(
+                    ns("district_filter"),
+                    "Distritos:", 
+                    choices = NULL,
+                    multiple = TRUE
+                  ),
+                  
+                  # Custom options for visualization types
+                  uiOutput(ns("custom_viz_options"))
+                )
               )
-            ),
-            
-            # Main content with dynamic modules
+            )
+          )
+        ),
+        
+        # Right content area with visualization
+        div(
+          class = "col-md-8",
+          div(
+            class = "custom-card",
             div(
-              id = ns("module_container"),
-              
-              conditionalPanel(
-                condition = sprintf("input['%s'] == 'razon'", ns("module_type")),
-                razonUI(ns("razon_module"))
-              ),
-              conditionalPanel(
-                condition = sprintf("input['%s'] == 'intervalo'", ns("module_type")),
-                intervalUI(ns("interval_module"))
-              ),
-              conditionalPanel(
-                condition = sprintf("input['%s'] == 'ordinal'", ns("module_type")),
-                ordinalUI(ns("ordinal_module"))
-              ),
-              conditionalPanel(
-                condition = sprintf("input['%s'] == 'categorico'", ns("module_type")),
-                categoricoUI(ns("categorico_module"))
-              ),
-              conditionalPanel(
-                condition = sprintf("input['%s'] == 'binaria'", ns("module_type")),
-                binaryUI(ns("binary_module"))
-              ),
-              conditionalPanel(
-                condition = sprintf("input['%s'] == 'nominal'", ns("module_type")),
-                nominalUI(ns("nominal_module"))
+              class = "card-body",
+              h4(textOutput(ns("viz_title")), class = "card-title mb-3"),
+              div(
+                class = "card-text",
+                p(htmlOutput(ns("question_text"))),
+                div(
+                  id = ns("viz_container"),
+                  uiOutput(ns("visualization"))
+                ),
+                # Download options
+                uiOutput(ns("download_options"))
               )
             )
           )
@@ -122,7 +204,13 @@ explorerUI <- function(id) {
       ),
       
       # Footer
-      create_dashboard_footer()
+      div(
+        class = "row mt-4",
+        div(
+          class = "col-12 text-center",
+          p("Desarrollado por Plan Estratégico de Juárez - 2024", class = "text-muted")
+        )
+      )
     )
   )
 }

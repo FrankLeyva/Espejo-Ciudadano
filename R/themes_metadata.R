@@ -227,7 +227,57 @@ get_subtheme_property <- function(theme_name, subtheme_name) {
   }
 }
 
-# Create a list of exported functions
+theme_name_translations <- list(
+  "Internal" = "Interno",
+  "Social & Economic Wellbeing" = "Bienestar Social y Económico",
+  "Public Services" = "Servicios Públicos",
+  "Urban Mobility & Environment" = "Movilidad Urbana y Medio Ambiente",
+  "Governance & Civic Engagement" = "Gobernanza y Participación Ciudadana",
+  "Dashboard Context" = "Contexto del Dashboard",
+  "Community Participation" = "Participación Comunitaria"
+)
+
+# Mapeo de nombres de subtemas de inglés a español
+subtheme_name_translations <- list(
+  "Internal" = "Interno",
+  "Economic Conditions" = "Condiciones Económicas",
+  "Cultural Participation" = "Participación Cultural",
+  "Demographic Trends" = "Tendencias Demográficas",
+  "Education" = "Educación",
+  "Healthcare" = "Salud",
+  "Housing" = "Vivienda",
+  "Utilities & Infrastructure" = "Servicios e Infraestructura",
+  "Transportation" = "Transporte",
+  "Environmental Quality" = "Calidad Ambiental",
+  "Government Operations" = "Operaciones Gubernamentales",
+  "Political Representation" = "Representación Política",
+  "Trust in Institutions" = "Confianza en Instituciones",
+  "Public Integrity" = "Integridad Pública",
+  "Government Performance" = "Desempeño Gubernamental",
+  "Justice & Accountability" = "Justicia y Rendición de Cuentas",
+  "Survey Demographics" = "Demografía de la Encuesta",
+  "Civic Activities" = "Actividades Cívicas",
+  "Community Involvement" = "Participación en la Comunidad",
+  "Decision-Making Participation" = "Participación en Toma de Decisiones"
+)
+
+# Función para traducir nombres de temas
+translate_theme_name <- function(english_name) {
+  if (english_name %in% names(theme_name_translations)) {
+    return(theme_name_translations[[english_name]])
+  }
+  return(english_name)  # Si no hay traducción, devuelve el nombre original
+}
+
+# Función para traducir nombres de subtemas
+translate_subtheme_name <- function(english_name) {
+  if (english_name %in% names(subtheme_name_translations)) {
+    return(subtheme_name_translations[[english_name]])
+  }
+  return(english_name)  # Si no hay traducción, devuelve el nombre original
+}
+
+# Modificar la lista theme_metadata para incluir las nuevas funciones
 theme_metadata <- list(
   load_thematic_classifications = load_thematic_classifications,
   get_all_themes = get_all_themes,
@@ -235,5 +285,7 @@ theme_metadata <- list(
   get_questions_by_theme = get_questions_by_theme,
   get_questions_by_subtheme = get_questions_by_subtheme,
   get_theme_property = get_theme_property,
-  get_subtheme_property = get_subtheme_property
+  get_subtheme_property = get_subtheme_property,
+  translate_theme_name = translate_theme_name,
+  translate_subtheme_name = translate_subtheme_name
 )

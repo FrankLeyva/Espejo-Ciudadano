@@ -52,6 +52,48 @@ explorerUI <- function(id) {
       .download-btn {
         margin-top: 10px;
       }
+         .value-box-border-left {
+    border-left-width: 0 !important; 
+  }
+  
+  .value-box-title {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+  }
+  
+  .value-box-value {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+  }
+  
+  .dataTables_wrapper .dataTable {
+    width: 100% !important;
+  }
+  
+  /* Improve table aesthetics */
+  .dataTables_wrapper {
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  
+  .dataTables_wrapper .dataTable thead th {
+    background-color: #f5f5f5;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .dataTables_wrapper .dataTable.stripe tbody tr.odd {
+    background-color: rgba(0,0,0,.02);
+  }
+  
+  /* Add spacing */
+  .mb-3 {
+    margin-bottom: 1rem;
+  }
+  
+  .mt-4 {
+    margin-top: 1.5rem;
+  }
     ")),
     
     div(
@@ -67,17 +109,7 @@ explorerUI <- function(id) {
         )
       ),
       
-      # Warning banner
-      div(
-        class = "row",
-        div(
-          class = "col-12",
-          div(
-            class = "warning-banner",
-            p(icon("exclamation-triangle"), " Las conclusiones derivadas de las visualizaciones generadas por esta herramienta NO son representativas de Plan Estratégico de Juárez y deben ser interpretadas cuidadosamente. Este es solo un explorador de datos básico para referencia.")
-          )
-        )
-      ),
+
       
       # Main content
       div(
@@ -202,7 +234,17 @@ explorerUI <- function(id) {
           )
         )
       ),
-      
+            # Warning banner
+            div(
+              class = "row",
+              div(
+                class = "col-12",
+                div(
+                  class = "warning-banner",
+                  p(icon("exclamation-triangle"), " Las conclusiones derivadas de las visualizaciones generadas por esta herramienta NO son representativas de Plan Estratégico de Juárez y deben ser interpretadas cuidadosamente. Este es solo un explorador de datos para referencia.")
+                )
+              )
+            ),
       # Footer
       div(
         class = "row mt-4",

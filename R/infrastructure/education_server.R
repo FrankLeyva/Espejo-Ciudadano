@@ -2,22 +2,9 @@
 educationServer <- function(input, output, session, current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
-  # Load survey data with dynamic year
-  survey_data <- reactive({
-    survey_id <- paste0("PER_", selectedYear())
-    load_survey_data(survey_id)
-  })
+  survey_data <- session$userData$perSurveyData
   
-  # Cargar datos geográficos
-  geo_data <- reactive({
-    tryCatch({
-      sf::st_read('data/geo/Jrz_Map.geojson', quiet = TRUE)
-    }, error = function(e) {
-      showNotification(paste("Error cargando datos geográficos:", e$message), type = "error")
-      NULL
-    })
-  })
-  
+  geo_data <- session$userData$geoData  
   # Use the current theme
   active_theme <- reactive({
     if (is.function(current_theme)) {

@@ -1,16 +1,9 @@
 # government_server.R
 governmentServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
-
   # Load survey data with dynamic year
-  perception_data <- reactive({
-    survey_id <- paste0("PER_", selectedYear())
-    load_survey_data(survey_id)
-  })
-  participation_data <- reactive({
-    survey_id <- paste0("PAR_", selectedYear())
-    load_survey_data(survey_id)
-  })
+  perception_data <- session$userData$perSurveyData
+  participation_data <- session$userData$parSurveyData
   
   # Use the current theme
   active_theme <- reactive({

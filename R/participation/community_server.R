@@ -2,10 +2,8 @@
 communityServer <- function(input, output, session,current_theme = NULL) {
   selectedYear <- session$userData$selectedYear
   
-  survey_data <- reactive({
-    survey_id <- paste0("PAR_", selectedYear())
-    load_survey_data(survey_id)
-  })
+  survey_data <- session$userData$parSurveyData
+  
   
   # Use the current theme
   active_theme <- reactive({

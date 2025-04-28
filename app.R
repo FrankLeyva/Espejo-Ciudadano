@@ -21,86 +21,68 @@ library(bsicons)
 library(pagedown)
 library(htmlwidgets)
 
+# Load only essential core modules at startup
 source("R/global_theme.R")
 source("R/utils.R")
 source("R/survey_config.R")
-source('R/razon_module.R')
-source('R/interval_module.R')
-source('R/ordinal_module.R')
-source('R/categorical_module.R')
-source('R/nominal_module.R')
-source('R/binary_module.R')
-source('R/special_module.R')
 source("R/data_loader.R")
 source("R/question_classifier.R")
-source("R/themes_metadata.R")    
+source("R/themes_metadata.R")  
 
-# Source all theme UI and server files for all categories
-# Bienestar Social y Económico
-source("R/wellness/wellness_ui.R")
-source("R/wellness/wellness_server.R")
-source("R/wellness/economy_ui.R")
-source("R/wellness/economy_server.R")
-source("R/wellness/cultural_ui.R")
-source("R/wellness/cultural_server.R")
-source("R/wellness/identity_ui.R")
-source("R/wellness/identity_server.R")
-source("R/wellness/environment_ui.R")
-source("R/wellness/environment_server.R")
-# Movilidad Urbana y Medio Ambiente
-source("R/urban/urban_ui.R")
-source("R/urban/urban_server.R")
-source("R/urban/mobility_ui.R")
-source("R/urban/mobility_server.R")
-source("R/urban/transportation_ui.R")
-source("R/urban/transportation_server.R")
+# Helper function for lazy loading modules
+load_module <- function(module_path, module_name = NULL) {
+  if (is.null(module_name)) {
+    # Extract module name from path if not provided
+    module_name <- basename(tools::file_path_sans_ext(module_path))
+  }
 
+  # Only source if not already loaded
+  if (!exists(paste0(module_name, "UI"), envir = .GlobalEnv) || 
+      !exists(paste0(module_name, "Server"), envir = .GlobalEnv)) {
+    
+    tryCatch({
+      source(module_path)
+      message(paste("Loaded module:", module_path))
+      return(TRUE)
+    }, error = function(e) {
+      warning(paste("Failed to load module:", module_path, "-", e$message))
+      return(FALSE)
+    })
+  }
+  return(TRUE)
+}
 
-# Gobierno
-source("R/government/government_ui.R")
-source("R/government/government_server.R")
-source("R/government/inequality_ui.R")
-source("R/government/inequality_server.R")
-source("R/government/accountability_ui.R")
-source("R/government/accountability_server.R")
-source("R/government/representation_ui.R")
-source("R/government/representation_server.R")
-source("R/government/expectations_ui.R")
-source("R/government/expectations_server.R")
-source("R/government/trust_ui.R")
-source("R/government/trust_server.R")
+# Function to load UI for a specific module
+load_ui_module <- function(section, module_name) {
+  module_path <- file.path("R", section, paste0(module_name, "_ui.R"))
+  load_module(module_path, module_name)
+}
 
-# Infraestructura y Servicios
-source("R/infrastructure/infrastructure_ui.R")
-source("R/infrastructure/infrastructure_server.R")
-source("R/infrastructure/public_services_ui.R")
-source("R/infrastructure/public_services_server.R")
-source("R/infrastructure/education_ui.R")
-source("R/infrastructure/education_server.R")
-source("R/infrastructure/healthcare_ui.R")
-source("R/infrastructure/healthcare_server.R")
-source("R/infrastructure/housing_ui.R")
-source("R/infrastructure/housing_server.R")
+# Function to load Server for a specific module
+load_server_module <- function(section, module_name) {
+  module_path <- file.path("R", section, paste0(module_name, "_server.R"))
+  load_module(module_path, module_name)
+}
 
-# Participación Ciudadana
-source("R/participation/participation_ui.R")
-source("R/participation/participation_server.R")
-source("R/participation/civic_ui.R")
-source("R/participation/civic_server.R")
-source("R/participation/community_ui.R")
-source("R/participation/community_server.R")
-
-# Extra section
-source("R/extra/methodology_ui.R")
-source("R/extra/methodology_server.R")
-source("R/extra/about_ui.R")
-source("R/extra/about_server.R")
-source("R/extra/explorer_ui.R")
-source("R/extra/explorer_server.R")
-source("R/extra/dashboard_map.R")
+# Preload core modules needed for main page
+load_module("R/binary_module.R", "binary")
+load_module("R/categorical_module.R", "categorical")
+load_module("R/interval_module.R", "interval")
+load_module("R/ordinal_module.R", "ordinal")
+load_module("R/nominal_module.R", "nominal")
+load_module("R/razon_module.R", "razon")
+load_module("R/special_module.R", "special")
 
 
+geo_data_global <- NULL
 
+# Attempt to load the geo data
+tryCatch({
+  geo_data_global <- sf::st_read('data/geo/Jrz_Map.geojson', quiet = TRUE)
+  message("Geographic data loaded successfully")
+}, error = function(e) {
+  message(paste("Error loading geographic data:", e$message))
+})
 
 
 ui <- page_navbar(
@@ -326,35 +308,35 @@ div(
     nav_panel(
       title = "Vista General",
       value = "wellness",
-      wellnessUI()
+      uiOutput("wellness_ui_container")
     ),
     
     # Condiciones Económicas
     nav_panel(
       title = "Condiciones Económicas",
       value = "economic", 
-      economyUI()
+      uiOutput("economic_ui_container")
     ),
     
     # Participación Cultural
     nav_panel(
       title = "Participación Cultural",
       value = "cultural",
-      culturalUI()
+      uiOutput("cultural_ui_container")
     ),
     
     # Tendencias Demográficas
     nav_panel(
       title = "Identidad y pertenencia",
       value = "identity",
-      identityUI()
+      uiOutput("identity_ui_container")
     ),
     
     # Medio Ambiente
     nav_panel(
       title = "Medio Ambiente",
       value = "environment",
-      environmentUI()
+      uiOutput("environment_ui_container")
     )
   ),
   
@@ -367,21 +349,23 @@ div(
     nav_panel(
       title = "Vista General",
       value = "urban",
-      urbanUI()
+      uiOutput("urban_ui_container")
     ),
     
     # Movilidad
     nav_panel(
       title = "Movilidad",
       value = "mobility",
-      mobilityUI()
+      uiOutput("mobility_ui_container")
+
     ),
     
     # Transporte Público
     nav_panel(
       title = "Transporte Público",
       value = "transportation",
-      transportationUI()
+      uiOutput("transportation_ui_container")
+
     )
   ),
   
@@ -394,42 +378,48 @@ div(
     nav_panel(
       title = "Vista General",
       value = "government",
-      governmentUI()
+      uiOutput("government_ui_container")
+
     ),
     
     # Desigualdad
     nav_panel(
       title = "Desigualdad",
       value = "inequality",
-      inequalityUI()
+      uiOutput("inequality_ui_container")
+
     ),
     
     # Rendición de Cuentas
     nav_panel(
       title = "Rendición de Cuentas",
       value = "accountability",
-      accountabilityUI()
+      uiOutput("accountability_ui_container")
+
     ),
     
     # Representación Política
     nav_panel(
       title = "Representación Política",
       value = "representation",
-      representationUI()
+      uiOutput("representation_ui_container")
+
     ),
     
     # Expectativas en el gobierno
     nav_panel(
       title = "Expectativas",
       value = "expectations",
-      expectationsUI()
+      uiOutput("expectations_ui_container")
+
     ),
     
     # Confianza en las instituciones
     nav_panel(
       title = "Confianza Institucional",
       value = "trust",
-      trustUI()
+      uiOutput("trust_ui_container")
+
     )
   ),
   
@@ -442,35 +432,40 @@ div(
     nav_panel(
       title = "Vista General",
       value = "infrastructure",
-      infrastructureUI()
+      uiOutput("infrastructure_ui_container")
+
     ),
     
     # Servicios Públicos
     nav_panel(
       title = "Servicios Públicos",
       value = "public_services",
-      publicServicesUI()
+      uiOutput("public_services_ui_container")
+
     ),
     
     # Educación
     nav_panel(
       title = "Educación",
       value = "education",
-      educationUI()
+      uiOutput("education_ui_container")
+
     ),
     
     # Servicios de Salud
     nav_panel(
       title = "Servicios de Salud",
       value = "healthcare",
-      healthcareUI()
+      uiOutput("healthcare_ui_container")
+
     ),
     
     # Vivienda
     nav_panel(
       title = "Vivienda",
       value = "housing",
-      housingUI()
+      uiOutput("housing_ui_container")
+
     )
   ),
   
@@ -483,21 +478,24 @@ div(
     nav_panel(
       title = "Vista General",
       value = "participation",
-      participationUI()
+      uiOutput("participation_ui_container")
+
     ),
     
     # Participación Cívica
     nav_panel(
       title = "Participación Cívica",
       value = "civic",
-      civicUI()
+      uiOutput("civic_ui_container")
+
     ),
     
     # Participación Comunitaria
     nav_panel(
       title = "Participación Comunitaria",
       value = "community",
-      communityUI()
+      uiOutput("community_ui_container")
+
     )
   ),
   
@@ -520,27 +518,31 @@ div(
   title = "Explorador de Encuesta",
   icon = icon("search"),
   value = "explorer",
-  explorerUI("survey_explorer")
+  uiOutput("explorer_ui_container")
+
 ),
 nav_panel(
   title = "Mapa del Dashboard",
   icon = icon("sitemap"),
   value = "dashboard_map",
-  dashboardMapUI("dashboard_map")
+  uiOutput("dashboard_map_ui_container")
+
 ),
     nav_panel(
       title = "Metodología",
       icon = icon("download"),
       value = "methodology",
-      methodologyUI()
+      uiOutput("methodology_ui_container")
+
     ),
     nav_panel(
       title = "Acerca de",
       icon = icon("info-circle"),
       value = "about",
-      aboutUI("about_section")
+      uiOutput("about_ui_container")
+
     )
-  ),
+  )
 )
 
 server <- function(input, output, session) {
@@ -574,7 +576,181 @@ server <- function(input, output, session) {
  selectedYear <- reactive({
    selectedYearVal()
  })
- 
+ surveyCache <- reactiveVal(list())
+
+  
+  # Create a reactive that handles survey loading
+loadSurveyData <- function(survey_type, year) {
+  # Create a unique key for this survey
+  cache_key <- paste0(survey_type, "_", year)
+  
+  # Check if survey exists in cache
+  current_cache <- surveyCache()
+  if (!is.null(current_cache[[cache_key]])) {
+    return(current_cache[[cache_key]])
+  }
+  
+  # If not in cache, load it
+  survey_id <- paste0(survey_type, "_", year)
+  survey_data <- load_survey_data(survey_id)
+  
+  # Store in cache
+  current_cache[[cache_key]] <- survey_data
+  surveyCache(current_cache)
+  
+  return(survey_data)
+}
+perSurveyData <- reactive({
+  loadSurveyData("PER", selectedYear())
+})
+
+parSurveyData <- reactive({
+  loadSurveyData("PAR", selectedYear())
+})
+  
+# In app.R, add an observer to invalidate cache on year change
+observeEvent(selectedYear(), {
+  # Reset the cache when year changes
+  surveyCache(list())
+})
+# Store these reactive functions in session$userData
+session$userData$perSurveyData <- perSurveyData
+session$userData$parSurveyData <- parSurveyData  
+  
+geoData <- reactive({
+  # Return the global geo data
+  geo_data_global
+})
+
+# Store in session$userData
+session$userData$geoData <- geoData 
+  
+  
+  
+output$wellness_ui_container <- renderUI({
+  load_ui_module("wellness", "wellness")
+  wellnessUI()
+})
+
+output$economic_ui_container <- renderUI({
+  load_ui_module("wellness", "economy")
+  economyUI()
+})
+  
+output$cultural_ui_container <- renderUI({
+  load_ui_module("wellness", "cultural")
+  culturalUI()
+})
+output$identity_ui_container <- renderUI({
+  load_ui_module("wellness", "identity")
+  identityUI()
+})
+  
+output$environment_ui_container <- renderUI({
+  load_ui_module("wellness", "environment")
+  environmentUI()
+})
+  
+  
+output$urban_ui_container <- renderUI({
+  load_ui_module("urban", "urban")
+  urbanUI()
+})
+output$mobility_ui_container <- renderUI({
+  load_ui_module("urban", "mobility")
+  mobilityUI()
+})
+output$transportation_ui_container <- renderUI({
+  load_ui_module("urban", "transportation")
+  transportationUI()
+})
+  
+output$participation_ui_container <- renderUI({
+  load_ui_module("participation", "participation")
+  participationUI()
+})
+
+output$civic_ui_container <- renderUI({
+  load_ui_module("participation", "civic")
+  civicUI()
+})
+output$community_ui_container <- renderUI({
+  load_ui_module("participation", "community")
+  communityUI()
+})
+  
+output$infrastructure_ui_container <- renderUI({
+  load_ui_module("infrastructure", "infrastructure")
+  infrastructureUI()
+})
+  
+output$education_ui_container <- renderUI({
+  load_ui_module("infrastructure", "education")
+  educationUI()
+})
+output$healthcare_ui_container <- renderUI({
+  load_ui_module("infrastructure", "healthcare")
+  healthcareUI()
+})
+output$housing_ui_container <- renderUI({
+  load_ui_module("infrastructure", "housing")
+  housingUI()
+})
+output$public_services_ui_container <- renderUI({
+  load_ui_module("infrastructure", "public_services")
+  publicServicesUI()
+})
+  
+output$government_ui_container <- renderUI({
+  load_ui_module("government", "government")
+  governmentUI()
+})
+  
+output$accountability_ui_container <- renderUI({
+  load_ui_module("government", "accountability")
+  accountabilityUI()
+})
+output$expectations_ui_container <- renderUI({
+  load_ui_module("government", "expectations")
+  expectationsUI()
+})
+output$inequality_ui_container <- renderUI({
+  load_ui_module("government", "inequality")
+  inequalityUI()
+})
+output$representation_ui_container <- renderUI({
+  load_ui_module("government", "representation")
+  representationUI()
+})
+output$trust_ui_container <- renderUI({
+  load_ui_module("government", "trust")
+  trustUI()
+})
+  
+output$about_ui_container <- renderUI({
+  load_ui_module("extras", "about")
+  aboutUI('about')
+})
+output$methodology_ui_container <- renderUI({
+  load_ui_module("extras", "methodology")
+  methodologyUI()
+}) 
+  output$explorer_ui_container <- renderUI({
+  load_ui_module("extras", "explorer")
+  explorerUI('survey_explorer')
+})
+  output$dashboard_map_ui_container <- renderUI({
+  load_module("R/extra/dashboard_map.R", "dashboard_map")
+  dashboardMapUI('dashboard_map')
+})
+  
+  
+  
+  
+  
+  
+  
+  
  # Update the reactiveVal when user selects a year
  observeEvent(input$surveyYear, {
    if (!is.null(input$surveyYear)) {
@@ -610,54 +786,100 @@ server <- function(input, output, session) {
     
     # Initialize the appropriate server module
     if (current_tab == "wellness") {
+      load_server_module("wellness", "wellness")
       wellnessServer(input, output, session, current_theme)
     } else if (current_tab == "economic") {
+      load_server_module("wellness", "economy")
+
       economyServer(input, output, session, current_theme)
     } else if (current_tab == "cultural") {
+      load_server_module("wellness", "cultural")
       culturalServer(input, output, session, current_theme)
     } else if (current_tab == "identity") {
+      load_server_module("wellness", "identity")
       identityServer(input, output, session, current_theme)
     } else if (current_tab == "urban") {
+      load_server_module("urban", "urban")
+
       urbanServer(input, output, session, current_theme)
     } else if (current_tab == "mobility") {
+      load_server_module("urban", "mobility")
+
       mobilityServer(input, output, session, current_theme)
     } else if (current_tab == "transportation") {
+      load_server_module("urban", "transportation")
+
       transportationServer(input, output, session, current_theme)
     } else if (current_tab == "environment") {
+      load_server_module("wellness", "environment")
+
       environmentServer(input, output, session, current_theme)
     } else if (current_tab == "government") {
+      load_server_module("government", "government")
+
       governmentServer(input, output, session, current_theme)
     } else if (current_tab == "inequality") {
+      load_server_module("government", "inequality")
+
       inequalityServer(input, output, session, current_theme)
     } else if (current_tab == "accountability") {
+      load_server_module("government", "accountability")
+
       accountabilityServer(input, output, session, current_theme)
     } else if (current_tab == "representation") {
+      load_server_module("government", "representation")
+
       representationServer(input, output, session, current_theme)
     } else if (current_tab == "expectations") {
+      load_server_module("government", "expectations")
+
       expectationsServer(input, output, session, current_theme)
     } else if (current_tab == "trust") {
+      load_server_module("government", "trust")
+
       trustServer(input, output, session, current_theme)
     } else if (current_tab == "infrastructure") {
+      load_server_module("infrastructure", "infrastructure")
+
       infrastructureServer(input, output, session, current_theme)
     } else if (current_tab == "public_services") {
+      load_server_module("infrastructure", "public_services")
+
       publicServicesServer(input, output, session, current_theme)
     } else if (current_tab == "education") {
+      load_server_module("infrastructure", "education")
+
       educationServer(input, output, session, current_theme)
     } else if (current_tab == "healthcare") {
+      load_server_module("infrastructure", "healthcare")
+
       healthcareServer(input, output, session, current_theme)
     } else if (current_tab == "housing") {
+      load_server_module("infrastructure", "housing")
+
       housingServer(input, output, session, current_theme)
     } else if (current_tab == "participation") {
+      load_server_module("participation", "participation")
+
       participationServer(input, output, session, current_theme)
     } else if (current_tab == "civic") {
+      load_server_module("participation", "civic")
+
       civicServer(input, output, session, current_theme)
     } else if (current_tab == "community") {
+      load_server_module("participation", "community")
+
       communityServer(input, output, session, current_theme)
     } else if (current_tab == "methodology") {
+      load_server_module("extras", "methodology")
+
       methodologyServer(input, output, session, current_theme)
     } else if (current_tab == "about") {
+      load_server_module("extras", "about")
       aboutServer("about_section")
     } else if (current_tab == "explorer") {
+      load_server_module("extras", "explorer")
+
       explorerServer("survey_explorer")
     } else if (current_tab == "dashboard_map") {
       dashboardMapServer("dashboard_map")

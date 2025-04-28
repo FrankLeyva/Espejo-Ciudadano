@@ -2,11 +2,8 @@ mobilityServer <- function(input, output, session,current_theme = NULL) {
   # Get the selected year from userData
   selectedYear <- session$userData$selectedYear
   
-  # Load survey data with dynamic year
-  survey_data <- reactive({
-    survey_id <- paste0("PER_", selectedYear())
-    load_survey_data(survey_id)
-  })
+  survey_data <- session$userData$perSurveyData
+  
   
   active_theme <- reactive({
     if (is.function(current_theme)) {

@@ -53,17 +53,27 @@ color: var(--movilidad-color) !important;
       # Bicycles card
       card(
         card_header(
-            "Bicicletas por Hogar",
-        ),
+        div(
+          class = "d-flex align-items-center",
+          "Bicicletas por Hogar",
+    create_tooltip("<b>ID</b>: Suma de PER Q68, Q69, Q70 <br>
+          <b>Pregunta</b>: Cuantas bicicletas para NIÑOS/ADOLESCENTES/ADULTOS hay disponibles en su hogar? (poner 0 si no se cuenta con ninguna de este tipo) <br>
+           <b>Escala</b>: Numérica")
+     )
+    ),
         plotlyOutput("bicycles_pie", height = "400px")
       ),
       
       # Vehicles card
       card(
         card_header(
-
-            "Vehículos Motorizados por Hogar",
-          
+            div(
+              class = "d-flex align-items-center",
+              "Vehículos Motorizados por Hogar",
+        create_tooltip("<b>ID</b>: PER Q66 <br>
+              <b>Pregunta</b>: 	Cuantos vehiculos de motor hay disponibles en su hogar? (Si no tiene ninguno, poner 0) <br>
+               <b>Escala</b>: Numérica")
+         )
         ),
         plotlyOutput("vehicles_pie", height = "400px")
       )
@@ -72,8 +82,15 @@ color: var(--movilidad-color) !important;
     # Transportation modes tabset panel
     card(
       card_header(
+        div(
+          class = "d-flex justify-content-between align-items-center",
+          div(
+            class = "d-flex align-items-center",
           "Modos de Transporte",
-      ),
+          create_dynamic_tooltip("transportation_tooltip")
+        )
+      )
+    ),
       div(class = "movilidad-pills",
       navset_pill(
         id = "transport_tabs",

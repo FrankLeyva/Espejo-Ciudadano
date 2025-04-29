@@ -54,7 +54,13 @@ color: var(--bienestar-color) !important;
       card(
 
         card_header(
+          div(
+            class = "d-flex align-items-center",
           "Monumentos importantes para la identidad juarense",
+          create_tooltip("<b>ID</b>: PER Q65 <br>
+            <b>Pregunta</b>: Mencione un LUGAR / EDIFICIO / MONUMENTO que considere representativo de Juarez <br>
+             <b>Escala</b>: Abierta (Respuestas Homologadas)")
+          )
         ),
         plotlyOutput("monuments_bar", height = "400px"),
       ),
@@ -64,7 +70,13 @@ color: var(--bienestar-color) !important;
       card(
 
         card_header(
+          div(
+            class = "d-flex align-items-center",
           "Orgullo por vivir en Ciudad Juárez",
+          create_tooltip("<b>ID</b>: PER Q80 <br>
+            <b>Pregunta</b>: Que tanto cree que nosotros los ciudadanos estemos orgullosos de ser o vivir en Ciudad Juarez? <br>
+             <b>Escala</b>: 1=Nada; 2=Poco; 3=Algo; 4=Mucho; 5=Ns/Nc")
+          )
         ),
         plotlyOutput("city_pride_pie", height = "400px"),
 
@@ -74,7 +86,11 @@ card(
   card_header(
     div(
       class = "d-flex justify-content-between align-items-center",
+      div(
+        class = "d-flex align-items-center",
       "Sentido de pertenencia",
+      create_dynamic_tooltip("connection_tooltip")
+    ),
       downloadButton(
         "download_connection_map", 
         "", 

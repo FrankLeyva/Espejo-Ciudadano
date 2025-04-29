@@ -4,7 +4,8 @@ wellnessUI <- function() {
   page_fluid(
     class = "section-bienestar",
     useShinyjs(),
-    
+    init_tooltips(),
+
     # Header
     layout_columns(
       fill = FALSE,
@@ -92,7 +93,16 @@ wellnessUI <- function() {
       # Economic situation pie chart
       card(
         card_header(
-          "Percepción de situación económica personal"
+          div(
+            class = "d-flex justify-content-between align-items-center",
+            div(
+              class = "d-flex align-items-center",
+              "Percepción de situación económica personal",
+              create_tooltip("<b>ID</b>: PER Q4 <br>
+                 <b>Pregunta</b>: En comparación con el año pasado, Diría usted que su situación económica personal ha mejorado, ha empeorado o sigue igual? <br>
+                  <b>Escala</b>: 1=Empeorado mucho; 2=Empeorado algo; 3=Igual; 4=Mejorado algo; 5=Mejorado mucho; 6=NS/NC")
+            )
+          )
         ),
         plotlyOutput("economic_situation_pie", height = "450px"),
       ),
@@ -101,26 +111,39 @@ wellnessUI <- function() {
         card_header(
           div(
             class = "d-flex justify-content-between align-items-center",
-            "Frecuencia con que piensa en irse de la ciudad",
+            div(
+              class = "d-flex align-items-center",
+              "Frecuencia con que piensa en irse de la ciudad",
+              create_tooltip("<b>ID</b>: PER Q5 <br>
+                 <b>Pregunta</b>: Con el total del ingreso familiar, usted diría que...? <br>
+                  <b>Escala</b>: 1=Les alcanza bien y pueden ahorrar; 2=Les alcanza justo, sin grandes dificultades; 3=No les alcanza y tienen dificultades; 4=No les alcanza y tienen grandes dificultades; 5=NS/NC")
+            
+            ),
             downloadButton(
               "download_migration_map", 
               "", 
               icon = icon("download"), 
               class = "btn-sm"
             )
-          )
-        ),
-        leafletOutput("migration_intention_map", height = "450px"),
+        )
+      ),
+        leafletOutput("migration_intention_map", height = "450px")
 
-      )
-    ),
+    )
+  ),
     
     # Content section 2: Activities chart
     layout_columns(
       card(
         card_header(
-          "Actividades realizadas en los últimos 3 meses"
-        ),
+          div(
+            class = "d-flex align-items-center",
+            "Actividades realizadas en los últimos 3 meses",
+            create_tooltip("<b>ID</b>: PER Q16 <br>
+               <b>Pregunta</b>: ¿Qué actividades culturales, recreativas realizó en la ciudad en los últimos tres meses?  <br>
+                <b>Escala</b>: 1=Sí; 2=No")
+          )
+          ),
         plotlyOutput("activities_chart", height = "550px")
       )
     )

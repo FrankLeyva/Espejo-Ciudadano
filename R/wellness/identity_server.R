@@ -20,7 +20,42 @@ identityServer <- function(input, output, session,current_theme = NULL) {
       get_section_theme("bienestar")
     }
   })
+ # Update tooltip content based on selected tab
+ observe({
+  # Get the active tab value - req() ensures it exists before proceeding
+  req(input$neighborhood_tabs)
+  
+  # Now we're sure it's a length 1 vector
+  active_tab <- input$neighborhood_tabs
+  
+  # Define tooltip content based on the active tab
+  tooltip_content <- switch(active_tab,
 
+    "Vínculo con la colonia o fraccionamiento" = "<b>ID</b>: PER Q64.2 <br>
+          <b>Pregunta</b>:	La colona o fraccionamiento en el que vive <br>
+           <b>Escala</b>:  	1=Nada;2=Poco;3=Algo;4=Bastante;5=Mucho;",
+    "Vínculo con los vecinos" = "<b>ID</b>: PER Q64.3 <br>
+          <b>Pregunta</b>:	Los vecinos que tiene <br>
+           <b>Escala</b>:  	1=Nada;2=Poco;3=Algo;4=Bastante;5=Mucho;",
+    "<b>ID</b>: PER Q64.2 <br>
+          <b>Pregunta</b>:	La colona o fraccionamiento en el que vive <br>
+           <b>Escala</b>:  	1=Nada;2=Poco;3=Algo;4=Bastante;5=Mucho;"
+  )
+  
+  # Update the tooltip
+  update_tooltip_content(session, "connection_tooltip", tooltip_content)
+})
+
+# Set initial tooltip for the first tab
+observeEvent(session$clientData$url_protocol, {
+  # This runs once when the session initializes
+  initial_tooltip <- "<b>ID</b>: PER Q64.2 <br>
+          <b>Pregunta</b>:	La colona o fraccionamiento en el que vive <br>
+           <b>Escala</b>:  	1=Nada;2=Poco;3=Algo;4=Bastante;5=Mucho;"
+  
+  # Set the initial tooltip content
+  update_tooltip_content(session, "connection_tooltip", initial_tooltip)
+}, once = TRUE)  # The once=TRUE ensures this only runs once at startup
   output$monuments_bar <- renderPlotly({
     req(survey_data())
     

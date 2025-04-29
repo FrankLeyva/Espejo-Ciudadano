@@ -29,13 +29,30 @@ communityUI <- function() {
     
     # Organization participation
     card(
-      card_header("Participación en organizaciones"),
+      
+      card_header(
+        div(
+            class = "d-flex align-items-center",
+            "Participación en organizaciones",
+            create_tooltip("<b>ID</b>: PAR Q132.1 - 132.11 <br>
+              <b>Pregunta</b>: Ver gráfica para lista de organizaciones <br>
+               <b>Escala</b>: 	1=Sí; 2=No")
+         )
+          ),
       plotlyOutput("organizations_plot", height = "450px")
     ),
     
     # Problem-solving activities
     card(
-      card_header("Actividades para resolver problemas comunitarios"),
+      card_header(
+        div(
+            class = "d-flex align-items-center",
+            "Actividades para resolver problemas comunitarios",
+            create_tooltip("<b>ID</b>: PAR Q136.1 - Q136.14 <br>
+              <b>Pregunta</b>: Ver gráfica para lista de actividades <br>
+               <b>Escala</b>: 1=Sí; 2=No")
+         )
+        ),
       plotlyOutput("activities_plot", height = "500px")
     )
   )

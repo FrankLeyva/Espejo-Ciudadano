@@ -53,7 +53,11 @@ color: var(--movilidad-color) !important;
       card_header(
         div(
           class = "d-flex justify-content-between align-items-center",
+          div(
+            class = "d-flex align-items-center",
           "Satisfacción con el Servicio de Transporte Público",
+          create_dynamic_tooltip("trans_satisfaction_tooltip")
+          ),
           downloadButton(
             "download_transport_map", 
             "", 
@@ -81,8 +85,11 @@ color: var(--movilidad-color) !important;
 
       card(
         card_header(
+          div(
+            class = "d-flex align-items-center",
             "Aspectos con los que no están satisfechos:",
-          
+            create_dynamic_tooltip("trans_dissatisfaction_tooltip")
+          )
         ),
         div(class = "movilidad-pills",
         navset_pill(

@@ -151,3 +151,118 @@ $(document).ready(function() {
   };
   
 });
+
+
+// Add to custom.js or create a new file called tooltip.js
+$(document).ready(function() {
+  // Initialize all tooltips
+  $('[data-bs-toggle="tooltip"]').tooltip();
+  
+  // Custom handler for dynamic tooltip updates
+  Shiny.addCustomMessageHandler('update-tooltip', function(message) {
+    eval(message.script);
+  });
+  
+  // Re-initialize tooltips when tabs change
+  $(document).on('shiny:inputchanged', function(event) {
+    if (event.name.includes('_tabs') || event.name.includes('selected_')) {
+      // Allow a small delay for the DOM to update
+      setTimeout(function() {
+        $('[data-bs-toggle="tooltip"]').tooltip('dispose');
+        $('[data-bs-toggle="tooltip"]').tooltip();
+      }, 100);
+    }
+  });
+});
+
+// Add CSS for the tooltips
+const tooltipStyles = document.createElement('style');
+tooltipStyles.textContent = `
+  .tooltip-inner {
+    max-width: 300px;
+    padding: 8px 12px;
+    background-color: rgba(0, 0, 0, 0.85);
+    font-size: 14px;
+    text-align: left;
+    border-radius: 4px;
+  }
+  
+  .info-tooltip {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  
+  .info-tooltip:hover {
+    opacity: 1;
+  }
+  
+  /* Section-specific tooltip colors */
+  .section-bienestar .info-tooltip {
+    color: var(--bienestar-color);
+  }
+  
+  .section-infraestructura .info-tooltip {
+    color: var(--infraestructura-color);
+  }
+  
+  .section-movilidad .info-tooltip {
+    color: var(--movilidad-color);
+  }
+  
+  .section-gobierno .info-tooltip {
+    color: var(--gobierno-color);
+  }
+  
+  .section-participacion .info-tooltip {
+    color: var(--participacion-color);
+  }
+  
+  .section-extras .info-tooltip {
+    color: var(--extras-color);
+  }
+`;
+document.head.appendChild(tooltipStyles);
+
+// Add to www/tooltip.js or create this file if it doesn't exist
+
+$(document).ready(function() {
+  // Initialize all tooltips
+  $('[data-bs-toggle="tooltip"]').tooltip();
+  
+  // Custom handler for dynamic tooltip updates
+  Shiny.addCustomMessageHandler('update-tooltip', function(message) {
+    eval(message.script);
+  });
+  
+  // Re-initialize tooltips when tabs change or inputs change
+  $(document).on('shiny:inputchanged', function(event) {
+    if (event.name.includes('_tabs') || event.name.includes('selected_')) {
+      // Allow a small delay for the DOM to update
+      setTimeout(function() {
+        $('[data-bs-toggle="tooltip"]').tooltip('dispose');
+        $('[data-bs-toggle="tooltip"]').tooltip();
+      }, 100);
+    }
+  });
+
+  // Special handling for value boxes, which might be loaded dynamically
+  $(document).on('shiny:value', function(event) {
+    // Allow a small delay for the DOM to fully update
+    setTimeout(function() {
+      // Reinitialize tooltips for any new elements
+      $('[data-bs-toggle="tooltip"]').tooltip('dispose');
+      $('[data-bs-toggle="tooltip"]').tooltip();
+    }, 200);
+  });
+  
+  // Handle value box hover effect for tooltips
+  $(document).on('mouseenter', '.value-box-tooltip', function() {
+    $(this).css('transform', 'translateY(-3px)');
+    $(this).css('box-shadow', '0 8px 15px rgba(0,0,0,0.15)');
+  });
+  
+  $(document).on('mouseleave', '.value-box-tooltip', function() {
+    $(this).css('transform', 'translateY(0)');
+    $(this).css('box-shadow', '0 2px 10px rgba(0,0,0,0.1)');
+  });
+});

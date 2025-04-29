@@ -265,3 +265,177 @@ generate_download_file <- function(survey_id, format = "csv", file) {
     return(FALSE)
   })
 }
+
+# Update these functions in your global.R file
+
+# Create a dynamic tooltip that updates based on input (with duplicate prevention)
+create_dynamic_tooltip <- function(id, css_class = "info-tooltip") {
+  tags$span(
+    class = paste(css_class, "tooltip-element"),  # Added tooltip-element class for easier selection
+    id = id,
+    style = "margin-left: 6px; cursor: help;",
+    `data-bs-toggle` = "tooltip",
+    `data-bs-placement` = "top",
+    `data-bs-html` = "true",
+    title = "Cargando información...",
+    bsicons::bs_icon("question-circle-fill", size = "1em")
+  )
+}
+
+# Create a static tooltip (with duplicate prevention)
+create_tooltip <- function(tooltip_text, placement = "top", css_class = "info-tooltip") {
+  tags$span(
+    class = paste(css_class, "tooltip-element"),  # Added tooltip-element class for easier selection
+    style = "margin-left: 6px; cursor: help;",
+    `data-bs-toggle` = "tooltip",
+    `data-bs-placement` = placement,
+    `data-bs-html` = "true",
+    title = tooltip_text,
+    bsicons::bs_icon("question-circle-fill", size = "1em")
+  )
+}
+
+# Updated tooltip update function to properly cleanup existing instances
+update_tooltip_content <- function(session, tooltip_id, new_content) {
+  # Send an improved jQuery command that properly disposes old tooltips
+  session$sendCustomMessage("simple-tooltip-update", 
+                           list(id = tooltip_id, content = new_content))
+}
+
+# Improved tooltip initialization with duplicate prevention
+init_tooltips <- function() {
+  tags$script(HTML("
+    $(document).ready(function() {
+      // Clean up function to make sure we don't have duplicate tooltips
+      function initializeTooltips() {
+        // First make sure all existing tooltips are disposed
+        $('.tooltip-element').each(function() {
+          try {
+            // Try to dispose any existing tooltip
+            var tooltipInstance = bootstrap.Tooltip.getInstance(this);
+            if (tooltipInstance) {
+              tooltipInstance.dispose();
+            }
+          } catch (e) {
+            console.log('Error disposing tooltip:', e);
+          }
+        });
+        
+        // Initialize tooltips with a small delay to ensure dispose is complete
+        setTimeout(function() {
+          $('.tooltip-element').tooltip({
+            html: true,
+            container: 'body'  // This helps prevent tooltip positioning issues
+          });
+        }, 50);
+      }
+      
+      // Initialize tooltips on page load
+      initializeTooltips();
+      
+      // Simple direct update handler with improved cleanup
+      Shiny.addCustomMessageHandler('simple-tooltip-update', function(message) {
+        // Get the element by ID
+        var tooltipEl = $('#' + message.id);
+        
+        if(tooltipEl.length) {
+          try {
+            // Try to dispose old tooltip
+            var tooltipInstance = bootstrap.Tooltip.getInstance(tooltipEl[0]);
+            if (tooltipInstance) {
+              tooltipInstance.dispose();
+            }
+          } catch (e) {
+            console.log('Error disposing old tooltip:', e);
+          }
+          
+          // Update the title attribute
+          tooltipEl.attr('title', message.content);
+          
+          // Re-initialize with a small delay
+          setTimeout(function() {
+            tooltipEl.tooltip({
+              html: true,
+              container: 'body'
+            });
+          }, 50);
+          
+          console.log('Updated tooltip: ' + message.id);
+        } else {
+          console.error('Tooltip element not found: ' + message.id);
+        }
+      });
+      
+      // Re-initialize tooltips after tab changes
+      $(document).on('shown.bs.tab', function() {
+        initializeTooltips();
+      });
+      
+      // Re-initialize tooltips when Shiny updates UI elements
+      $(document).on('shiny:value', function() {
+        initializeTooltips();
+      });
+    });
+  "))
+}
+
+value_box_with_title_tooltip <- function(title, value, showcase, theme, tooltip_text, force_icon_color = NULL) {
+  # Extract background color from theme to determine icon color
+  bg_color <- NULL
+  if (!is.null(theme) && !is.null(theme$bg)) {
+    bg_color <- theme$bg
+  }
+  
+  # Use forced color if provided, otherwise determine automatically
+  icon_color <- if (!is.null(force_icon_color)) {
+    force_icon_color
+  } else {
+    # Default to white for dark backgrounds
+    icon_color <- "rgba(255, 255, 255, 0.8)" 
+    
+    # Convert hex to RGB and check brightness if we have a background color
+    if (!is.null(bg_color) && substr(bg_color, 1, 1) == "#") {
+      # Simple brightness calculation
+      # Convert hex to RGB
+      r <- strtoi(substr(bg_color, 2, 3), 16)
+      g <- strtoi(substr(bg_color, 4, 5), 16)
+      b <- strtoi(substr(bg_color, 6, 7), 16)
+      
+      # Calculate brightness (simplified formula)
+      brightness <- (r * 299 + g * 587 + b * 114) / 1000
+      
+      # If background is light, use dark icon
+      if (brightness > 128) {
+        icon_color <- "rgba(0, 0, 0, 0.7)"
+      }
+    }
+    
+    icon_color
+  }
+  
+  # Create an icon with appropriate styling
+  tooltip_icon <- tags$span(
+    class = "info-tooltip-icon",
+    style = paste0("margin-left: 6px; cursor: help; color: ", icon_color, ";"),
+    title = tooltip_text,
+    `data-bs-toggle` = "tooltip",
+    `data-bs-placement` = "top",
+    `data-bs-html` = "true",
+    bsicons::bs_icon("question-circle-fill", size = "0.8em")
+  )
+  
+  # Build a title with tooltip icon
+  title_with_tooltip <- div(
+    class = "d-flex align-items-center",
+    title,
+    tooltip_icon
+  )
+  
+  # Create the value box with enhanced title
+  value_box(
+    title = title_with_tooltip,
+    value = value,
+    showcase = showcase,
+    theme = theme
+  )
+}

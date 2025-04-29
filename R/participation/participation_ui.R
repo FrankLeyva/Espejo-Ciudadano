@@ -60,11 +60,14 @@ participationUI <- function() {
     # Active Social Movement Support (Callout Box)
     layout_columns(
       col_widths = 12,
-      value_box(
+      value_box_with_title_tooltip(
         title = "Apoyo activo a movimientos sociales en 2024",
         value = textOutput("social_movement_support"),
         showcase = bsicons::bs_icon("megaphone-fill"),
-        theme = value_box_theme(bg = "#F57C00", fg = "white")
+        theme = value_box_theme(bg = "#F57C00", fg = "white"),
+        tooltip_text = "<b>ID</b>: PAR Q134 <br>
+          <b>Pregunta</b>: Durante el año:¿Apoyó activamente a algún movimiento social?  <br>
+           <b>Escala</b>: 1=Sí; 2=No"
       )
     ),
     
@@ -73,7 +76,13 @@ participationUI <- function() {
       card_header(
         div(
           class = "d-flex justify-content-between align-items-center",
+          div(
+            class = "d-flex align-items-center",
           "Importancia del voto por distrito",
+          create_tooltip("<b>ID</b>: PAR Q137 <br>
+            <b>Pregunta</b>: Para usted, votar es... <br>
+             <b>Escala</b>: 1=Importante; 2=Poco importante; 3=Nada importante")
+			 ),
           downloadButton(
             "download_voting_map", 
             "", 
@@ -85,7 +94,15 @@ participationUI <- function() {
     
     # Political Interest Pie Chart
     card(
-      card_header("Interés en participar en política municipal"),
+      card_header(
+        div(
+            class = "d-flex align-items-center",
+            "Interés en participar en política municipal",
+            create_tooltip("<b>ID</b>: PAR 130 <br>
+              <b>Pregunta</b>: Que tanto le interesa participar en la policita del municipio, interviniendo en decisiones o realizando acciones de interes publico en beneficio de la ciudad? <br>
+               <b>Escala</b>: 1=NADA; 2=POCO; 3=REGULAR; 4=ALGO; 5=MUCHO")
+         )
+          ),
             plotlyOutput("interest_pie", height = "400px")
     )
   )

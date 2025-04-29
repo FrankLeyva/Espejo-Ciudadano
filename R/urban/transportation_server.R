@@ -20,6 +20,73 @@ transportationServer <- function(input, output, session,current_theme = NULL) {
     }
   })
   
+  observe({
+    req(input$transport_tabs)
+    
+    active_tab <- input$transport_tabs
+    
+    tooltip_content <- switch(active_tab,
+
+      "Camión/Rutera" = "<b>ID</b>: PER Q75 <br>
+            <b>Pregunta</b>:	En una escala del 1 al 10, que tan satisfecho está con la calidad del servicio del camión/rutera? <br>
+             <b>Escala</b>:  1-10",
+      "Juárez Bus" = "<b>ID</b>: PER Q78 <br>
+            <b>Pregunta</b>:	En una escala del 1 al 10, que tan satisfecho está con la calidad del servicio del BravoBus/EcoBus/ViveBus/Juarez Bus)?<br>
+             <b>Escala</b>:  1-10",
+"<b>ID</b>: PER Q75 <br>
+            <b>Pregunta</b>:	En una escala del 1 al 10, que tan satisfecho está con la calidad del servicio del camión/rutera? <br>
+             <b>Escala</b>:  1-10"
+    )
+    
+    update_tooltip_content(session, "trans_satisfaction_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PER Q75 <br>
+            <b>Pregunta</b>:	En una escala del 1 al 10, que tan satisfecho está con la calidad del servicio del camión/rutera? <br>
+             <b>Escala</b>:  1-10"
+    
+    update_tooltip_content(session, "trans_satisfaction_tooltip", initial_tooltip)
+  }, once = TRUE)
+
+
+
+
+
+
+  observe({
+    req(input$service_issues_tabs)
+    
+    active_tab <- input$service_issues_tabs
+    
+    tooltip_content <- switch(active_tab,
+
+      "Camión/Rutera" = "<b>ID</b>: PER Q76.1: Q76.6 <br>
+            <b>Pregunta</b>:		Tiempo de espera de los camiones / Estado de la unidad / Estado de la parada de camión	/ Trato de los choferes	 / 	Conducción de la unidad por parte del chofer / Tarifa <br>
+             <b>Escala</b>:  1=Sí; 2=No",
+      "Juárez Bus" = "<b>ID</b>: PER PER Q79.1: Q79.6 <br>
+            <b>Pregunta</b>:		Tiempo de espera de los camiones / Estado de la unidad / Estado de la parada de camión	/ Trato de los choferes	 / 	Conducción de la unidad por parte del chofer / Tarifa <br>
+             <b>Escala</b>:  1=Sí; 2=No",
+"<b>ID</b>: PER Q76.1: Q76.6 <br>
+            <b>Pregunta</b>:		Tiempo de espera de los camiones / Estado de la unidad / Estado de la parada de camión	/ Trato de los choferes	 / 	Conducción de la unidad por parte del chofer / Tarifa <br>
+             <b>Escala</b>:  1=Sí; 2=No"
+    )
+    
+    update_tooltip_content(session, "trans_dissatisfaction_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PER Q76.1: Q76.6 <br>
+            <b>Pregunta</b>:		Tiempo de espera de los camiones / Estado de la unidad / Estado de la parada de camión	/ Trato de los choferes	 / 	Conducción de la unidad por parte del chofer / Tarifa <br>
+             <b>Escala</b>:  1=Sí; 2=No"
+    
+    update_tooltip_content(session, "trans_dissatisfaction_tooltip", initial_tooltip)
+  }, once = TRUE)
+
+
+
+
+
   # Prepare data for bus satisfaction map (Q75)
   output$bus_satisfaction_map <- renderLeaflet({
     req(survey_data(), geo_data())

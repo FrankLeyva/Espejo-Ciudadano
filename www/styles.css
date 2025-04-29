@@ -615,4 +615,44 @@
     }
   }
 
+  .info-tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    margin-left: 6px;
+  }
   
+  .info-tooltip-icon:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  
+  /* Add a subtle glow effect on hover for better visibility */
+  .bslib-value-box .info-tooltip-icon:hover {
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+  }
+  
+  /* Value box title alignment with tooltip */
+  .bslib-value-box .bslib-value-box-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  /* Special case for light-colored backgrounds */
+  .bslib-value-box[style*="background-color: #f8f9fa"] .info-tooltip-icon,
+  .bslib-value-box[style*="background-color: #ffffff"] .info-tooltip-icon,
+  .bslib-value-box[style*="background-color: #e9ecef"] .info-tooltip-icon {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 2px;
+  }
+  
+  /* Ensure tooltip text is readable */
+  .tooltip-inner {
+    line-height: 1.4;
+  }

@@ -18,6 +18,37 @@ mobilityServer <- function(input, output, session,current_theme = NULL) {
     }
   })
   
+  observe({
+    req(input$transport_tabs)
+    
+    active_tab <- input$transport_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Transporte al Trabajo" = "<b>ID</b>: PER Q72.1 - Q72.10 <br>
+            <b>Pregunta</b>:	Caminando / Bicicleta / Autobús escolar	/ Autobús especial (transporte de personal)	 / Taxi / Uber/Didi/InDriver o cualquier otro servicio por aplicación / Motocicleta / Vehículo propio	/ Camion / Juarez Bus <br>
+             <b>Escala</b>:  1=Sí; 2=No	",
+      "Transporte General"= "<b>ID</b>: PER Q73.1 - Q73.10 <br>
+            <b>Pregunta</b>:	Caminando / Bicicleta / Autobús escolar	/ Autobús especial (transporte de personal)	 / Taxi / Uber/Didi/InDriver o cualquier otro servicio por aplicación / Motocicleta / Vehículo propio	/ Camion / Juarez Bus <br>
+             <b>Escala</b>:  1=Sí; 2=No	",
+      "Transporte al Trabajo" = "<b>ID</b>: PER Q72.1 - Q72.10 <br>
+            <b>Pregunta</b>:	Caminando / Bicicleta / Autobús escolar	/ Autobús especial (transporte de personal)	 / Taxi / Uber/Didi/InDriver o cualquier otro servicio por aplicación / Motocicleta / Vehículo propio	/ Camion / Juarez Bus <br>
+             <b>Escala</b>:  1=Sí; 2=No	"
+    )
+    
+    update_tooltip_content(session, "transportation_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PER Q89 <br>
+            <b>Pregunta</b>:	¿Qué tan satisfecho está con LA CALIDAD DEL AIRE? <br>
+             <b>Escala</b>:  1-10"
+    
+    update_tooltip_content(session, "transportation_tooltip", initial_tooltip)
+  }, once = TRUE)  
+
+
+
+
   # Create bicycle distribution pie chart
   output$bicycles_pie <- renderPlotly({
     req(survey_data())

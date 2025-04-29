@@ -24,6 +24,8 @@ color: var(--bienestar-color) !important;
         }
       "))
     ),
+    init_tooltips(),
+
    div(
       class = "mb-4",
       tags$a(
@@ -50,8 +52,12 @@ color: var(--bienestar-color) !important;
       card_header(
         div(
           class = "d-flex justify-content-between align-items-center",
-          "Satisfacción con Aspectos Ambientales",
-          downloadButton(
+          div(
+            class = "d-flex align-items-center",
+            "Satisfacción con Aspectos Ambientales",
+            # Dynamic tooltip that will be updated based on selected tab
+            create_dynamic_tooltip("env_satisfaction_tooltip")
+          ),          downloadButton(
             "download_environment_map", 
             "", 
             icon = icon("download"), 
@@ -86,8 +92,14 @@ color: var(--bienestar-color) !important;
     card(
       card_header(
 
+        div(
+          class = "d-flex align-items-center",
           "Principales Problemas Ambientales por Colonia",
-      ),
+          create_tooltip("<b>ID</b>: PER Q97 <br>
+            <b>Pregunta</b>: 	De las siguientes problemáticas medioambientales, cual cree que sea el mayor problema de la colonia? <br>
+             <b>Escala</b>: 1=Neumaticos/ llantas tiradas; 2=Calles sucias/ Basura en las calles; 3=Parque sucios/descuidados; 4=Falta de recoleccion de residuos; 5=Basureros Clandestinos/ Casas/terrenos;6=Terrenos baldios; 7=Otro")
+       )
+            ),
       plotlyOutput("env_problems_plot", height = "500px")
     ),
 

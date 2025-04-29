@@ -21,6 +21,41 @@ environmentServer <- function(input, output, session,current_theme = NULL) {
     }
   })
   
+  observe({
+    req(input$env_satisfaction_tabs)
+    
+    active_tab <- input$env_satisfaction_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Calidad del Aire" = "<b>ID</b>: PER Q89 <br>
+            <b>Pregunta</b>:	¿Qué tan satisfecho está con LA CALIDAD DEL AIRE? <br>
+             <b>Escala</b>:  1-10",
+      "Arbolado Urbano" = "<b>ID</b>: PER Q90 <br>
+            <b>Pregunta</b>:	¿Qué tan satisfecho está con LA CANTIDAD DE ÁRBOLES EN LA CIUDAD? <br>
+             <b>Escala</b>:  1-10",
+      "Limpieza de Calles" = "<b>ID</b>: PER Q91 <br>
+            <b>Pregunta</b>:	¿Qué tan satisfecho está con LA LIMPIEZA EN LAS CALLES (basura en las calles)? <br>
+             <b>Escala</b>:  1-10",
+      "Calidad del Agua" = "<b>ID</b>: PER Q92 <br>
+            <b>Pregunta</b>:	¿Qué tan satisfecho está con LA CALIDAD DEL AGUA? (CONSIDERAR SI ESTÁ SUCIA, CONTAMINADA O TIENE MAL SABOR) <br>
+             <b>Escala</b>:  1-10",
+      "<b>ID</b>: PER Q89 <br>
+            <b>Pregunta</b>:	¿Qué tan satisfecho está con LA CALIDAD DEL AIRE? <br>
+             <b>Escala</b>:  1-10"
+    )
+    
+    update_tooltip_content(session, "env_satisfaction_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PER Q89 <br>
+            <b>Pregunta</b>:	¿Qué tan satisfecho está con LA CALIDAD DEL AIRE? <br>
+             <b>Escala</b>:  1-10"
+    
+    update_tooltip_content(session, "env_satisfaction_tooltip", initial_tooltip)
+  }, once = TRUE)  
+
+
   # Air quality map
   output$air_quality_map <- renderLeaflet({
     req(survey_data(), geo_data())

@@ -1,3 +1,4 @@
+
 /* ==============================
    VARIABLE DEFINITIONS
    ============================== */
@@ -16,7 +17,7 @@
     /* Section-specific colors */
     --bienestar-color: #1E88E5;
     --movilidad-color: #43A047;
-    --gobierno-color: #423629;
+    --gobierno-color: #984334;
     --participacion-color: #F57C00;
     --infraestructura-color: #8E24AA;
     --extras-color: #2d2d2d;
@@ -246,7 +247,7 @@
     color: var(--gobierno-color);
   }
   .nav-card-gobierno:hover {
-    background-color: rgba(140, 96, 39, 0.05);
+    background-color: rgba(152, 67, 52, 0.05);
     border-top: 3px solid var(--gobierno-color);
   }
   
@@ -465,7 +466,7 @@
   }
   
   .section-gobierno .card-header {
-    background-color: rgba(140, 96, 39, 0.05);
+    background-color: rgba(152, 67, 52, 0.05);
     border-bottom: 4px solid var(--gobierno-color);
   }
   

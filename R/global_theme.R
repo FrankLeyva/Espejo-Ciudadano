@@ -70,13 +70,13 @@ theme_config <- list(
       )
     ),
     gobierno = list(
-      primary = "#423629",
-      secondary = "#8A8178",
+      primary = "#984334",
+      secondary = "#BA7568",
       accent = "#FB8C00",
       palettes = list(
-        sequential = c("#8A8178", "#756C62", "#605A4D", "#4B4238", "#423629", "#372D22", "#2C241C"),
-        categorical = c("#423629", "#605A4D", "#8A8178", "#FB8C00", "#FFA726", "#FFCC80"),
-        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#423629"))(9)
+        sequential = c("#BA7568", "#AD655A", "#A0574C", "#934B3F", "#984334", "#7D362A", "#622A21"),
+        categorical = c("#984334", "#AD655A", "#BA7568", "#FB8C00", "#FFA726", "#FFCC80"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#984334"))(9)
       )
     ),
     participacion = list(

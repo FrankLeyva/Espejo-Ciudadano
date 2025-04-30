@@ -4,6 +4,8 @@ educationUI <- function() {
     class = "section-infraestructura",
 
     useShinyjs(),
+    init_tooltips(),
+
     tags$head(
       tags$style(HTML("
         /* Override pill navigation styling for this page */
@@ -52,7 +54,11 @@ educationUI <- function() {
       card_header(
         div(
           class = "d-flex justify-content-between align-items-center",
+          div(
+            class = "d-flex align-items-center",
           "Hogares con Estudiantes",
+          create_dynamic_tooltip("students_tooltip")
+          ),
           downloadButton(
             "download_students_map", 
             "", 
@@ -105,7 +111,11 @@ educationUI <- function() {
       card_header(
         div(
           class = "d-flex justify-content-between align-items-center",
+          div(
+            class = "d-flex align-items-center",
           "Satisfacción con Niveles Educativos",
+          create_dynamic_tooltip("edu_satis_tooltip")
+          ),
           downloadButton(
             "download_edu_satis_map", 
             "", 

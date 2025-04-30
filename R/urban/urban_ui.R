@@ -3,7 +3,8 @@ urbanUI <- function() {
   page_fluid(
     class = "section-movilidad",
     useShinyjs(),
-   
+    init_tooltips(),
+
     # Header
     layout_columns(
       fill = FALSE,
@@ -69,10 +70,11 @@ urbanUI <- function() {
         title = "Uso de Vehículo Particular (General)",
         value = textOutput("private_vehicle_usage"),
         showcase = bsicons::bs_icon("car-front"),
-        theme = value_box_theme(bg = "#80CBC4", fg = "black"),
+        theme = value_box_theme(bg = "#80CBC4", fg = "white"),
         tooltip_text = "<b>ID</b>: PER Q172.8 <br>
                <b>Pregunta</b>: Vehículo propio  <br>
-                <b>Escala</b>: 1=Sí; 2=No"
+                <b>Escala</b>: 1=Sí; 2=No",
+        force_icon_color = "rgba(255, 255, 255, 0.8)"
       ),
       
       # Bus satisfaction
@@ -91,10 +93,11 @@ urbanUI <- function() {
         title = "Satisfacción con Juárez Bus",
         value = textOutput("juarez_bus_satisfaction"),
         showcase = bsicons::bs_icon("star-half"),
-        theme = value_box_theme(bg = "#80CBC4", fg = "black"),
+        theme = value_box_theme(bg = "#80CBC4", fg = "white"),
         tooltip_text = "<b>ID</b>: PER Q78 <br>
                <b>Pregunta</b>: 	En una escala del 1 al 10, que tan satisfecho está con la calidad del servicio del BravoBus/EcoBus/ViveBus/Juarez Bus)?  <br>
-                <b>Escala</b>: 1-10"
+                <b>Escala</b>: 1-10",
+        force_icon_color = "rgba(255, 255, 255, 0.8)"
       )
     ),
     

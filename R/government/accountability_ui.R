@@ -4,7 +4,8 @@ accountabilityUI <- function() {
     class = "section-gobierno",
 
     useShinyjs(),
-    
+    init_tooltips(),
+
     tags$head(
       tags$style(HTML("
         /* Override pill navigation styling for this page */
@@ -68,9 +69,17 @@ color: var(--gobierno-color) !important;
     
     # Tabset for histograms: Corruption punishment (Q123, Q124, Q125)
     card(
-      card_header("Percepción sobre Castigo a Servidores Públicos Corruptos"),
+      card_header(
+        div(
+          class = "d-flex align-items-center",
+        "Percepción sobre Castigo a Servidores Públicos Corruptos",
+        create_dynamic_tooltip("punishment_tooltip")
+      )
+      ),
       div(class = "gobierno-pills",
       navset_pill(
+        id = "punishment_tabs",
+
         nav_panel(
           title = "Gobierno Municipal",
           plotlyOutput("municipal_punishment_hist", height = "400px")
@@ -89,9 +98,15 @@ color: var(--gobierno-color) !important;
     
     # Tabset for pie charts: Corruption acts (Q15.1, Q16.1, Q17.1)
     card(
-      card_header("Percepción sobre Actos de Corrupción en el Gobierno"),
+      card_header(
+        div(
+          class = "d-flex align-items-center",
+        "Percepción sobre Actos de Corrupción en el Gobierno",
+      create_dynamic_tooltip("corruption_tooltip")
+    )),
       div(class = "gobierno-pills",
       navset_pill(
+        id = "corruption_tabs",
         nav_panel(
           title = "Gobierno Municipal",
           plotlyOutput("municipal_corruption_pie", height = "400px")

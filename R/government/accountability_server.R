@@ -18,6 +18,72 @@ accountabilityServer <- function(input, output, session,current_theme = NULL) {
     }
   })
   
+  observe({
+    req(input$punishment_tabs)
+    
+    active_tab <- input$punishment_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Gobierno Municipal" = "<b>ID</b>: PAR Q123 <br>
+            <b>Pregunta</b>:		¿Usted cree que el GOBIERNO MUNICIPAL sanciona a los servidores públicos que son sorprendidos en actos de corrupción? <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "Gobierno Estatal" = "<b>ID</b>: PAR Q124 <br>
+            <b>Pregunta</b>:	¿Usted cree que el GOBIERNO ESTATAL  sanciona a los servidores públicos que son sorprendidos en actos de corrupción? <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "Gobierno Federal" = "<b>ID</b>: PAR Q124 <br>
+            <b>Pregunta</b>:	¿Usted cree que el GOBIERNO FEDERAL sanciona a los servidores públicos que son sorprendidos en actos de corrupción? <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "<b>ID</b>: PAR Q123 <br>
+            <b>Pregunta</b>:		¿Usted cree que el GOBIERNO MUNICIPAL sanciona a los servidores públicos que son sorprendidos en actos de corrupción? <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC"
+    )
+    
+    update_tooltip_content(session, "punishment_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PAR Q123 <br>
+            <b>Pregunta</b>:		¿Usted cree que el GOBIERNO MUNICIPAL sanciona a los servidores públicos que son sorprendidos en actos de corrupción? <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC"
+    
+    update_tooltip_content(session, "punishment_tooltip", initial_tooltip)
+  }, once = TRUE)  	
+
+
+
+  observe({
+    req(input$corruption_tabs)
+    
+    active_tab <- input$corruption_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Gobierno Municipal" = "<b>ID</b>: PAR Q15.1 <br>
+            <b>Pregunta</b>:		Llevó a cabo actos de corrupcion <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "Gobierno Estatal" = "<b>ID</b>: PAR Q15.2 <br>
+            <b>Pregunta</b>:	Llevó a cabo actos de corrupcion <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "Gobierno Federal" = "<b>ID</b>: PAR Q15.3 <br>
+            <b>Pregunta</b>:	Llevó a cabo actos de corrupcion <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "<b>ID</b>: PAR Q15.1 <br>
+            <b>Pregunta</b>:		Llevó a cabo actos de corrupcion <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC"
+    )
+    
+    update_tooltip_content(session, "corruption_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PAR Q15.1 <br>
+            <b>Pregunta</b>:		Llevó a cabo actos de corrupcion <br>
+             <b>Escala</b>:  1=Nunca (nunca lo hacen); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC"
+    
+    update_tooltip_content(session, "corruption_tooltip", initial_tooltip)
+  }, once = TRUE)  	
+
+
+
   # Callout for Q122 - Justice perception
   output$justice_perception <- renderText({
     req(survey_data())

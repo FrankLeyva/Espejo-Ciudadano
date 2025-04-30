@@ -3,6 +3,8 @@ representationUI <- function() {
     class = "section-gobierno",
 
     useShinyjs(),
+    init_tooltips(),
+
     tags$head(
       tags$style(HTML("
         /* Override pill navigation styling for this page */
@@ -50,39 +52,7 @@ color: var(--gobierno-color) !important;
         "Volver a Gobierno"
       )
     ),
-    layout_columns(
-      col_widths = c(3, 3,3,3), 
-      value_box(
-        title = "Regidores: Representación de Intereses Ciudadanos",
-        value = textOutput("regidores_rating"),
-        showcase = bsicons::bs_icon("person-check-fill"),
-        theme = value_box_theme(bg = "#423629", fg = "white")
-      ),
-      
-      # Value box 2: Síndico representation rating
-      value_box(
-        title = "Síndico(a): Representación de Intereses Ciudadanos",
-        value = textOutput("sindico_rating"),
-        showcase = bsicons::bs_icon("person-check-fill"),
-        theme = value_box_theme(bg = "#8A8178", fg = "black")
-      ),
-      
-      # Value box 3: Local deputy representation rating
-      value_box(
-        title = "Diputado(a) Local: Representación de Intereses Ciudadanos",
-        value = textOutput("diputado_local_rating"),
-        showcase = bsicons::bs_icon("person-check-fill"),
-        theme = value_box_theme(bg = "#423629", fg = "white")
-      ),
-      
-      # Value box 4: Federal deputy representation rating
-      value_box(
-        title = "Diputado(a) Federal: Representación de Intereses Ciudadanos",
-        value = textOutput("diputado_federal_rating"),
-        showcase = bsicons::bs_icon("person-check-fill"),
-        theme = value_box_theme(bg = "#8A8178", fg = "black")
-      )
-    ),
+
     layout_columns(
       fill = FALSE,
       card(
@@ -93,7 +63,53 @@ color: var(--gobierno-color) !important;
         )
       )
     ),
-    
+    layout_columns(
+      col_widths = c(3, 3,3,3), 
+      value_box_with_title_tooltip(
+        title = "Regidores: Representación de Intereses Ciudadanos",
+        value = textOutput("regidores_rating"),
+        showcase = bsicons::bs_icon("person-check-fill"),
+        theme = value_box_theme(bg = "#984334", fg = "white"),
+        tooltip_text = "<b>ID</b>: PAR Q11 <br>
+               <b>Pregunta</b>: 	Que tanto cree que los REGIDORES representan los intereses de los ciudadanos?  <br>
+                <b>Escala</b>: 1-10"
+      ),
+      
+      # Value box 2: Síndico representation rating
+      value_box_with_title_tooltip(
+        title = "Síndico(a): Representación de Intereses Ciudadanos",
+        value = textOutput("sindico_rating"),
+        showcase = bsicons::bs_icon("person-check-fill"),
+        theme = value_box_theme(bg = "#BA7568", fg = "white"),
+        tooltip_text = "<b>ID</b>: PAR Q12 <br>
+               <b>Pregunta</b>: 	¿Que tanto cree que EL/LA SINDICO(A) represente los intereses de los ciudadanos? <br>
+                <b>Escala</b>: 1-10",
+        force_icon_color = "rgba(255, 255, 255, 0.8)"
+      ),
+      
+      # Value box 3: Local deputy representation rating
+      value_box_with_title_tooltip(
+        title = "Diputado(a) Local: Representación de Intereses Ciudadanos",
+        value = textOutput("diputado_local_rating"),
+        showcase = bsicons::bs_icon("person-check-fill"),
+        theme = value_box_theme(bg = "#984334", fg = "white"),
+        tooltip_text = "<b>ID</b>: PAR Q11 <br>
+               <b>Pregunta</b>: 		¿Que tanto cree que EL/LA DIPUTADO(A) LOCAL represente los intereses de los ciudadanos?  <br>
+                <b>Escala</b>: 1-10"
+      ),
+      
+      # Value box 4: Federal deputy representation rating
+      value_box_with_title_tooltip(
+        title = "Diputado(a) Federal: Representación de Intereses Ciudadanos",
+        value = textOutput("diputado_federal_rating"),
+        showcase = bsicons::bs_icon("person-check-fill"),
+        theme = value_box_theme(bg = "#BA7568", fg = "white"),
+        tooltip_text = "<b>ID</b>: PAR Q11 <br>
+               <b>Pregunta</b>: 	¿Que tanto cree que EL/LA DIPUTADO(A) LOCAL represente los intereses de los ciudadanos?  <br>
+                <b>Escala</b>: 1-10",
+        force_icon_color = "rgba(255, 255, 255, 0.8)"
+      )
+    ),
     # Main layout with side-by-side columns
     layout_columns(
       col_widths = c(6, 6),  
@@ -101,7 +117,11 @@ color: var(--gobierno-color) !important;
           card_header(
           div(
             class = "d-flex justify-content-between align-items-center",
+            div(
+              class = "d-flex align-items-center",
           "Conocimiento de Representantes por Distrito",
+          create_dynamic_tooltip("political_knowledge_tooltip")
+          ),
           downloadButton(
             "download_political_knowledge_map", 
             "", 
@@ -112,20 +132,26 @@ color: var(--gobierno-color) !important;
           navset_pill(
             id = "knowledge_tabs",
             tabPanel("Regidor(a)", 
-                     div(class = "chart-container", leafletOutput("regidor_knowledge_map"))),
+                     div(class = "chart-container", leafletOutput("regidor_knowledge_map", height ="auto"))),
             tabPanel("Síndico(a)", 
-                     div(class = "chart-container", leafletOutput("sindico_knowledge_map"))),
+                     div(class = "chart-container", leafletOutput("sindico_knowledge_map", height ="auto"))),
             tabPanel("Diputado(a) Local y/o Estatal", 
-                     div(class = "chart-container", leafletOutput("diputadol_knowledge_map"))),
+                     div(class = "chart-container", leafletOutput("diputadol_knowledge_map", height ="auto"))),
             tabPanel("Diputado(a) Federal", 
-                     div(class = "chart-container", leafletOutput("diputadof_knowledge_map")))
+                     div(class = "chart-container", leafletOutput("diputadof_knowledge_map", height ="auto")))
           )
         )
         ),
         
         # Second tabset: Representative knowledge bar charts
         card(
-          card_header("Conocimiento de Representantes Específicos"),
+          card_header(
+            div(
+              class = "d-flex align-items-center",
+              "Conocimiento de Representantes Específicos",
+              create_dynamic_tooltip("specific_knowledge_tooltip")
+            )
+            ),
           div(class = "gobierno-pills",
           navset_pill(
             id = "specific_knowledge_tabs",

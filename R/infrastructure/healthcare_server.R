@@ -19,7 +19,45 @@ healthcareServer <- function(input, output, session, current_theme = NULL) {
       get_section_theme("infraestructura")
     }
   })
+  observe({
+    req(input$healthcare_tabs)
+    
+    active_tab <- input$healthcare_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Servicios en General" = "<b>ID</b>: PER Q19 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho/a esta en GENERAL con los servicios de salud que recibe del servicio medico que mas USA? <br>
+             <b>Escala</b>:  1-10",
+      "Instalaciones" = "<b>ID</b>: PER Q20 <br>
+            <b>Pregunta</b>:		Que tan satisfecho esta con las INSTALACIONES del servicio medico que usa? <br>
+             <b>Escala</b>:  1-10",
+      "Tiempo de Atención" = "<b>ID</b>: PER Q21 <br>
+            <b>Pregunta</b>:	Que tan satisfecho está con el TIEMPO QUE TARDA EN SER ATENDIDO del servicio medico que usa? <br>
+             <b>Escala</b>:  1-10",
+      "Medicamentos" = "<b>ID</b>: PER Q22 <br>
+            <b>Pregunta</b>:	Que tan satisfecho está con la DISPONIBILIDAD DE MEDICINAS del servicio medico que usa? <br>
+             <b>Escala</b>:  1-10",
+      "Calidad de Servicio" = "<b>ID</b>: PER Q23 <br>
+            <b>Pregunta</b>:	Que tan satisfecho está con la ATENCIÓN RECIBIDA del servicio médico que usa? <br>
+             <b>Escala</b>:  1-10",
+      "Distancia" = "<b>ID</b>: PER Q24 <br>
+              <b>Pregunta</b>: Que tan satisfecho está con la CERCANIA CON LOS CENTROS DE SALUD del servicio médico que usa? <br>
+               <b>Escala</b>:  1-10",
+             "<b>ID</b>: PER Q19 <br>
+                <b>Pregunta</b>:	 Que tan satisfecho/a esta en GENERAL con los servicios de salud que recibe del servicio medico que mas USA? <br>
+                 <b>Escala</b>:  1-10"
+    )
+    
+    update_tooltip_content(session, "healthcare_tooltip", tooltip_content)
+  })
 
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <-  "<b>ID</b>: PER Q19 <br>
+      <b>Pregunta</b>:	 Que tan satisfecho/a esta en GENERAL con los servicios de salud que recibe del servicio medico que mas USA? <br>
+       <b>Escala</b>:  1-10"
+    
+    update_tooltip_content(session, "healthcare_tooltip", initial_tooltip)
+  }, once = TRUE)  	 
   # Mapeo de preguntas de satisfacción con servicios de salud
   health_questions <- c(
     "health_services" = "Q19",   # Servicios de salud en general

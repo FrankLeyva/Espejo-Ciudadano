@@ -5,7 +5,8 @@ economyUI <- function() {
     class = "section-bienestar",
 
     useShinyjs(),
-    
+    init_tooltips(),
+
     
     div(
       class = "mb-4",

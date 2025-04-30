@@ -1030,9 +1030,9 @@ create_utilities_overview <- function(survey_data, custom_theme = NULL) {
   
   utility_labels <- c(
     "Agua", "Drenaje", "CFE", "Recolección de basura",
-    "Alumbrado", "Calles", "Áreas verdes", "Unidades deportivas", 
-    "Bibliotecas", "Centros comunitarios", "Espacios p/discapacidad", 
-    "Parques", "Transporte público"
+    "Alumbrado", "Calles", "Semaforización", "Áreas verdes", 
+    "Unidades deportivas", "Bibliotecas", "Centros comunitarios", 
+    "Banquetas", "Espacios p/discapacidad"
   )
   
   # Calculate mean for each service

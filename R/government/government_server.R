@@ -18,7 +18,41 @@ governmentServer <- function(input, output, session,current_theme = NULL) {
       get_section_theme("gobierno")
     }
   })
-  
+  observe({
+    req(input$env_satisfaction_tabs)
+    
+    active_tab <- input$env_satisfaction_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Regidor/a" = "<b>ID</b>: PAR Q5 <br>
+            <b>Pregunta</b>: ¿Conoce o puede mencionar el nombre de los actuales regidores? <br>
+             <b>Escala</b>:  1=Sí puede mencionar por lo menos 1 regidor; 2=No conoce ningún regidor",
+      "Síndico/a" = "<b>ID</b>: PAR Q7 <br>
+            <b>Pregunta</b>:	¿Puede decirme el nombre del síndico o síndica municipal? <br>
+             <b>Escala</b>:  1=No conoce el nombre del/la síndico(a); 2=Sí conoce",
+      "Diputado/a Local y/o Estatal" = "<b>ID</b>: PAR Q8 <br>
+            <b>Pregunta</b>:		Conoce o puede nombrar algun diputado local/ estatal de su distrito (Computada) <br>
+             <b>Escala</b>:  1 = No conoce el nombre de algun diputado local; 2 = Si conoce algun diputado local",
+      "Diputado/a Federal" = "<b>ID</b>: PAR Q9 <br>
+            <b>Pregunta</b>:		¿Puede decirme el nombre del (la) diputado(a) federal de su distrito? NO AYUDAR CON NOMBRES <br>
+             <b>Escala</b>:  	1=Sí conoce diputado(a) federal; 2=No conoce diputado(a) federal",
+      "<b>ID</b>: PAR Q5 <br>
+            <b>Pregunta</b>: ¿Conoce o puede mencionar el nombre de los actuales regidores? <br>
+             <b>Escala</b>:  1=Sí puede mencionar por lo menos 1 regidor; 2=No conoce ningún regidor"
+    )
+    
+    update_tooltip_content(session, "knowledge_pub_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PAR Q5 <br>
+            <b>Pregunta</b>: ¿Conoce o puede mencionar el nombre de los actuales regidores? <br>
+             <b>Escala</b>:  1=Sí puede mencionar por lo menos 1 regidor; 2=No conoce ningún regidor"
+    
+    update_tooltip_content(session, "knowledge_pub_tooltip", initial_tooltip)
+  }, once = TRUE)  	  
+
+
   # Card 1: Knowledge of Officials Plots
   output$officials_knowledge_regidor_plot <- renderPlotly({
     req(participation_data())

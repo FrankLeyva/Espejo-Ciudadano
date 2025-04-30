@@ -4,7 +4,8 @@ healthcareUI <- function() {
     class = "section-infraestructura",
 
     useShinyjs(),
-      
+    init_tooltips(),
+
     tags$head(
       tags$style(HTML("
         /* Override pill navigation styling for this page */
@@ -54,7 +55,11 @@ color: var(--infraestructura-color) !important;
       card_header(
       div(
         class = "d-flex justify-content-between align-items-center",
+        div(
+          class = "d-flex align-items-center",
       "Satisfacción con los Servicios de Salud",
+      create_dynamic_tooltip("healthcare_tooltip")
+          ),
       downloadButton(
         "download_healthcare_map", 
         "", 
@@ -138,7 +143,13 @@ color: var(--infraestructura-color) !important;
     card(
       class = "provider-card",
       card_header(
-"Proveedores de Servicios de Salud"
+        div(
+          class = "d-flex align-items-center",
+"Proveedores de Servicios de Salud",
+create_tooltip("<b>ID</b>: PER Q17.1 -17.8  <br>
+  <b>Pregunta</b>: Ver grafica para los proveedores de servicios de salud <br>
+   <b>Escala</b>: 1=Sí; 2=No ")
+)
       ),
       plotlyOutput('healthcare_providers_chart')
     )

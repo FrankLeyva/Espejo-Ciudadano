@@ -19,6 +19,73 @@ educationServer <- function(input, output, session, current_theme = NULL) {
     }
   })
 
+  observe({
+    req(input$students_tabs)
+    
+    active_tab <- input$students_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "General" = "<b>ID</b>: PER Q6 <br>
+            <b>Pregunta</b>:	En su familia, hay por lo menos 1 o más estudiantes de cualquier nivel educativo? <br>
+             <b>Escala</b>:  1=Sí; 2=No",
+      "Educación Básica" = "<b>ID</b>: PER Q7 <br>
+            <b>Pregunta</b>:		En una escala del 1 al 10, que tan satisfecho esta con la educacion que recibe? EDUCACIÓN BASICA: PRIMARIA Y SECUNDARIA <br>
+             <b>Escala</b>:  Conteo ",
+      "Educación Media Superior" = "<b>ID</b>: PER Q10 <br>
+            <b>Pregunta</b>:		En una escala del 1 al 10, Que tan satisfecho esta con la educacion que recibe? EDUCACION MEDIA <br>
+             <b>Escala</b>:  Conteo",
+      "Educación Superior" = "<b>ID</b>: PER Q13 <br>
+            <b>Pregunta</b>:		En una escala del 1 al 10, Qué tan satisfecho esta con la educacion que recibe? EDUCACION SUPERIOR <br>
+             <b>Escala</b>:  Conteo ",
+      "<b>ID</b>: PER Q6 <br>
+            <b>Pregunta</b>:	En su familia, hay por lo menos 1 o más estudiantes de cualquier nivel educativo? <br>
+             <b>Escala</b>:  1=Sí; 2=No"
+    )
+    
+    update_tooltip_content(session, "students_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PER Q6 <br>
+            <b>Pregunta</b>:	En su familia, hay por lo menos 1 o más estudiantes de cualquier nivel educativo? <br>
+             <b>Escala</b>:  1=Sí; 2=No"
+    update_tooltip_content(session, "students_tooltip", initial_tooltip)
+  }, once = TRUE)
+
+  observe({
+    req(input$education_tabs)
+    
+    active_tab <- input$education_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Comparativa" = "<b>ID</b>: PER Q7 Q8 Q9 <br>
+            <b>Pregunta</b>:	Satisfacción en los tres niveles educativos <br>
+             <b>Escala</b>:  1-10",
+      "Educación Básica" = "<b>ID</b>: PER Q7 <br>
+            <b>Pregunta</b>:		En una escala del 1 al 10, que tan satisfecho esta con la educacion que recibe? EDUCACIÓN BASICA: PRIMARIA Y SECUNDARIA <br>
+             <b>Escala</b>:  1-10",
+      "Educación Media Superior" = "<b>ID</b>: PER Q10 <br>
+            <b>Pregunta</b>:		En una escala del 1 al 10, Que tan satisfecho esta con la educacion que recibe? EDUCACION MEDIA <br>
+             <b>Escala</b>:  1-10",
+      "Educación Superior" = "<b>ID</b>: PER Q13 <br>
+            <b>Pregunta</b>:		En una escala del 1 al 10, Qué tan satisfecho esta con la educacion que recibe? EDUCACION SUPERIOR <br>
+             <b>Escala</b>:  1-10",
+       "<b>ID</b>: PER Q7 <br>
+            <b>Pregunta</b>:		En una escala del 1 al 10, que tan satisfecho esta con la educacion que recibe? EDUCACIÓN BASICA: PRIMARIA Y SECUNDARIA <br>
+             <b>Escala</b>:  1-10"
+    )
+    
+    update_tooltip_content(session, "edu_satis_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PER Q7 <br>
+            <b>Pregunta</b>:		En una escala del 1 al 10, que tan satisfecho esta con la educacion que recibe? EDUCACIÓN BASICA: PRIMARIA Y SECUNDARIA <br>
+             <b>Escala</b>:  1-10"
+    update_tooltip_content(session, "edu_satis_tooltip", initial_tooltip)
+  }, once = TRUE)
+
+
   # Datos sobre hogares con estudiantes (Q6)
   student_data <- reactive({
     req(survey_data())

@@ -4,7 +4,8 @@ participationUI <- function() {
     class = "section-participacion",
 
     useShinyjs(),
-      
+    init_tooltips(),
+
     # Header
     layout_columns(
       fill = FALSE,

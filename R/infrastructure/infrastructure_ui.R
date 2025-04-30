@@ -2,6 +2,7 @@ infrastructureUI <- function() {
   page_fluid(
     class = "section-infrastructure",
     useShinyjs(),
+    init_tooltips(),
 
 
     # Header
@@ -96,7 +97,13 @@ infrastructureUI <- function() {
         card_header(
           div(
             class = "d-flex justify-content-between align-items-center",
+            div(
+              class = "d-flex align-items-center",
             "Educación: Hogares con estudiantes por distrito",
+            create_tooltip("<b>ID</b>: PER Q6 <br>
+              <b>Pregunta</b>: En su familia, hay por lo menos 1 o más estudiantes de cualquier nivel educativo?v <br>
+               <b>Escala</b>: 1=Sí; 2=No")
+         ),
             downloadButton(
               "download_gen_students_map", 
               "", 
@@ -111,7 +118,13 @@ infrastructureUI <- function() {
       # Healthcare Plot
       card(
         card_header(
+          div(
+            class = "d-flex align-items-center",
           "Salud: Satisfacción con servicios de salud"),
+          create_tooltip("<b>ID</b>: PER Q19 <br>
+            <b>Pregunta</b>: En una escala del 1 al 10, Que tan satisfecho/a esta en GENERAL con los servicios de salud que recibe del servicio medico que mas USA? <br>
+             <b>Escala</b>: 1-10")
+			 ),
         plotlyOutput("healthcare_plot", height = "400px")
       )
     ),
@@ -122,7 +135,15 @@ infrastructureUI <- function() {
       
       # Utilities Plot
       card(
-        card_header("Servicios Públicos: Satisfacción por servicio"),
+        card_header(
+          div(
+            class = "d-flex align-items-center",
+            "Servicios Públicos: Satisfacción por servicio",
+            create_tooltip("<b>ID</b>: PER Q29 - Q56 <br>
+              <b>Pregunta</b>: Satisfacción con los servicios en la gráfica <br>
+               <b>Escala</b>: 1-10")
+         )
+          ),
         plotlyOutput("utilities_plot", height = "500px")
       ),
       
@@ -131,7 +152,13 @@ infrastructureUI <- function() {
         card_header(        
           div(
           class = "d-flex justify-content-between align-items-center",
+          div(
+            class = "d-flex align-items-center",
           "Vivienda: Satisfacción por distrito",
+          create_tooltip("<b>ID</b>: PER Q25 <br>
+            <b>Pregunta</b>: En una escala del 1 al 10, Que tan satisfecho esta con LA CASA EN LA QUE VIVE? <br>
+             <b>Escala</b>: 1-10")
+			 ),
         
         downloadButton(
           "download_housing_map", 

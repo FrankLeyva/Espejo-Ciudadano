@@ -4,7 +4,8 @@ publicServicesUI <- function() {
     class = "section-infraestructura",
 
     useShinyjs(),
-      
+    init_tooltips(),
+
     div(
       class = "mb-4",
       tags$a(
@@ -45,13 +46,13 @@ publicServicesUI <- function() {
               "Recolección de Basura" = "Q40",
               "Alumbrado Público" = "Q45",
               "Calles y Pavimentación" = "Q51",
-              "Áreas verdes y Espacios públicos" = "Q55",
-              "Unidades deportivas" = "Q56",
-              "Bibliotecas" = "Q58",
-              "Centros comunitarios" = "Q59",
-              "Espacios para personas con discapacidad" = "Q60",
-              "Parques" = "Q61",
-              "Transporte público" = "Q62"
+              "Semaforización" = "Q55",
+              "Áreas verdes y Espacios públicos" = "Q56",
+              "Unidades deportivas" = "Q58",
+              "Bibliotecas" = "Q59",
+              "Centros comunitarios" = "Q60",
+              "Banquetas" = "Q61",
+              "Espacios para personas con discapacidad" = "Q62"
             ),
             selected = "Q29"
           )
@@ -64,7 +65,11 @@ publicServicesUI <- function() {
         card_header(
           div(
             class = "d-flex justify-content-between align-items-center",
-            textOutput("service_title"),  # Título dinámico
+            div(
+              class = "d-flex align-items-center",
+            textOutput("service_title"), 
+            create_dynamic_tooltip("utilities_tooltip")
+          ),
             downloadButton(
               "download_service_map", 
               "", 
@@ -78,7 +83,7 @@ publicServicesUI <- function() {
       
     ),
     conditionalPanel(
-      condition = "input.selected_service == 'Q55'", # Show when "Áreas verdes y Espacios públicos" is selected
+      condition = "input.selected_service == 'Q56'", # Show when "Áreas verdes y Espacios públicos" is selected
       card(
         card_header(
           "Evaluación de áreas verdes y espacios públicos",
@@ -86,29 +91,42 @@ publicServicesUI <- function() {
         ),
         layout_columns(
           col_widths = c(3, 3, 3, 3),
-          value_box(
+          value_box_with_title_tooltip(
             title = "Equipamiento",
             value = textOutput("green_areas_equipment"),
             showcase = bsicons::bs_icon("tools"),
-            theme = value_box_theme(bg = "#2A9D8F", fg = "white")
+            theme = value_box_theme(bg = "#2A9D8F", fg = "white"),
+            tooltip_text = "<b>ID</b>: PER57.1 <br>
+                   <b>Pregunta</b>: Equipamiento  <br>
+                    <b>Escala</b>: 1-10"
           ),
-          value_box(
+          value_box_with_title_tooltip(
             title = "Iluminación",
             value = textOutput("green_areas_lighting"),
             showcase = bsicons::bs_icon("lightbulb-fill"),
-            theme = value_box_theme(bg = "#6969B3", fg = "white")
+            theme = value_box_theme(bg = "#6969B3", fg = "white"),
+            tooltip_text = "<b>ID</b>: PER57.2 <br>
+                   <b>Pregunta</b>: Iluminacion  <br>
+                    <b>Escala</b>: 1-10"
           ),
-          value_box(
+          value_box_with_title_tooltip(
             title = "Cuidado y Mantenimiento",
             value = textOutput("green_areas_maintenance"),
             showcase = bsicons::bs_icon("brush"),
-            theme = value_box_theme(bg = "#F4A261", fg = "white")
+            theme = value_box_theme(bg = "#F4A261", fg = "white"),
+            tooltip_text = "<b>ID</b>: PER57.3 <br>
+                   <b>Pregunta</b>: 	Cuidado (limpieza y mantenimiento)  <br>
+                    <b>Escala</b>: 1-10",
+        force_icon_color = "rgba(255, 255, 255, 0.8)"
           ),
-          value_box(
+          value_box_with_title_tooltip(
             title = "Seguridad",
             value = textOutput("green_areas_security"),
             showcase = bsicons::bs_icon("shield-lock"),
-            theme = value_box_theme(bg = "#E86486", fg = "white")
+            theme = value_box_theme(bg = "#E86486", fg = "white"),
+            tooltip_text = "<b>ID</b>: PER57.4 <br>
+                   <b>Pregunta</b>: Seguridad  <br>
+                    <b>Escala</b>: 1-10"
           )
         )
       )
@@ -160,7 +178,15 @@ publicServicesUI <- function() {
       )
     ),
     card(
-      card_header("Reportes de Servicios Públicos"),
+      card_header(
+        div(
+          class = "d-flex align-items-center",
+        "Reportes de Servicios Públicos",
+        create_tooltip("<b>ID</b>: PER Q32 Q33 Q37 Q38 Q42 Q43 Q48 Q49 Q52 Q53 <br>
+          <b>Pregunta</b>: Durante este año Interpuso algún reporte? El problema fue atendido por la dependencia? <br>
+           <b>Escala</b>: 1=Si;2=No;3=no sabe")
+     )
+    ),
       uiOutput("report_statistics_plot")  # Changed from plotlyOutput to uiOutput
     )
   )

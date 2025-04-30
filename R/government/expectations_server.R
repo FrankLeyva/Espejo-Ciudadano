@@ -18,6 +18,71 @@ expectationsServer <- function(input, output, session,current_theme = NULL) {
       get_section_theme("gobierno")
     }
   })
+
+  observe({
+    req(input$expectations_tabs)
+    
+    active_tab <- input$expectations_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Gobierno Municipal" = "<b>ID</b>: PAR Q19  <br>
+              <b>Pregunta</b>: Como calificaria la expectativa que tiene en este momento del gobierno Municipal ?<br>
+               <b>Escala</b>: 1-10",
+      "Gobierno Estatal" = "<b>ID</b>: PAR Q20  <br>
+              <b>Pregunta</b>: Como calificaria la expectativa que tiene en este momento del gobierno Estatal ?<br>
+               <b>Escala</b>: 1-10",
+      "Gobierno Federal" = "<b>ID</b>: PAR Q21  <br>
+              <b>Pregunta</b>: Como calificaria la expectativa que tiene en este momento del gobierno Federal ?<br>
+               <b>Escala</b>: 1-10",
+      "<b>ID</b>: PAR Q19  <br>
+              <b>Pregunta</b>: Como calificaria la expectativa que tiene en este momento del gobierno Municipal ?<br>
+               <b>Escala</b>: 1-10"
+    )
+    
+    update_tooltip_content(session, "expectations_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PAR Q19  <br>
+              <b>Pregunta</b>: Como calificaria la expectativa que tiene en este momento del gobierno Municipal ?<br>
+               <b>Escala</b>: 1-10"
+    
+    update_tooltip_content(session, "expectations_tooltip", initial_tooltip)
+  }, once = TRUE)  	
+
+
+  observe({
+    req(input$perception_tabs)
+    
+    active_tab <- input$perception_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Toma en cuenta a ciudadanos" = "<b>ID</b>: PAR Q15.2 Q16.2 Q17.2  <br>
+              <b>Pregunta</b>: Tomó en cuenta a los ciudadanos (Municipal/Estatal/Federal) <br>
+               <b>Escala</b>: 1=Nunca (nunca lo hace); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "Cumple compromisos y metas" = "<b>ID</b>: PAR Q15.3 Q16.3 Q17.3  <br>
+              <b>Pregunta</b>: 	Cumplio con sus compromisos y promesas (Municipal/Estatal/Federal) <br>
+               <b>Escala</b>: 1=Nunca (nunca lo hace); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "Aplica la ley de manera imparcial" = "<b>ID</b>: PAR Q15.4 Q16.4 Q17.4  <br>
+              <b>Pregunta</b>: Aplico imparcialmente las leyes (Municipal/Estatal/Federal) <br>
+               <b>Escala</b>: 1=Nunca (nunca lo hace); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC",
+      "<b>ID</b>: PAR Q15.2 Q16.2 Q17.2  <br>
+              <b>Pregunta</b>: Tomó en cuenta a los ciudadanos (Municipal/Estatal/Federal) <br>
+               <b>Escala</b>: 1=Nunca (nunca lo hace); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC"
+    )
+    
+    update_tooltip_content(session, "perception_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PAR Q15.2 Q16.2 Q17.2  <br>
+              <b>Pregunta</b>: Tomó en cuenta a los ciudadanos (Municipal/Estatal/Federal) <br>
+               <b>Escala</b>: 1=Nunca (nunca lo hace); 2=Poco (con poca frecuencia); 3=Algo (con algo de frecuencia); 4=Mucho (con mucha frecuencia); 5=NS/NC"
+    
+    update_tooltip_content(session, "perception_tooltip", initial_tooltip)
+  }, once = TRUE)  	
+
+
   # Municipal Expectations Map (Q18)
   output$municipal_expectations_map <- renderLeaflet({
     req(survey_data(), geo_data())

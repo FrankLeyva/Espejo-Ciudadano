@@ -5,7 +5,8 @@ culturalUI <- function() {
     class = "section-bienestar",
 
     useShinyjs(),
-    
+    init_tooltips(),
+
     # Initialize tooltips
     init_tooltips(),
 

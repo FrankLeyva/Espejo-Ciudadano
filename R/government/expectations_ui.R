@@ -4,6 +4,8 @@ expectationsUI <- function() {
     class = "section-gobierno",
 
     useShinyjs(),
+    init_tooltips(),
+
     tags$head(
       tags$style(HTML("
         /* Override pill navigation styling for this page */
@@ -53,7 +55,11 @@ color: var(--gobierno-color) !important;
       card_header(
         div(
         class = "d-flex justify-content-between align-items-center",
+        div(
+          class = "d-flex align-items-center",
       "Expectativas de los Ciudadanos sobre el Gobierno",
+      create_dynamic_tooltip("expectations_tooltip")
+          ),
       downloadButton(
         "download_expectations_map", 
         "", 
@@ -82,7 +88,12 @@ color: var(--gobierno-color) !important;
     
     # Comparison bar chart
     card(
-      card_header("Comparación de Percepción Ciudadana por Nivel de Gobierno"),
+      card_header(
+        div(
+          class = "d-flex align-items-center",
+        "Comparación de Percepción Ciudadana por Nivel de Gobierno",
+        create_dynamic_tooltip("perception_tooltip")
+      ),),
       div(class = "gobierno-pills",
         navset_pill(
           id = "perception_tabs",

@@ -3,7 +3,8 @@ transportationUI <- function() {
     class = "section-movilidad",
 
     useShinyjs(),
-    
+    init_tooltips(),
+
     tags$head(
       tags$style(HTML("
         /* Override pill navigation styling for this page */

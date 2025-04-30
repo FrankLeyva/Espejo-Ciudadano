@@ -4,6 +4,7 @@ communityUI <- function() {
     class = "section-participacion",
 
     useShinyjs(),
+    init_tooltips(),
 
     div(
       class = "mb-4",

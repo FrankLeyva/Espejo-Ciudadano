@@ -28,6 +28,8 @@ color: var(--bienestar-color) !important;
         }
       "))
     ),
+    init_tooltips(),
+
     div(
       class = "mb-4",
       tags$a(

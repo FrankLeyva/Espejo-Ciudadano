@@ -20,6 +20,40 @@ housingServer <- function(input, output, session, current_theme = NULL) {
     }
   })
 
+  observe({
+    req(input$housing_tabs)
+    
+    active_tab <- input$housing_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Calidad de Materiales" = "<b>ID</b>: PER Q26 <br>
+            <b>Pregunta</b>:	Que tan satisfecho esta con LA CALIDAD DE LOS MATERIALES DE LA VIVIENDA? <br>
+             <b>Escala</b>:  1-10",
+      "Tamaño y Espacios" = "<b>ID</b>: PER Q27 <br>
+            <b>Pregunta</b>:	Qué tan satisfecho está con EL TAMAÑO Y ESPACIOS DE LA VIVIENDA? <br>
+             <b>Escala</b>:  1-10",
+      "Ubicación y Accesibilidad" = "<b>ID</b>: PER Q28 <br>
+            <b>Pregunta</b>:	que tan satisfecho está con LA ACCESIBILIDAD DE LA UBICACIÓN DE SU VIVIENDA? (Cercanía con centros comerciales, trabajo, escuelas, avenidas principales, etc.) <br>
+             <b>Escala</b>:  1-10",
+      "Comparativa" = "<b>ID</b>: PER Q26 - Q28 <br>
+            <b>Pregunta</b>:	Satisfacción en multiples rasgos <br>
+             <b>Escala</b>:  1-10",
+      "<b>ID</b>: PER Q26 <br>
+            <b>Pregunta</b>:	Que tan satisfecho esta con LA CALIDAD DE LOS MATERIALES DE LA VIVIENDA? <br>
+             <b>Escala</b>:  1-10"
+    )
+    
+    update_tooltip_content(session, "housing_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PER Q26 <br>
+            <b>Pregunta</b>:	Que tan satisfecho esta con LA CALIDAD DE LOS MATERIALES DE LA VIVIENDA? <br>
+             <b>Escala</b>:  1-10"
+    
+    update_tooltip_content(session, "housing_tooltip", initial_tooltip)
+  }, once = TRUE)  	 
+
   # Mapeo de preguntas de vivienda
   housing_questions <- c(
     "materials" = "Q26",  # Calidad de materiales

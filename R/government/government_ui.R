@@ -24,6 +24,7 @@ color: var(--gobierno-color) !important;
         }
       "))
     ),
+    init_tooltips(),
 
     # Header
     layout_columns(
@@ -131,7 +132,13 @@ color: var(--gobierno-color) !important;
       
       # Card 1: Knowledge of officials (tabset with pie charts)
       card(
-        card_header("Conocimiento de Funcionarios Públicos"),
+        card_header(
+          div(
+          class = "d-flex align-items-center",
+          "Conocimiento de Funcionarios Públicos",
+          create_dynamic_tooltip("knowledge_pub_tooltip")
+          )
+        ),
         div(class = "gobierno-pills",
         navset_pill(
           tabPanel("Regidor/a", plotlyOutput("officials_knowledge_regidor_plot", height = "400px")),
@@ -144,7 +151,15 @@ color: var(--gobierno-color) !important;
       
       # Card 2: Perception of inequality
       card(
-        card_header("Percepción de la Desigualdad"),
+        card_header(
+          div(
+            class = "d-flex align-items-center",
+          "Percepción de la Desigualdad",
+          create_tooltip("<b>ID</b>: PER Q87 <br>
+            <b>Pregunta</b>: Por distintos motivos, no todas las personas que habitan en Juarez pueden acceder en condiciones de igualdad a los bienes y servicios, ni tienen las mismas oportunidades en la vida. Como describiría la desigualdad que se vive hoy en día? <br>
+             <b>Escala</b>: 1=Muy alta;2=Alta;3=Media;4=Baja;5=Muy baja;6=No sabe/No contestó")
+			 )
+        ),
         plotlyOutput("inequality_perception_plot", height = "400px")
       )
     ),
@@ -155,13 +170,28 @@ color: var(--gobierno-color) !important;
       
       # Card 3: Government expectations
       card(
-        card_header("Expectativas Ciudadanas sobre el Gobierno"),
+        card_header(
+          div(
+            class = "d-flex align-items-center",
+            "Expectativas Ciudadanas sobre el Gobierno",
+            create_tooltip("<b>ID</b>: PAR Q19 Q20 Q21 <br>
+              <b>Pregunta</b>: Como calificaria la expectativa que tiene en este momento del gobierno Municipal  / Estatal / Federal ?<br>
+               <b>Escala</b>: 1-10")
+         )),
         plotlyOutput("government_expectations_plot", height = "500px")
       ),
       
       # Card 4: Important problems
       card(
-        card_header("Problemas Importantes de Ciudad Juárez"),
+        card_header(
+          div(
+            class = "d-flex align-items-center",
+          "Problemas Importantes de Ciudad Juárez",
+          create_tooltip("<b>ID</b>: PER Q81 Q82 <br>
+              <b>Pregunta</b>: Para usted, cuales son los 2 problemas mas importantes de Juarez? <br>
+               <b>Escala</b>: 19 categorías")
+          )
+        ),
         plotlyOutput("important_problems_plot", height = "500px")
       )
     )

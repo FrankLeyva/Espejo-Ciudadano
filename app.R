@@ -188,7 +188,9 @@ ui <- page_navbar(
 ")),
 tags$script(src = "custom.js")
   ),
-  
+
+  init_tooltips(),
+
   # Main overview tab
   nav_panel(
     title = "Inicio",

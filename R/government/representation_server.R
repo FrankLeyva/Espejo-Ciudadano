@@ -18,6 +18,75 @@ representationServer <- function(input, output, session,current_theme = NULL) {
       get_section_theme("gobierno")
     }
   })
+  observe({
+    req(input$knowledge_tabs)
+    
+    active_tab <- input$knowledge_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Regidor/a" = "<b>ID</b>: PAR Q5 <br>
+        <b>Pregunta</b>: ¿Conoce o puede mencionar el nombre de los actuales regidores? <br>
+         <b>Escala</b>:  1=Sí puede mencionar por lo menos 1 regidor; 2=No conoce ningún regidor",
+  "Síndico/a" = "<b>ID</b>: PAR Q7 <br>
+        <b>Pregunta</b>:	¿Puede decirme el nombre del síndico o síndica municipal? <br>
+         <b>Escala</b>:  1=No conoce el nombre del/la síndico(a); 2=Sí conoce",
+  "Diputado/a Local y/o Estatal" = "<b>ID</b>: PAR Q8 <br>
+        <b>Pregunta</b>:		Conoce o puede nombrar algun diputado local/ estatal de su distrito (Computada) <br>
+         <b>Escala</b>:  1 = No conoce el nombre de algun diputado local; 2 = Si conoce algun diputado local",
+  "Diputado/a Federal" = "<b>ID</b>: PAR Q9 <br>
+        <b>Pregunta</b>:		¿Puede decirme el nombre del (la) diputado(a) federal de su distrito? NO AYUDAR CON NOMBRES <br>
+         <b>Escala</b>:  	1=Sí conoce diputado(a) federal; 2=No conoce diputado(a) federal",
+  "<b>ID</b>: PAR Q5 <br>
+        <b>Pregunta</b>: ¿Conoce o puede mencionar el nombre de los actuales regidores? <br>
+         <b>Escala</b>:  1=Sí puede mencionar por lo menos 1 regidor; 2=No conoce ningún regidor"
+    )
+    
+    update_tooltip_content(session, "political_knowledge_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PAR Q5 <br>
+        <b>Pregunta</b>: ¿Conoce o puede mencionar el nombre de los actuales regidores? <br>
+         <b>Escala</b>:  1=Sí puede mencionar por lo menos 1 regidor; 2=No conoce ningún regidor"
+    
+    update_tooltip_content(session, "political_knowledge_tooltip", initial_tooltip)
+  }, once = TRUE) 
+
+
+  observe({
+    req(input$specific_knowledge_tabs)
+    
+    active_tab <- input$specific_knowledge_tabs
+    
+    tooltip_content <- switch(active_tab,
+      "Regidores" = "<b>ID</b>: PAR Q6.1 - Q6.20 <br>
+        <b>Pregunta</b>: Nombres de los regidores en la gráfica <br>
+         <b>Escala</b>:  	0=No seleccionado; 1=Seleccionado",
+  "Diputados Locales" = "<b>ID</b>: PAR Q8.1 - Q8.10 <br>
+        <b>Pregunta</b>:	Nombres de los diputados locales en la gráfica <br>
+         <b>Escala</b>:  0=No seleccionado; 1=Seleccionado",
+  "Diputados Federales" = "<b>ID</b>: PAR Q10.1 - Q10.4 <br>
+        <b>Pregunta</b>:		Nombres de los diputados federales en la gráfica <br>
+         <b>Escala</b>:  0=No seleccionado; 1=Seleccionado",
+
+  "<b>ID</b>: PAR Q6.1 - Q6.20 <br>
+        <b>Pregunta</b>: Nombres de los regidores en la gráfica <br>
+         <b>Escala</b>:  	0=No seleccionado; 1=Seleccionado"
+    )
+    
+    update_tooltip_content(session, "specific_knowledge_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PAR Q6.1 - Q6.20 <br>
+        <b>Pregunta</b>: Nombres de los regidores en la gráfica <br>
+         <b>Escala</b>:  	0=No seleccionado; 1=Seleccionado"
+    
+    update_tooltip_content(session, "specific_knowledge_tooltip", initial_tooltip)
+  }, once = TRUE) 
+
+
+
   # KNOWLEDGE MAPS
   
   # Helper function to create district maps for knowledge questions

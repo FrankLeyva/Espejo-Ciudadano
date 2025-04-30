@@ -3,6 +3,8 @@ trustUI <- function() {
     class = "section-gobierno",
 
     useShinyjs(),
+    init_tooltips(),
+
     div(
       class = "mb-4",
       tags$a(
@@ -29,7 +31,13 @@ trustUI <- function() {
     # First bar plot: Institutions of popular election
     card(
       card_header(
-          "Instituciones de Elección Popular"
+        div(
+          class = "d-flex align-items-center",
+          "Instituciones de Elección Popular",
+          create_tooltip("<b>ID</b>: PAR Q21.1, PAR Q21.17 - PAR Q21.24 <br>
+            <b>Pregunta</b>: Lista de instituciones de elección popular en la gráfica <br>
+             <b>Escala</b>: 1=Mucha desconfianza; 2=Algo de desconfianza; 3=Algo de confianza; 4=Mucha confianza; 5=NS/NC")
+			 )
         
       ),
       card_body(
@@ -40,7 +48,13 @@ trustUI <- function() {
     # Second bar plot: Public institutions and media
     card(
       card_header(
-"Instituciones Públicas y Medios de Comunicación"
+        div(
+          class = "d-flex align-items-center",
+"Instituciones Públicas y Medios de Comunicación",
+create_tooltip("<b>ID</b>: PAR Q21.2 - PAR Q21.9 <br>
+  <b>Pregunta</b>: Lista de instituciones de públicas y medios de comunicación en la gráfica <br>
+   <b>Escala</b>: 1=Mucha desconfianza; 2=Algo de desconfianza; 3=Algo de confianza; 4=Mucha confianza; 5=NS/NC")
+        )
       ),
       card_body(
         plotlyOutput("public_institutions_media_plot", height = "500px")
@@ -50,9 +64,14 @@ trustUI <- function() {
     # Third bar plot: Public safety institutions
     card(
       card_header(
-
-"Instituciones de Seguridad Pública"
-      ),
+        div(
+          class = "d-flex align-items-center",
+"Instituciones de Seguridad Pública",
+create_tooltip("<b>ID</b>: PAR Q21.10 - PAR Q21.16 <br>
+  <b>Pregunta</b>: Lista de instituciones de seguridad pública en la gráfica <br>
+   <b>Escala</b>: 1=Mucha desconfianza; 2=Algo de desconfianza; 3=Algo de confianza; 4=Mucha confianza; 5=NS/NC")
+      )
+    ),
       card_body(
         plotlyOutput("public_safety_institutions_plot", height = "500px")
       )

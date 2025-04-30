@@ -20,6 +20,91 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
     }
   })
   
+
+  observe({
+    req(input$selected_service)
+    service_mapping <- c(
+      "Q29" = "Agua",
+      "Q30" = "Drenaje y Alcantarillado",
+      "Q35" = "Comisión Federal de Electricidad",
+      "Q40" = "Recolección de Basura",
+      "Q45" = "Alumbrado Público",
+      "Q51" = "Calles y Pavimentación",
+      "Q55" = "Semaforización",
+      "Q56" = "Áreas verdes y Espacios públicos",
+      "Q58" = "Unidades deportivas",
+      "Q59" = "Bibliotecas",
+      "Q60" = "Centros Comunitarios",
+      "Q61" = "Banquetas",
+      "Q62" = "Espacios para personas con discapacidad"
+    )
+    active_tab <- service_mapping[input$selected_service]
+    
+    tooltip_content <- switch(active_tab,
+      "Agua" = "<b>ID</b>: PER Q29 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho esta con el SERVICIO DEL AGUA? <br>
+             <b>Escala</b>:  1-10",
+      "Drenaje y Alcantarillado" = "<b>ID</b>: PER Q30 <br>
+            <b>Pregunta</b>:	 que tan satisfecho está con el SERVICIO DE DRENAJE Y ALCANTARILLADO? <br>
+             <b>Escala</b>:  1-10",
+      "Comisión Federal de Electricidad" = "<b>ID</b>: PER Q35 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho esta con el SERVICIO DE Comision Federal de Electricidad (CFE)? <br>
+             <b>Escala</b>:  1-10",
+      "Recolección de Basura" = "<b>ID</b>: PER Q40 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho esta con el SERVICIO DE RECOLECCION DE BASURA? <br>
+             <b>Escala</b>:  1-10",
+      "Alumbrado Público" = "<b>ID</b>: PER Q45 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho se siente con la calidad del servicio de alumbrado público en la CIUDAD? <br>
+             <b>Escala</b>:  1-10",
+      "Calles y Pavimentación" = "<b>ID</b>: PER Q51 <br>
+            <b>Pregunta</b>:	  Que tan satisfecho se siente con la calidad de las calles y la pavimentación? <br>
+             <b>Escala</b>:  1-10",
+      "Semaforización" = "<b>ID</b>: PER Q55 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho esta con LA SEMAFORIZACION y señales viales? <br>
+             <b>Escala</b>:  1-10",
+      "Áreas verdes y Espacios públicos" = "<b>ID</b>: PER Q56 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho está con LA DISPONIBILIDAD DE ÁREAS VERDES Y ESPACIOS PÚBLICOS CERCA DE SU CASA? <br>
+             <b>Escala</b>:  1-10",
+      "Unidades deportivas" = "<b>ID</b>: PER Q58 <br>
+            <b>Pregunta</b>:	  En que estado considera que se encuentran las UNIDADES DEPORTIVAS? <br>
+             <b>Escala</b>:  1-10",
+      "Bibliotecas" = "<b>ID</b>: PER Q59 <br>
+            <b>Pregunta</b>:	 En qué estado considera que se encuentran las BIBLIOTECAS? <br>
+             <b>Escala</b>:  1-10",
+      "Centros comunitarios" = "<b>ID</b>: PER Q60 <br>
+            <b>Pregunta</b>:	  En que estado considera que se encuentran las CENTROS COMUNITARIOS? <br>
+             <b>Escala</b>:  1-10",
+      "Espacios para personas con discapacidad" = "<b>ID</b>: PER Q62 <br>
+            <b>Pregunta</b>:	 En que estado considera que se encuentran los ESPACIOS PARA PERSONAS CON DISCAPACIDAD? <br>
+             <b>Escala</b>:  1-10",
+      "Banquetas" = "<b>ID</b>: PER Q61 <br>
+            <b>Pregunta</b>:	 En qué estado considera que se encuentran las BANQUETAS? <br>
+             <b>Escala</b>:  1-10",
+      "Transporte público" = "<b>ID</b>: PER Q35 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho esta con el SERVICIO DE Comision Federal de Electricidad (CFE)? <br>
+             <b>Escala</b>:  1-10",
+      "<b>ID</b>: PER Q29 <br>
+            <b>Pregunta</b>:	 Que tan satisfecho esta con el SERVICIO DEL AGUA? <br>
+             <b>Escala</b>:  1-10"
+    )
+    
+    update_tooltip_content(session, "utilities_tooltip", tooltip_content)
+  })
+
+  observeEvent(session$clientData$url_protocol, {
+    initial_tooltip <- "<b>ID</b>: PER Q89 <br>
+            <b>Pregunta</b>:	¿Qué tan satisfecho está con LA CALIDAD DEL AIRE? <br>
+             <b>Escala</b>:  1-10"
+    
+    update_tooltip_content(session, "utilities_tooltip", initial_tooltip)
+  }, once = TRUE)  
+
+
+
+
+
+
+
   # Mostrar texto de la pregunta basado en el servicio seleccionado
   output$question_text <- renderText({
     req(survey_data(), input$selected_service)
@@ -126,13 +211,13 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
       "Q40" = "Satisfacción con la recolección de basura",
       "Q45" = "Satisfacción con el alumbrado público",
       "Q51" = "Satisfacción con calles y pavimentación",
-      "Q55" = "Satisfacción con áreas verdes y espacios públicos",
-      "Q56" = "Satisfacción con unidades deportivas",
-      "Q58" = "Satisfacción con bibliotecas",
-      "Q59" = "Satisfacción con centros comunitarios",
-      "Q60" = "Satisfacción con espacios para personas con discapacidad",
-      "Q61" = "Satisfacción con parques",
-      "Q62" = "Satisfacción con transporte público"
+      "Q55" = "Satisfacción con semaforización y señales viales",
+      "Q56" = "Satisfacción con áreas verdes y espacios públicos",
+      "Q58" = "Satisfacción con unidades deportivas",
+      "Q59" = "Satisfacción con bibliotecas",
+      "Q60" = "Satisfacción con centros comunitarios",
+      "Q61" = "Satisfacción con banquetas",
+      "Q62" = "Satisfacción con espacios para personas con discapacidad"
     )
     
     title <- service_titles[input$selected_service]
@@ -180,9 +265,9 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
       
       service_names <- c(
         "Agua", "Drenaje y Alcantarillado", "CFE", "Recolección de Basura",
-        "Alumbrado Público", "Calles y Pavimentación", "Áreas verdes",
-        "Unidades deportivas", "Bibliotecas", "Centros comunitarios",
-        "Espacios para discapacitados", "Parques", "Transporte público"
+        "Alumbrado Público", "Calles y Pavimentación", "Semaforización",
+        "Áreas verdes", "Unidades deportivas", "Bibliotecas",
+        "Centros comunitarios", "Banquetas", "Espacios para personas con discapacidad"
       )
       
       for (i in 1:length(service_questions)) {
@@ -298,13 +383,13 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
         "Q40" = "Recoleccion_Basura",
         "Q45" = "Alumbrado_Publico",
         "Q51" = "Calles_y_Pavimentacion",
-        "Q55" = "Areas_Verdes",
-        "Q56" = "Unidades_Deportivas",
-        "Q58" = "Bibliotecas",
-        "Q59" = "Centros_Comunitarios",
-        "Q60" = "Espacios_Discapacidad",
-        "Q61" = "Parques",
-        "Q62" = "Transporte_Publico"
+        "Q55" = "Semaforizacion",
+        "Q56" = "Areas_Verdes",
+        "Q58" = "Unidades_Deportivas",
+        "Q59" = "Bibliotecas",
+        "Q60" = "Centros_Comunitarios",
+        "Q61" = "Banquetas",
+        "Q62" = "Espacios_Discapacidad"
       )
       
       service_name <- service_mapping[input$selected_service]
@@ -324,13 +409,13 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
         "Q40" = "Satisfacción con la recolección de basura",
         "Q45" = "Satisfacción con el alumbrado público",
         "Q51" = "Satisfacción con calles y pavimentación",
-        "Q55" = "Satisfacción con áreas verdes y espacios públicos",
-        "Q56" = "Satisfacción con unidades deportivas",
-        "Q58" = "Satisfacción con bibliotecas",
-        "Q59" = "Satisfacción con centros comunitarios",
-        "Q60" = "Satisfacción con espacios para personas con discapacidad",
-        "Q61" = "Satisfacción con parques",
-        "Q62" = "Satisfacción con transporte público"
+        "Q55" = "Satisfacción con semaforización y señales viales",
+        "Q56" = "Satisfacción con áreas verdes y espacios públicos",
+        "Q58" = "Satisfacción con unidades deportivas",
+        "Q59" = "Satisfacción con bibliotecas",
+        "Q60" = "Satisfacción con centros comunitarios",
+        "Q61" = "Satisfacción con banquetas",
+        "Q62" = "Satisfacción con espacios para personas con discapacidad"
       )
       
       # Get title for the selected service

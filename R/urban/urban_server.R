@@ -1,83 +1,137 @@
-# urbanServer.R
-urbanServer <- function(input, output, session,current_theme = NULL) {
-   # Get the selected year from userData
-   selectedYear <- session$userData$selectedYear
+# urban_server.R - Updated with Enhanced Data Management
+
+urbanServer <- function(input, output, session, current_theme = NULL) {
+  # Get dependencies from userData
+  selectedYear <- session$userData$selectedYear
+  data_manager <- session$userData$data_manager
+  geo_data <- session$userData$geoData
   
-   survey_data <- session$userData$perSurveyData
-  
-  
-   active_theme <- reactive({
+  active_theme <- reactive({
     if (is.function(current_theme)) {
-      # If current_theme is a reactive function, call it to get the value
       current_theme()
     } else if (!is.null(current_theme)) {
-      # If it's a direct value, use it
       current_theme
     } else {
-      # Default to movilidad theme if nothing provided
       get_section_theme("movilidad")
     }
   })
   
-  
-  # Public transport usage for work (Q72.9 - Binary)
-  output$public_transport_work <- renderText({
-    req(survey_data())
+  # Try to load pre-saved plots first, then create if needed
+  plots <- reactive({
+    req(selectedYear())
     
-    # Extract binary values for public transport usage
-    pt_values <- survey_data()$responses$Q72.9
+    # Try to load saved plots
+    saved_plots <- data_manager$load_saved_plots("urban", selectedYear())
     
-    # Calculate percentage
-    pt_percentage <- 100 * sum(pt_values == "1", na.rm=T) / length(pt_values)
+    if (!is.null(saved_plots)) {
+      return(saved_plots)
+    }
     
-    sprintf("%.1f%%", pt_percentage)
+    # If no saved plots, create them
+    survey_id <- paste0("PER_", selectedYear())
+    
+    # Create plots using data manager
+    plot_list <- list()
+    
+    # Environmental quality plot
+    plot_key <- paste0("env_quality_plot_", survey_id)
+    plot_list$env_quality_plot <- data_manager$get_or_create_plot(
+      plot_key = plot_key,
+      plot_function = function() {
+        survey_data <- data_manager$get_survey_data(survey_id)
+        
+        create_env_quality_plot(
+          survey_data$responses, 
+          custom_theme = active_theme()
+        ) %>% 
+          apply_plotly_theme(custom_theme = active_theme())
+      }
+    )
+    
+    # Save plots for future use
+    data_manager$save_plots(plot_list, "urban", selectedYear())
+    
+    return(plot_list)
   })
   
-  # Private vehicle usage (Q73.8 - Binary)
-  output$private_vehicle_usage <- renderText({
-    req(survey_data())
+  # Value box calculations
+  calculations <- reactive({
+    req(selectedYear())
     
-    # Extract binary values for private vehicle usage
-    veh_values <- survey_data()$responses$Q73.8
+    calc_cache_key <- paste0("urban_calculations_", selectedYear())
+    if (!is.null(data_manager$cache[[calc_cache_key]])) {
+      return(data_manager$cache[[calc_cache_key]])
+    }
     
-    # Calculate percentage
-    veh_percentage <- 100 * sum(veh_values == "1", na.rm=T) / length(veh_values)
+    survey_id <- paste0("PER_", selectedYear())
     
-    sprintf("%.1f%%", veh_percentage)
+    # Get survey data
+    survey_data <- data_manager$get_survey_data(survey_id)
+    
+    calc_list <- list()
+    
+    # Public transport usage for work (Q72.9 - Binary)
+    if (!is.null(survey_data)) {
+      pt_values <- survey_data$responses$Q72.9
+      pt_percentage <- 100 * sum(pt_values == "1", na.rm = TRUE) / length(pt_values)
+      calc_list$public_transport_work <- sprintf("%.1f%%", pt_percentage)
+      
+      # Private vehicle usage (Q73.8 - Binary)
+      veh_values <- survey_data$responses$Q73.8
+      veh_percentage <- 100 * sum(veh_values == "1", na.rm = TRUE) / length(veh_values)
+      calc_list$private_vehicle_usage <- sprintf("%.1f%%", veh_percentage)
+      
+      # Bus satisfaction (Q75 - Interval 1-10)
+      bus_values <- as.numeric(survey_data$responses$Q75)
+      bus_values <- bus_values[!is.na(bus_values)]
+      if (length(bus_values) > 0) {
+        bus_avg <- mean(bus_values)
+        calc_list$bus_satisfaction <- sprintf("%.1f/10", bus_avg)
+      } else {
+        calc_list$bus_satisfaction <- "N/A"
+      }
+      
+      # Juarez Bus satisfaction (Q78 - Interval 1-10)
+      jbus_values <- as.numeric(survey_data$responses$Q78)
+      jbus_values <- jbus_values[!is.na(jbus_values)]
+      if (length(jbus_values) > 0) {
+        jbus_avg <- mean(jbus_values)
+        calc_list$juarez_bus_satisfaction <- sprintf("%.1f/10", jbus_avg)
+      } else {
+        calc_list$juarez_bus_satisfaction <- "N/A"
+      }
+    } else {
+      calc_list$public_transport_work <- "N/A"
+      calc_list$private_vehicle_usage <- "N/A"
+      calc_list$bus_satisfaction <- "N/A"
+      calc_list$juarez_bus_satisfaction <- "N/A"
+    }
+    
+    # Cache calculations
+    data_manager$cache[[calc_cache_key]] <- calc_list
+    
+    return(calc_list)
   })
   
-  # Bus satisfaction (Q75 - Interval 1-10)
-  output$bus_satisfaction <- renderText({
-    req(survey_data())
-    
-    # Extract satisfaction values
-    bus_values <- as.numeric(survey_data()$responses$Q75)
-    bus_values <- bus_values[!is.na(bus_values)]
-    
-    # Calculate average
-    bus_avg <- mean(bus_values)
-    
-    sprintf("%.1f/10", bus_avg)
-  })
-  
-  # Juarez Bus satisfaction (Q78 - Interval 1-10)
-  output$juarez_bus_satisfaction <- renderText({
-    req(survey_data())
-    
-    # Extract satisfaction values
-    jbus_values <- as.numeric(survey_data()$responses$Q78)
-    jbus_values <- jbus_values[!is.na(jbus_values)]
-    
-    # Calculate average
-    jbus_avg <- mean(jbus_values)
-    
-    sprintf("%.1f/10", jbus_avg)
-  })
-  
-  # Environmental quality plot
+  # Render outputs
   output$env_quality_plot <- renderPlotly({
-    req(survey_data())
-    create_env_quality_plot(survey_data()$responses, custom_theme = active_theme())
+    plots()$env_quality_plot
   })
-
+  
+  # Render value box text outputs
+  output$public_transport_work <- renderText({
+    calculations()$public_transport_work
+  })
+  
+  output$private_vehicle_usage <- renderText({
+    calculations()$private_vehicle_usage
+  })
+  
+  output$bus_satisfaction <- renderText({
+    calculations()$bus_satisfaction
+  })
+  
+  output$juarez_bus_satisfaction <- renderText({
+    calculations()$juarez_bus_satisfaction
+  })
 }

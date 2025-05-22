@@ -1,176 +1,153 @@
-# Función del servidor para el Dashboard de Participación
-participationServer <- function(input, output, session,current_theme = NULL) {
+# participation_server.R - Updated with Enhanced Data Management
+
+participationServer <- function(input, output, session, current_theme = NULL) {
+  # Get dependencies from userData
   selectedYear <- session$userData$selectedYear
-  
-  survey_data <- session$userData$parSurveyData
-  
+  data_manager <- session$userData$data_manager
   geo_data <- session$userData$geoData
   
-  # Use the current theme
   active_theme <- reactive({
     if (is.function(current_theme)) {
-      # If current_theme is a reactive function, call it to get the value
       current_theme()
     } else if (!is.null(current_theme)) {
-      # If it's a direct value, use it
       current_theme
     } else {
-      # Default to participacion theme if nothing provided
       get_section_theme("participacion")
     }
   })
   
-  # Social Movement Support Percentage
-  output$social_movement_support <- renderText({
-    req(survey_data())
+  # Try to load pre-saved plots first, then create if needed
+  plots <- reactive({
+    req(selectedYear())
     
-    tryCatch({
-      # Extract Q134 values
-      values <- survey_data()$responses[["Q136"]]
-      values <- values[!is.na(values)]
-      
-      if(length(values) > 0) {
-        # Calculate percentage of "Yes" responses (value = 1)
-        support_count <- sum(values == "1", na.rm=T)
-        support_percent <- 100 * support_count / length(values)
-        
-        # Format for display
-        sprintf("%.1f%% de los encuestados", support_percent)
+    # Try to load saved plots
+    saved_plots <- data_manager$load_saved_plots("participation", selectedYear())
+    
+    if (!is.null(saved_plots)) {
+      return(saved_plots)
+    }
+    
+    # If no saved plots, create them
+    survey_id <- paste0("PAR_", selectedYear())
+    plot_list <- list()
+    
+    plot_key <- paste0("interest_pie_", survey_id)
+plot_list$interest_pie <- data_manager$get_or_create_plot(
+  plot_key = plot_key,
+  plot_function = function() {
+    interest_data <- data_manager$get_processed_data(survey_id, "Q131", "categorical")
+    interest_data <- interest_data[!interest_data$value %in% c("Ns/Nc"), ]
+    
+    # Create pie chart using the standard function
+    create_category_pie(
+      interest_data,
+      max_categories = 5,
+      custom_theme = active_theme(),
+      highlight_max = FALSE,
+      palette = 'sequential'
+    ) %>% apply_plotly_theme(title = '', custom_theme = active_theme())
+  }
+)
+    
+    # Save plots for future use
+    data_manager$save_plots(plot_list, "participation", selectedYear())
+    
+    return(plot_list)
+  })
+  
+  # Maps - create separately since they use geo data
+  maps <- reactive({
+    req(selectedYear(), geo_data())
+    
+    # Try to load cached maps
+    map_cache_key <- paste0("participation_maps_", selectedYear())
+    if (!is.null(data_manager$cache[[map_cache_key]])) {
+      return(data_manager$cache[[map_cache_key]])
+    }
+    
+    survey_id <- paste0("PAR_", selectedYear())
+    map_list <- list()
+    
+    # Voting Importance Map
+    voting_data <- data_manager$get_processed_data(survey_id, "Q139", "interval")
+    map_list$voting_map <- create_interval_district_map(
+      data = voting_data, 
+      geo_data = geo_data(),
+      # Select responses for "Importante" and "Poco importante" (1 and 2)
+      selected_responses = c("1", "2"),
+      highlight_extremes = TRUE,
+      use_gradient = FALSE,
+      color_scale = "Blues",
+      custom_theme = active_theme()
+    )
+    
+    # Cache maps
+    data_manager$cache[[map_cache_key]] <- map_list
+    
+    return(map_list)
+  })
+  
+  # Value box calculations
+  calculations <- reactive({
+    req(selectedYear())
+    
+    calc_cache_key <- paste0("participation_calculations_", selectedYear())
+    if (!is.null(data_manager$cache[[calc_cache_key]])) {
+      return(data_manager$cache[[calc_cache_key]])
+    }
+    
+    survey_id <- paste0("PAR_", selectedYear())
+    
+    # Get processed data
+    social_movement_data <- data_manager$get_processed_data(survey_id, "Q136", "binary")
+    
+    calc_list <- list()
+    
+    # Calculate social movement support percentage
+    if (!is.null(social_movement_data)) {
+      support_count <- sum(social_movement_data$binary_value, na.rm = TRUE)
+      total_count <- nrow(social_movement_data)
+      if (total_count > 0) {
+        support_percent <- 100 * support_count / total_count
+        calc_list$social_movement_support <- sprintf("%.1f%% de los encuestados", support_percent)
       } else {
-        "Datos no disponibles"
+        calc_list$social_movement_support <- "Datos no disponibles"
       }
-    }, error = function(e) {
-      warning(paste("Error calculating social movement support:", e$message))
-      "Error al procesar datos"
-    })
-  })
-  
-  # Voting Importance Map
-  output$voting_map <- renderLeaflet({
-    req(survey_data(), geo_data())
+    } else {
+      calc_list$social_movement_support <- "Datos no disponibles"
+    }
     
-    tryCatch({
-      # Prepare data for Q137
-      voting_data <- prepare_interval_data(
-        data = survey_data()$responses,
-        question_id = "Q139",
-        metadata = survey_data()$metadata
-      )
-      
-      # Create district map
-      create_interval_district_map(
-        data = voting_data, 
-        geo_data = geo_data(),
-        # Select responses for "Importante" and "Poco importante" (1 and 2)
-        selected_responses = c("1", "2"),
-        highlight_extremes = TRUE,
-        use_gradient = F,
-        color_scale = "Blues",
-        custom_theme = active_theme()
-      )
-    }, error = function(e) {
-      warning(paste("Error creating voting map:", e$message))
-      leaflet() %>% 
-        addTiles() %>%
-        addControl("Error al generar el mapa de importancia del voto", position = "topright")
-    })
+    # Cache calculations
+    data_manager$cache[[calc_cache_key]] <- calc_list
+    
+    return(calc_list)
   })
   
-  # Political Interest Pie Chart
+  # Render outputs
   output$interest_pie <- renderPlotly({
-    req(survey_data())
-    
-    tryCatch({
-      # Extract Q130 values
-      interest_values <- survey_data()$responses[["Q131"]]
-      interest_values <- interest_values[!is.na(interest_values)]
-      
-      if(length(interest_values) == 0) {
-        return(plotly_empty() %>% 
-                 layout(title = "No hay datos disponibles sobre interés político"))
-      }
-      
-      # Count responses for each level
-      interest_counts <- table(interest_values)
-      
-      # Create labels for interest levels
-      interest_labels <- c(
-        "1" = "Nada",
-        "2" = "Poco",
-        "3" = "Regular",
-        "4" = "Algo",
-        "5" = "Mucho"
-      )
-      
-      # Create data frame for plotting
-      plot_data <- data.frame(
-        Interest = sapply(names(interest_counts), function(x) interest_labels[x]),
-        Count = as.numeric(interest_counts),
-        stringsAsFactors = FALSE
-      )
-      
-      # Calculate percentages
-      plot_data$Percentage <- round(100 * plot_data$Count / sum(plot_data$Count), 1)
-      
-      # Create color gradient based on interest level
-      colors <- active_theme()$palettes$sequential
-      
-      # Create pie chart
-      plot_ly(
-        labels = ~plot_data$Interest,
-        values = ~plot_data$Count,
-        type = "pie",
-        textinfo = "label+percent",
-        hoverinfo = "text",
-        text = ~paste0(plot_data$Interest, ": ", plot_data$Count, " (", plot_data$Percentage, "%)"),
-        marker = list(
-          colors = colors,
-          line = list(color = '#FFFFFF', width = 1)
-        )
-      ) %>%
-        layout(
-          title = "",
-          showlegend = FALSE,
-          legend = list(
-            orientation = "h",
-            xanchor = "center",
-            x = 0.5,
-            y = -0.1
-          )
-        ) %>% apply_plotly_theme()
-    }, error = function(e) {
-      warning(paste("Error creating interest pie chart:", e$message))
-      return(plotly_empty() %>% 
-               layout(title = "Error al generar gráfico de interés político"))
-    })
+    plots()$interest_pie
   })
-
-
+  
+  output$voting_map <- renderLeaflet({
+    maps()$voting_map
+  })
+  
+  output$social_movement_support <- renderText({
+    calculations()$social_movement_support
+  })
+  
+  # Download handler for voting map
   output$download_voting_map <- downloadHandler(
     filename = function() {
       paste("mapa_voto_", Sys.Date(), ".png", sep = "")
     },
     content = function(file) {
-      # We need to save the map to a temporary file first
       tmp_html <- tempfile(fileext = ".html")
-      voting_data <- prepare_interval_data(
-        data = survey_data()$responses,
-        question_id = "Q139",
-        metadata = survey_data()$metadata
-      )
-      # Get the map
-      map <- create_interval_district_map(
-        data = voting_data, 
-        geo_data = geo_data(),
-        # Select responses for "Importante" and "Poco importante" (1 and 2)
-        selected_responses = c("1", "2"),
-        highlight_extremes = TRUE,
-        use_gradient = F,
-        color_scale = "Blues",
-        custom_theme = active_theme()
-      )
       
-      # Add title and footer to the map directly
+      # Get the map
+      map <- maps()$voting_map
+      
+      # Add title and footer to the map
       map <- map %>%
         addControl(
           html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
@@ -185,17 +162,13 @@ participationServer <- function(input, output, session,current_theme = NULL) {
           position = "bottomright"
         )
       
-      # Save the map to HTML
+      # Save and convert
       htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
       
-      # Use pagedown with Chrome headless
       pagedown::chrome_print(
         input = tmp_html,
         output = file,
-        options = list(
-          printBackground = TRUE,
-          scale = 2.0
-        ),
+        options = list(printBackground = TRUE, scale = 2.0),
         format = "png",
         browser = "/usr/bin/google-chrome",
         extra_args = c("--no-sandbox", "--disable-dev-shm-usage")

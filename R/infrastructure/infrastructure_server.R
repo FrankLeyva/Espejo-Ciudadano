@@ -1,59 +1,145 @@
-infrastructureServer <- function(input, output, session,current_theme = NULL) {
+# infrastructure_server.R - Updated with Enhanced Data Management
+
+infrastructureServer <- function(input, output, session, current_theme = NULL) {
+  # Get dependencies from userData
   selectedYear <- session$userData$selectedYear
-  
-  survey_data <- session$userData$perSurveyData
-  
+  data_manager <- session$userData$data_manager
   geo_data <- session$userData$geoData
   
-  # Use the current theme
   active_theme <- reactive({
     if (is.function(current_theme)) {
-      # If current_theme is a reactive function, call it to get the value
       current_theme()
     } else if (!is.null(current_theme)) {
-      # If it's a direct value, use it
       current_theme
     } else {
-      # Default to infraestructura theme if nothing provided
       get_section_theme("infraestructura")
     }
   })
   
-  # Education Plot
+  # Try to load pre-saved plots first, then create if needed
+  plots <- reactive({
+    req(selectedYear())
+    
+    # Try to load saved plots
+    saved_plots <- data_manager$load_saved_plots("infrastructure", selectedYear())
+    
+    if (!is.null(saved_plots)) {
+      return(saved_plots)
+    }
+    
+    # If no saved plots, create them
+    survey_id <- paste0("PER_", selectedYear())
+    plot_list <- list()
+    
+    # Healthcare Plot
+    plot_key <- paste0("healthcare_overview_", survey_id)
+    plot_list$healthcare_plot <- data_manager$get_or_create_plot(
+      plot_key = plot_key,
+      plot_function = function() {
+        survey_data <- data_manager$get_survey_data(survey_id)
+        create_healthcare_overview(survey_data$responses, active_theme())
+      }
+    )
+    
+    # Utilities Plot
+    plot_key <- paste0("utilities_overview_", survey_id)
+    plot_list$utilities_plot <- data_manager$get_or_create_plot(
+      plot_key = plot_key,
+      plot_function = function() {
+        survey_data <- data_manager$get_survey_data(survey_id)
+        create_utilities_overview(survey_data$responses, active_theme())
+      }
+    )
+    
+    # Save plots for future use
+    data_manager$save_plots(plot_list, "infrastructure", selectedYear())
+    
+    return(plot_list)
+  })
+  
+  # Maps - create separately since they use geo data
+  maps <- reactive({
+    req(selectedYear(), geo_data())
+    
+    # Try to load cached maps
+    map_cache_key <- paste0("infrastructure_maps_", selectedYear())
+    if (!is.null(data_manager$cache[[map_cache_key]])) {
+      return(data_manager$cache[[map_cache_key]])
+    }
+    
+    survey_id <- paste0("PER_", selectedYear())
+    survey_data <- data_manager$get_survey_data(survey_id)
+    map_list <- list()
+    
+    # Education Map
+    map_list$education_map <- create_education_overview(
+      survey_data$responses, 
+      geo_data(), 
+      active_theme()
+    )
+    
+    # Housing Map
+    map_list$housing_map <- create_housing_overview(
+      survey_data$responses, 
+      geo_data(), 
+      active_theme()
+    )
+    
+    # Cache maps
+    data_manager$cache[[map_cache_key]] <- map_list
+    
+    return(map_list)
+  })
+  
+  # Value box calculations if needed
+  calculations <- reactive({
+    req(selectedYear())
+    
+    calc_cache_key <- paste0("infrastructure_calculations_", selectedYear())
+    if (!is.null(data_manager$cache[[calc_cache_key]])) {
+      return(data_manager$cache[[calc_cache_key]])
+    }
+    
+    # Add any calculations for value boxes here
+    calc_list <- list()
+    
+    # Cache calculations
+    data_manager$cache[[calc_cache_key]] <- calc_list
+    
+    return(calc_list)
+  })
+  
+  # Render Education Map
   output$education_plot <- renderLeaflet({
-    req(survey_data())
-    create_education_overview(survey_data()$responses,geo_data(), active_theme())
+    maps()$education_map
   })
   
-  # Healthcare Plot
+  # Render Healthcare Plot
   output$healthcare_plot <- renderPlotly({
-    req(survey_data())
-    create_healthcare_overview(survey_data()$responses, active_theme())
+    plots()$healthcare_plot
   })
   
-  # Utilities Plot
+  # Render Utilities Plot
   output$utilities_plot <- renderPlotly({
-    req(survey_data())
-    create_utilities_overview(survey_data()$responses, active_theme())
+    plots()$utilities_plot
   })
   
-  # Housing Map
+  # Render Housing Map
   output$housing_map <- renderLeaflet({
-    req(survey_data(), geo_data())
-    create_housing_overview(survey_data()$responses, geo_data(), active_theme())
+    maps()$housing_map
   })
-
+  
+  # Education Map Download Handler
   output$download_gen_students_map <- downloadHandler(
     filename = function() {
       paste("mapa_estudiantes_", Sys.Date(), ".png", sep = "")
     },
     content = function(file) {
-      # We need to save the map to a temporary file first
+      # Create a temporary HTML file
       tmp_html <- tempfile(fileext = ".html")
       
-    # Create interval district map
-    map <-    create_education_overview(survey_data()$responses,geo_data(), active_theme())
-
+      # Get the map
+      map <- maps()$education_map
       
       # Add title and footer to the map directly
       map <- map %>%
@@ -92,21 +178,18 @@ infrastructureServer <- function(input, output, session,current_theme = NULL) {
       }
     }
   )
-
-
+  
+  # Housing Map Download Handler
   output$download_housing_map <- downloadHandler(
     filename = function() {
       paste("mapa_viviendas_", Sys.Date(), ".png", sep = "")
     },
     content = function(file) {
-      # We need to save the map to a temporary file first
+      # Create a temporary HTML file
       tmp_html <- tempfile(fileext = ".html")
       
-
-    
-    # Create interval district map
-    map <-    create_housing_overview(survey_data()$responses, geo_data(), active_theme())
-
+      # Get the map
+      map <- maps()$housing_map
       
       # Add title and footer to the map directly
       map <- map %>%
@@ -145,8 +228,4 @@ infrastructureServer <- function(input, output, session,current_theme = NULL) {
       }
     }
   )
-
-
-
-
 }

@@ -6,6 +6,43 @@ representationUI <- function() {
     init_tooltips(),
 
     tags$head(
+      tags$script(HTML("
+    $(document).ready(function() {
+      // Function to resize all leaflet maps
+      function resizeLeafletMaps() {
+        setTimeout(function() {
+          $('.leaflet-container').each(function() {
+            var mapId = $(this).closest('[id]').attr('id');
+            if (mapId && window[mapId] && window[mapId].getMap) {
+              window[mapId].getMap().invalidateSize();
+            }
+          });
+          
+          // Alternative method using HTMLWidgets
+          if (window.HTMLWidgets) {
+            HTMLWidgets.find('.leaflet').forEach(function(widget) {
+              if (widget.getMap) {
+                widget.getMap().invalidateSize();
+              }
+            });
+          }
+        }, 100);
+      }
+      
+      // Trigger resize when tabs change
+      $(document).on('shown.bs.tab', 'a[data-bs-toggle=\"pill\"]', function (e) {
+        resizeLeafletMaps();
+      });
+      
+      // Also trigger on window resize
+      $(window).resize(function() {
+        resizeLeafletMaps();
+      });
+      
+      // Initial resize after page load
+      setTimeout(resizeLeafletMaps, 500);
+    });
+  ")),
       tags$style(HTML("
         /* Override pill navigation styling for this page */
         .gobierno-pills .nav-pills .nav-link:not(.active) {
@@ -38,6 +75,22 @@ color: var(--gobierno-color) !important;
     /* Fix for long labels in horizontal bar charts */
     .ytick text {
       text-anchor: end !important;
+    }
+      /* Ensure map containers have proper dimensions */
+    .leaflet-container {
+      height: 400px !important;
+      width: 100% !important;
+    }
+    
+    /* Make sure tab content is visible */
+    .tab-content > .tab-pane {
+      height: auto !important;
+    }
+    
+    /* Fix for chart containers in tabs */
+    .chart-container {
+      min-height: 400px !important;
+      height: 400px !important;
     }
       "))
     ),
@@ -132,17 +185,18 @@ color: var(--gobierno-color) !important;
           navset_pill(
             id = "knowledge_tabs",
             tabPanel("Regidor(a)", 
-                     div(class = "chart-container", leafletOutput("regidor_knowledge_map", height ="auto"))),
+                     leafletOutput("regidor_knowledge_map", height ="auto")),
             tabPanel("Síndico(a)", 
-                     div(class = "chart-container", leafletOutput("sindico_knowledge_map", height ="auto"))),
+                     leafletOutput("sindico_knowledge_map", height ="auto")),
             tabPanel("Diputado(a) Local y/o Estatal", 
-                     div(class = "chart-container", leafletOutput("diputadol_knowledge_map", height ="auto"))),
+                     leafletOutput("diputadol_knowledge_map", height ="auto")),
             tabPanel("Diputado(a) Federal", 
-                     div(class = "chart-container", leafletOutput("diputadof_knowledge_map", height ="auto")))
+                     leafletOutput("diputadof_knowledge_map", height ="auto"))
           )
         )
         ),
-        
+        # Add this somewhere in your UI for debugging
+
         # Second tabset: Representative knowledge bar charts
         card(
           card_header(
@@ -164,8 +218,9 @@ color: var(--gobierno-color) !important;
           )
         )
         )
-      )
-      
+      ),
+
+
     
   )
 }

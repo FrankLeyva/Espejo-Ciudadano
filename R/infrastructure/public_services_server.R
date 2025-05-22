@@ -1,43 +1,58 @@
-# Función del servidor para el Dashboard de Servicios Públicos
+# public_services_server.R - Updated with Enhanced Data Management
+
 publicServicesServer <- function(input, output, session, current_theme = NULL) {
+  # Get dependencies from userData
   selectedYear <- session$userData$selectedYear
-  
-  survey_data <- session$userData$perSurveyData
-  
+  data_manager <- session$userData$data_manager
   geo_data <- session$userData$geoData
   
-  # Use the current theme
   active_theme <- reactive({
     if (is.function(current_theme)) {
-      # If current_theme is a reactive function, call it to get the value
       current_theme()
     } else if (!is.null(current_theme)) {
-      # If it's a direct value, use it
       current_theme
     } else {
-      # Default to infraestructura theme if nothing provided
       get_section_theme("infraestructura")
     }
   })
   
-
+  # Service mapping for UI elements
+  service_mapping <- c(
+    "Q29" = "Agua",
+    "Q30" = "Drenaje y Alcantarillado",
+    "Q35" = "Comisión Federal de Electricidad",
+    "Q40" = "Recolección de Basura",
+    "Q45" = "Alumbrado Público",
+    "Q51" = "Calles y Pavimentación",
+    "Q55" = "Semaforización",
+    "Q56" = "Áreas verdes y Espacios públicos",
+    "Q58" = "Unidades deportivas",
+    "Q59" = "Bibliotecas",
+    "Q60" = "Centros Comunitarios",
+    "Q61" = "Banquetas",
+    "Q62" = "Espacios para personas con discapacidad"
+  )
+  
+  # Service titles for maps and displays
+  service_titles <- c(
+    "Q29" = "Satisfacción con los servicios de agua",
+    "Q30" = "Satisfacción con los servicios de drenaje y alcantarillado",
+    "Q35" = "Satisfacción con los servicios de CFE",
+    "Q40" = "Satisfacción con la recolección de basura",
+    "Q45" = "Satisfacción con el alumbrado público",
+    "Q51" = "Satisfacción con calles y pavimentación",
+    "Q55" = "Satisfacción con semaforización y señales viales",
+    "Q56" = "Satisfacción con áreas verdes y espacios públicos",
+    "Q58" = "Satisfacción con unidades deportivas",
+    "Q59" = "Satisfacción con bibliotecas",
+    "Q60" = "Satisfacción con centros comunitarios",
+    "Q61" = "Satisfacción con banquetas",
+    "Q62" = "Satisfacción con espacios para personas con discapacidad"
+  )
+  
+  # Update tooltip content based on selected service
   observe({
     req(input$selected_service)
-    service_mapping <- c(
-      "Q29" = "Agua",
-      "Q30" = "Drenaje y Alcantarillado",
-      "Q35" = "Comisión Federal de Electricidad",
-      "Q40" = "Recolección de Basura",
-      "Q45" = "Alumbrado Público",
-      "Q51" = "Calles y Pavimentación",
-      "Q55" = "Semaforización",
-      "Q56" = "Áreas verdes y Espacios públicos",
-      "Q58" = "Unidades deportivas",
-      "Q59" = "Bibliotecas",
-      "Q60" = "Centros Comunitarios",
-      "Q61" = "Banquetas",
-      "Q62" = "Espacios para personas con discapacidad"
-    )
     active_tab <- service_mapping[input$selected_service]
     
     tooltip_content <- switch(active_tab,
@@ -80,9 +95,6 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
       "Banquetas" = "<b>ID</b>: PER Q61 <br>
             <b>Pregunta</b>:	 En qué estado considera que se encuentran las BANQUETAS? <br>
              <b>Escala</b>:  1-10",
-      "Transporte público" = "<b>ID</b>: PER Q35 <br>
-            <b>Pregunta</b>:	 Que tan satisfecho esta con el SERVICIO DE Comision Federal de Electricidad (CFE)? <br>
-             <b>Escala</b>:  1-10",
       "<b>ID</b>: PER Q29 <br>
             <b>Pregunta</b>:	 Que tan satisfecho esta con el SERVICIO DEL AGUA? <br>
              <b>Escala</b>:  1-10"
@@ -90,27 +102,167 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
     
     update_tooltip_content(session, "utilities_tooltip", tooltip_content)
   })
-
+  
+  # Set initial tooltip
   observeEvent(session$clientData$url_protocol, {
     initial_tooltip <- "<b>ID</b>: PER Q89 <br>
             <b>Pregunta</b>:	¿Qué tan satisfecho está con LA CALIDAD DEL AIRE? <br>
              <b>Escala</b>:  1-10"
     
     update_tooltip_content(session, "utilities_tooltip", initial_tooltip)
-  }, once = TRUE)  
-
-
-
-
-
-
-
-  # Mostrar texto de la pregunta basado en el servicio seleccionado
-  output$question_text <- renderText({
-    req(survey_data(), input$selected_service)
+  }, once = TRUE)
+  
+  # Try to load pre-saved maps first, then create if needed
+  maps <- reactive({
+    req(selectedYear(), input$selected_service, geo_data())
     
-    # Obtener metadatos de la pregunta
-    question_meta <- survey_data()$metadata %>%
+    # Try to load cached maps
+    map_cache_key <- paste0("public_services_maps_", selectedYear())
+    
+    # We'll just check if the cache exists, but we'll reload specific maps as needed
+    # since they depend on the selected_service which can change
+    if (!is.null(data_manager$cache[[map_cache_key]]) && 
+        !is.null(data_manager$cache[[map_cache_key]][[input$selected_service]])) {
+      return(data_manager$cache[[map_cache_key]][[input$selected_service]])
+    }
+    
+    # If we don't have a cached map for this service, create it
+    survey_id <- paste0("PER_", selectedYear())
+    
+    # Get processed data for the selected service
+    prepared_data <- data_manager$get_processed_data(
+      survey_id = survey_id,
+      question_id = input$selected_service,
+      data_type = "interval"
+    )
+    
+    # Create the map
+    service_map <- create_interval_district_map(
+      data = prepared_data,
+      geo_data = geo_data(),
+      highlight_extremes = TRUE,
+      use_gradient = FALSE,
+      color_scale = "Blues",
+      custom_theme = active_theme()
+    )
+    
+    # Make sure the cache is initialized
+    if (is.null(data_manager$cache[[map_cache_key]])) {
+      data_manager$cache[[map_cache_key]] <- list()
+    }
+    
+    # Cache this specific map
+    data_manager$cache[[map_cache_key]][[input$selected_service]] <- service_map
+    
+    return(service_map)
+  })
+  
+  # Value box calculations
+  calculations <- reactive({
+    req(selectedYear())
+    
+    calc_cache_key <- paste0("public_services_calculations_", selectedYear())
+    if (!is.null(data_manager$cache[[calc_cache_key]])) {
+      return(data_manager$cache[[calc_cache_key]])
+    }
+    
+    survey_id <- paste0("PER_", selectedYear())
+    survey_data <- data_manager$get_survey_data(survey_id)
+    
+    calc_list <- list()
+    
+    # Water days calculation
+    water_data <- as.numeric(survey_data$responses$Q31)
+    water_data <- water_data[!is.na(water_data)]
+    if (length(water_data) > 0) {
+      calc_list$water_days <- sprintf("%.1f días", mean(water_data, na.rm = TRUE))
+    } else {
+      calc_list$water_days <- "Datos no disponibles"
+    }
+    
+    # Power outages calculation
+    outage_data <- survey_data$responses$Q36
+    outage_data <- outage_data[!is.na(outage_data)]
+    if (length(outage_data) > 0) {
+      outage_mapping <- c(
+        "1" = "Casi todos los días",
+        "2" = "Al menos una vez a la semana",
+        "3" = "Al menos una vez al mes",
+        "4" = "Solo hubo un apagón",
+        "5" = "No hubo apagones"
+      )
+      freq_table <- table(outage_data)
+      most_common <- names(freq_table)[which.max(freq_table)]
+      if (most_common %in% names(outage_mapping)) {
+        calc_list$power_outages <- outage_mapping[most_common]
+      } else {
+        calc_list$power_outages <- "Dato más común"
+      }
+    } else {
+      calc_list$power_outages <- "Datos no disponibles"
+    }
+    
+    # Trash pickup calculation
+    trash_data <- as.numeric(survey_data$responses$Q41)
+    trash_data <- trash_data[!is.na(trash_data)]
+    if (length(trash_data) > 0) {
+      calc_list$trash_pickup <- sprintf("%.1f días", mean(trash_data, na.rm = TRUE))
+    } else {
+      calc_list$trash_pickup <- "Datos no disponibles"
+    }
+    
+    # Green areas ratings
+    # Equipment
+    equipment_values <- as.numeric(survey_data$responses$Q57.1)
+    equipment_values <- equipment_values[!is.na(equipment_values)]
+    if (length(equipment_values) > 0) {
+      calc_list$green_areas_equipment <- sprintf("%.1f / 10", mean(equipment_values, na.rm = TRUE))
+    } else {
+      calc_list$green_areas_equipment <- "No disponible"
+    }
+    
+    # Lighting
+    lighting_values <- as.numeric(survey_data$responses$Q57.2)
+    lighting_values <- lighting_values[!is.na(lighting_values)]
+    if (length(lighting_values) > 0) {
+      calc_list$green_areas_lighting <- sprintf("%.1f / 10", mean(lighting_values, na.rm = TRUE))
+    } else {
+      calc_list$green_areas_lighting <- "No disponible"
+    }
+    
+    # Maintenance
+    maintenance_values <- as.numeric(survey_data$responses$Q57.3)
+    maintenance_values <- maintenance_values[!is.na(maintenance_values)]
+    if (length(maintenance_values) > 0) {
+      calc_list$green_areas_maintenance <- sprintf("%.1f / 10", mean(maintenance_values, na.rm = TRUE))
+    } else {
+      calc_list$green_areas_maintenance <- "No disponible"
+    }
+    
+    # Security
+    security_values <- as.numeric(survey_data$responses$Q57.4)
+    security_values <- security_values[!is.na(security_values)]
+    if (length(security_values) > 0) {
+      calc_list$green_areas_security <- sprintf("%.1f / 10", mean(security_values, na.rm = TRUE))
+    } else {
+      calc_list$green_areas_security <- "No disponible"
+    }
+    
+    # Cache calculations
+    data_manager$cache[[calc_cache_key]] <- calc_list
+    
+    return(calc_list)
+  })
+  
+  # Get survey data from the data manager for displaying question text
+  output$question_text <- renderText({
+    req(input$selected_service)
+    
+    survey_id <- paste0("PER_", selectedYear())
+    survey_data <- data_manager$get_survey_data(survey_id)
+    
+    # Get metadata for the question
+    question_meta <- survey_data$metadata %>%
       filter(variable == input$selected_service) %>%
       first()
     
@@ -121,104 +273,9 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
     }
   })
   
-  # Calcular y mostrar valor para Q31 (días con agua)
-  output$water_days <- renderText({
-    req(survey_data())
-    
-    # Calcular promedio de días con agua
-    water_data <- as.numeric(survey_data()$responses$Q31)
-    water_data <- water_data[!is.na(water_data)]
-    
-    if (length(water_data) > 0) {
-      mean_days <- mean(water_data, na.rm = TRUE)
-      # Formatear a 1 decimal
-      sprintf("%.1f días", mean_days)
-    } else {
-      "Datos no disponibles"
-    }
-  })
-  
-  # Calcular y mostrar valor para Q36 (cortes de luz)
-  output$power_outages <- renderText({
-    req(survey_data())
-    
-    # Obtener valores y eliminar NAs
-    outage_data <- survey_data()$responses$Q36
-    outage_data <- outage_data[!is.na(outage_data)]
-    
-    if (length(outage_data) > 0) {
-      # Crear mapeo de valores a descripciones
-      outage_mapping <- c(
-        "1" = "Casi todos los días",
-        "2" = "Al menos una vez a la semana",
-        "3" = "Al menos una vez al mes",
-        "4" = "Solo hubo un apagón",
-        "5" = "No hubo apagones"
-      )
-      
-      # Encontrar el valor más común (moda)
-      freq_table <- table(outage_data)
-      most_common <- names(freq_table)[which.max(freq_table)]
-      
-      # Devolver la descripción del valor más común
-      if (most_common %in% names(outage_mapping)) {
-        outage_mapping[most_common]
-      } else {
-        "Dato más común"
-      }
-    } else {
-      "Datos no disponibles"
-    }
-  })
-  
-  # Calcular y mostrar valor para Q41 (frecuencia de recolección de basura)
-  output$trash_pickup <- renderText({
-    req(survey_data())
-    
-    # Calcular promedio de días con agua
-    trash_data <- as.numeric(survey_data()$responses$Q41)
-    trash_data <- trash_data[!is.na(trash_data)]
-    
-    if (length(trash_data) > 0) {
-      mean_days <- mean(trash_data, na.rm = TRUE)
-      # Formatear a 1 decimal
-      sprintf("%.1f días", mean_days)
-    } else {
-      "Datos no disponibles"
-    }
-  })
-  
-  # Preparar datos para el mapa 
-  prepared_data <- reactive({
-    req(survey_data(), input$selected_service)
-    
-    # Utilizar la función del módulo de intervalo para preparar los datos
-    prepare_interval_data(
-      data = survey_data()$responses,
-      question_id = input$selected_service,
-      metadata = survey_data()$metadata
-    )
-  })
-  
+  # Output service title
   output$service_title <- renderText({
     req(input$selected_service)
-    
-    # Mismo mapeo que usamos en el renderLeaflet
-    service_titles <- c(
-      "Q29" = "Satisfacción con los servicios de agua",
-      "Q30" = "Satisfacción con los servicios de drenaje y alcantarillado",
-      "Q35" = "Satisfacción con los servicios de CFE",
-      "Q40" = "Satisfacción con la recolección de basura",
-      "Q45" = "Satisfacción con el alumbrado público",
-      "Q51" = "Satisfacción con calles y pavimentación",
-      "Q55" = "Satisfacción con semaforización y señales viales",
-      "Q56" = "Satisfacción con áreas verdes y espacios públicos",
-      "Q58" = "Satisfacción con unidades deportivas",
-      "Q59" = "Satisfacción con bibliotecas",
-      "Q60" = "Satisfacción con centros comunitarios",
-      "Q61" = "Satisfacción con banquetas",
-      "Q62" = "Satisfacción con espacios para personas con discapacidad"
-    )
     
     title <- service_titles[input$selected_service]
     if (is.na(title)) title <- "Evaluación de servicios por distrito"
@@ -226,40 +283,69 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
     return(title)
   })
   
-  # Renderizar mapa usando la función del módulo de intervalo
+  # Render service map
   output$service_map <- renderLeaflet({
-    req(prepared_data(), geo_data(), input$selected_service)
-    
-    # Use the create_interval_district_map function from the interval module
-    create_interval_district_map(
-      data = prepared_data(),
-      geo_data = geo_data(),
-      # You can add these UI inputs if needed:
-      # selected_responses = NULL,  # This would be populated if you have a UI element for selecting specific responses
-      highlight_extremes = TRUE,    # Default to highlighting extreme values
-      use_gradient = FALSE,         # Use gradient coloring for better visualization
-      color_scale = "Blues",        # Use a blue color scale for the gradient
-      custom_theme = active_theme() # Pass the current theme
-    )
+    maps()
   })
   
+  # Render the report statistics
   output$report_statistics_plot <- renderUI({
-    req(survey_data())
+    req(selectedYear())
     
-    # Create the responsive report statistics visualization
-    create_report_statistics(survey_data()$responses)
+    survey_id <- paste0("PER_", selectedYear())
+    survey_data <- data_manager$get_survey_data(survey_id)
+    
+    create_report_statistics(survey_data$responses)
   })
   
-  # Manejador de descarga
+  # Output water days
+  output$water_days <- renderText({
+    calculations()$water_days
+  })
+  
+  # Output power outages
+  output$power_outages <- renderText({
+    calculations()$power_outages
+  })
+  
+  # Output trash pickup
+  output$trash_pickup <- renderText({
+    calculations()$trash_pickup
+  })
+  
+  # Output green areas equipment
+  output$green_areas_equipment <- renderText({
+    calculations()$green_areas_equipment
+  })
+  
+  # Output green areas lighting
+  output$green_areas_lighting <- renderText({
+    calculations()$green_areas_lighting
+  })
+  
+  # Output green areas maintenance
+  output$green_areas_maintenance <- renderText({
+    calculations()$green_areas_maintenance
+  })
+  
+  # Output green areas security
+  output$green_areas_security <- renderText({
+    calculations()$green_areas_security
+  })
+  
+  # Download data handler
   output$download_data <- downloadHandler(
     filename = function() {
       paste("servicios_publicos_datos_", Sys.Date(), ".xlsx", sep = "")
     },
     content = function(file) {
-      # Crear un libro de trabajo
+      # Create a workbook
       wb <- createWorkbook()
       
-      # Añadir una hoja de trabajo para cada servicio
+      survey_id <- paste0("PER_", selectedYear())
+      survey_data <- data_manager$get_survey_data(survey_id)
+      
+      # Add a worksheet for each service
       service_questions <- c("Q29", "Q30", "Q35", "Q40", "Q45", "Q51", "Q55", 
                             "Q56", "Q58", "Q59", "Q60", "Q61", "Q62")
       
@@ -271,112 +357,44 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
       )
       
       for (i in 1:length(service_questions)) {
-        # Crear un dataframe para este servicio
+        # Create a dataframe for this service
         q_id <- service_questions[i]
         service_name <- service_names[i]
         
-        # Extraer datos
+        # Extract data
         service_data <- data.frame(
-          Distrito = survey_data()$responses$DISTRICT,
-          Calificacion = survey_data()$responses[[q_id]]
+          Distrito = survey_data$responses$DISTRICT,
+          Calificacion = survey_data$responses[[q_id]]
         )
         
-        # Añadir al libro de trabajo
+        # Add to workbook
         addWorksheet(wb, service_name)
         writeData(wb, service_name, service_data)
       }
       
-      # Añadir estadísticas resumidas
+      # Add summarized statistics
       addWorksheet(wb, "Resumen")
       summary_data <- data.frame(
         Servicio = service_names,
         Promedio = sapply(service_questions, function(q) {
-          mean(as.numeric(survey_data()$responses[[q]]), na.rm = TRUE)
+          mean(as.numeric(survey_data$responses[[q]]), na.rm = TRUE)
         }),
         Mediana = sapply(service_questions, function(q) {
-          median(as.numeric(survey_data()$responses[[q]]), na.rm = TRUE)
+          median(as.numeric(survey_data$responses[[q]]), na.rm = TRUE)
         })
       )
       writeData(wb, "Resumen", summary_data)
       
-      # Guardar el libro de trabajo
+      # Save the workbook
       saveWorkbook(wb, file, overwrite = TRUE)
     }
   )
   
-  # Calculate average rating for green areas equipment (Q57.1)
-  output$green_areas_equipment <- renderText({
-    req(survey_data())
-    
-    # Get values for Q57.1 (Equipment)
-    equipment_values <- as.numeric(survey_data()$responses$Q57.1)
-    equipment_values <- equipment_values[!is.na(equipment_values)]
-    
-    if (length(equipment_values) > 0) {
-      mean_value <- mean(equipment_values, na.rm = TRUE)
-      # Format to 1 decimal place with scale of 1-10
-      sprintf("%.1f / 10", mean_value)
-    } else {
-      "No disponible"
-    }
-  })
-  
-  # Calculate average rating for green areas lighting (Q57.2)
-  output$green_areas_lighting <- renderText({
-    req(survey_data())
-    
-    # Get values for Q57.2 (Lighting)
-    lighting_values <- as.numeric(survey_data()$responses$Q57.2)
-    lighting_values <- lighting_values[!is.na(lighting_values)]
-    
-    if (length(lighting_values) > 0) {
-      mean_value <- mean(lighting_values, na.rm = TRUE)
-      # Format to 1 decimal place with scale of 1-10
-      sprintf("%.1f / 10", mean_value)
-    } else {
-      "No disponible"
-    }
-  })
-  
-  # Calculate average rating for green areas maintenance (Q57.3)
-  output$green_areas_maintenance <- renderText({
-    req(survey_data())
-    
-    # Get values for Q57.3 (Maintenance)
-    maintenance_values <- as.numeric(survey_data()$responses$Q57.3)
-    maintenance_values <- maintenance_values[!is.na(maintenance_values)]
-    
-    if (length(maintenance_values) > 0) {
-      mean_value <- mean(maintenance_values, na.rm = TRUE)
-      # Format to 1 decimal place with scale of 1-10
-      sprintf("%.1f / 10", mean_value)
-    } else {
-      "No disponible"
-    }
-  })
-  
-  # Calculate average rating for green areas security (Q57.4)
-  output$green_areas_security <- renderText({
-    req(survey_data())
-    
-    # Get values for Q57.4 (Security)
-    security_values <- as.numeric(survey_data()$responses$Q57.4)
-    security_values <- security_values[!is.na(security_values)]
-    
-    if (length(security_values) > 0) {
-      mean_value <- mean(security_values, na.rm = TRUE)
-      # Format to 1 decimal place with scale of 1-10
-      sprintf("%.1f / 10", mean_value)
-    } else {
-      "No disponible"
-    }
-  })
-  
-  # Download handler for the service map
+  # Download service map handler
   output$download_service_map <- downloadHandler(
     filename = function() {
-      # Get service name for filename based on selected service
-      service_mapping <- c(
+      # Get service name for filename
+      service_filename_mapping <- c(
         "Q29" = "Agua",
         "Q30" = "Drenaje_y_Alcantarillado",
         "Q35" = "CFE",
@@ -392,45 +410,21 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
         "Q62" = "Espacios_Discapacidad"
       )
       
-      service_name <- service_mapping[input$selected_service]
+      service_name <- service_filename_mapping[input$selected_service]
       if (is.na(service_name)) service_name <- "Servicio"
       
       paste("mapa_servicio_", service_name, "_", Sys.Date(), ".png", sep = "")
     },
     content = function(file) {
-      # Temporary file for the HTML content
+      # Temporary file for HTML content
       tmp_html <- tempfile(fileext = ".html")
-      
-      # Service titles for the map caption
-      service_titles <- c(
-        "Q29" = "Satisfacción con los servicios de agua",
-        "Q30" = "Satisfacción con los servicios de drenaje y alcantarillado",
-        "Q35" = "Satisfacción con los servicios de CFE",
-        "Q40" = "Satisfacción con la recolección de basura",
-        "Q45" = "Satisfacción con el alumbrado público",
-        "Q51" = "Satisfacción con calles y pavimentación",
-        "Q55" = "Satisfacción con semaforización y señales viales",
-        "Q56" = "Satisfacción con áreas verdes y espacios públicos",
-        "Q58" = "Satisfacción con unidades deportivas",
-        "Q59" = "Satisfacción con bibliotecas",
-        "Q60" = "Satisfacción con centros comunitarios",
-        "Q61" = "Satisfacción con banquetas",
-        "Q62" = "Satisfacción con espacios para personas con discapacidad"
-      )
       
       # Get title for the selected service
       title_text <- service_titles[input$selected_service]
       if (is.na(title_text)) title_text <- "Evaluación de servicios por distrito"
       
-      # Create the map using the same function and data as the displayed map
-      map <- create_interval_district_map(
-        data = prepared_data(),
-        geo_data = geo_data(),
-        highlight_extremes = TRUE,
-        use_gradient = FALSE,
-        color_scale = "Blues",
-        custom_theme = active_theme()
-      )
+      # Get the map
+      map <- maps()
       
       # Add title and footer
       map <- map %>%

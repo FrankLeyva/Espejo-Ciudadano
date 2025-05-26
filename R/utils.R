@@ -439,3 +439,85 @@ value_box_with_title_tooltip <- function(title, value, showcase, theme, tooltip_
     theme = theme
   )
 }
+# Add this to utils.R or create a new file plot_utils.R
+
+#' Update plot title for plotly objects
+#' @param plot_obj A plotly object
+#' @param new_title The new title to set
+#' @param custom_theme Optional theme for styling
+#' @return Updated plotly object
+update_plot_title <- function(plot_obj, new_title, custom_theme = NULL) {
+  if (is.null(plot_obj) || !inherits(plot_obj, "plotly")) {
+    return(plot_obj)
+  }
+  
+  # Use provided theme or default
+  active_theme <- if (!is.null(custom_theme)) custom_theme else theme_config
+  
+  # Update the title
+  plot_obj %>%
+    layout(
+      title = list(
+        text = new_title,
+        font = list(
+          family = active_theme$typography$font_family,
+          size = active_theme$typography$sizes$title,
+          color = active_theme$colors$text
+        )
+      )
+    )
+}
+
+#' Update multiple plots with custom titles
+#' @param plots_list A list of plotly objects
+#' @param title_mapping A named list mapping plot names to new titles
+#' @param custom_theme Optional theme
+#' @return Updated plots list
+update_plot_titles <- function(plots_list, title_mapping, custom_theme = NULL) {
+  if (is.null(plots_list) || !is.list(plots_list)) {
+    return(plots_list)
+  }
+  
+  for (plot_name in names(title_mapping)) {
+    if (plot_name %in% names(plots_list)) {
+      plots_list[[plot_name]] <- update_plot_title(
+        plots_list[[plot_name]], 
+        title_mapping[[plot_name]], 
+        custom_theme
+      )
+    }
+  }
+  
+  return(plots_list)
+}
+
+#' Define title mappings for different sections
+get_title_mappings <- function(section, year) {
+  title_mappings <- list(
+    "cultural" = list(
+      "home_activities_pie" = "Actividades en Casa",
+      "exercise_activities_pie" = "Actividades de Ejercicio", 
+      "nature_activities_pie" = "Actividades al Aire Libre",
+      "cultural_participation_pie" = "Participación Cultural"
+    ),
+    "wellness" = list(
+      "economic_situation_pie" = "Situación Económica",
+      "migration_intention_pie" = "Intención de Migrar"
+    ),
+    "identity" = list(
+      "city_pride_pie" = "Orgullo por la Ciudad",
+      "neighborhood_connection_pie" = "Conexión con el Vecindario"
+    ),
+    "environment" = list(
+      "water_quality_pie" = "Calidad del Agua",
+      "air_quality_pie" = "Calidad del Aire",
+      "noise_levels_pie" = "Niveles de Ruido"
+    )
+    # Add more sections as needed
+  )
+  
+  return(title_mappings[[section]] %||% list())
+}
+
+# Helper operator for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x

@@ -1,4 +1,4 @@
-# environment_server.R - Updated with Enhanced Data Management
+# environment_server.R - Simplified with Data Manager Integration
 
 environmentServer <- function(input, output, session, current_theme = NULL) {
   # Get dependencies from userData
@@ -16,154 +16,22 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
     }
   })
   
-  # Try to load pre-saved plots first, then create if needed
+  # Load pre-saved plots
   plots <- reactive({
     req(selectedYear())
-    
-    # Try to load saved plots
-    saved_plots <- data_manager$load_saved_plots("environment", selectedYear())
-    
-    if (!is.null(saved_plots)) {
-      return(saved_plots)
-    }
-    
-    # If no saved plots, create them
-    survey_id <- paste0("PER_", selectedYear())
-    
-    # Create plots using data manager
-    plot_list <- list()
-    
-    # Environmental problems plot
-    plot_key <- paste0("env_problems_plot_", survey_id)
-    plot_list$env_problems_plot <- data_manager$get_or_create_plot(
-      plot_key = plot_key,
-      plot_function = function() {
-        survey_data <- data_manager$get_survey_data(survey_id)
-        
-        create_env_problems_plot(
-          survey_data$responses,
-          custom_theme = active_theme()
-        ) %>% 
-          apply_plotly_theme(
-            title = "",
-            custom_theme = active_theme()
-          )
-      }
-    )
-    
-    # Save plots for future use
-    data_manager$save_plots(plot_list, "environment", selectedYear())
-    
-    return(plot_list)
+    data_manager$get_plots("environment", selectedYear())
   })
   
-  # Maps - create separately since they use geo data
+  # Load pre-saved maps
   maps <- reactive({
-    req(selectedYear(), geo_data())
-    
-    # Try to load cached maps
-    map_cache_key <- paste0("environment_maps_", selectedYear())
-    if (!is.null(data_manager$cache[[map_cache_key]])) {
-      return(data_manager$cache[[map_cache_key]])
-    }
-    
-    survey_id <- paste0("PER_", selectedYear())
-    map_list <- list()
-    
-    # Air quality map
-    air_quality_data <- data_manager$get_processed_data(survey_id, "Q89", "interval")
-    map_list$air_quality_map <- create_interval_district_map(
-      air_quality_data,
-      geo_data(),
-      use_gradient = FALSE,
-      color_scale = "Greens",
-      custom_theme = active_theme()
-    )
-    
-    # Urban trees map
-    urban_trees_data <- data_manager$get_processed_data(survey_id, "Q90", "interval")
-    map_list$urban_trees_map <- create_interval_district_map(
-      urban_trees_data,
-      geo_data(),
-      use_gradient = FALSE,
-      color_scale = "Greens",
-      custom_theme = active_theme()
-    )
-    
-    # Street cleanliness map
-    street_cleanliness_data <- data_manager$get_processed_data(survey_id, "Q91", "interval")
-    map_list$street_cleanliness_map <- create_interval_district_map(
-      street_cleanliness_data,
-      geo_data(),
-      use_gradient = FALSE,
-      color_scale = "Greens",
-      custom_theme = active_theme()
-    )
-    
-    # Water quality map
-    water_quality_data <- data_manager$get_processed_data(survey_id, "Q92", "interval")
-    map_list$water_quality_map <- create_interval_district_map(
-      water_quality_data,
-      geo_data(),
-      use_gradient = FALSE,
-      color_scale = "Blues",
-      custom_theme = active_theme()
-    )
-    
-    # Cache maps
-    data_manager$cache[[map_cache_key]] <- map_list
-    
-    return(map_list)
+    req(selectedYear())
+    data_manager$get_maps("environment", selectedYear())
   })
   
-  # Value box calculations (if needed)
-  calculations <- reactive({
+  # Load pre-calculated percentages
+  percentages <- reactive({
     req(selectedYear())
-    
-    calc_cache_key <- paste0("environment_calculations_", selectedYear())
-    if (!is.null(data_manager$cache[[calc_cache_key]])) {
-      return(data_manager$cache[[calc_cache_key]])
-    }
-    
-    survey_id <- paste0("PER_", selectedYear())
-    
-    # Get processed data for environmental metrics
-    air_quality_data <- data_manager$get_processed_data(survey_id, "Q89", "interval")
-    urban_trees_data <- data_manager$get_processed_data(survey_id, "Q90", "interval")
-    street_cleanliness_data <- data_manager$get_processed_data(survey_id, "Q91", "interval")
-    water_quality_data <- data_manager$get_processed_data(survey_id, "Q92", "interval")
-    
-    calc_list <- list()
-    
-    # Calculate average satisfaction for each environmental aspect
-    if (!is.null(air_quality_data)) {
-      calc_list$air_quality_avg <- round(mean(air_quality_data$value_num, na.rm = TRUE), 1)
-    } else {
-      calc_list$air_quality_avg <- "N/A"
-    }
-    
-    if (!is.null(urban_trees_data)) {
-      calc_list$urban_trees_avg <- round(mean(urban_trees_data$value_num, na.rm = TRUE), 1)
-    } else {
-      calc_list$urban_trees_avg <- "N/A"
-    }
-    
-    if (!is.null(street_cleanliness_data)) {
-      calc_list$street_cleanliness_avg <- round(mean(street_cleanliness_data$value_num, na.rm = TRUE), 1)
-    } else {
-      calc_list$street_cleanliness_avg <- "N/A"
-    }
-    
-    if (!is.null(water_quality_data)) {
-      calc_list$water_quality_avg <- round(mean(water_quality_data$value_num, na.rm = TRUE), 1)
-    } else {
-      calc_list$water_quality_avg <- "N/A"
-    }
-    
-    # Cache calculations
-    data_manager$cache[[calc_cache_key]] <- calc_list
-    
-    return(calc_list)
+    data_manager$get_percentages("environment", selectedYear())
   })
   
   # Update tooltip content based on selected tab
@@ -202,11 +70,28 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
     update_tooltip_content(session, "env_satisfaction_tooltip", initial_tooltip)
   }, once = TRUE)
   
-  # Render outputs
+  # Render outputs using pre-saved plots
   output$env_problems_plot <- renderPlotly({
     plots()$env_problems_plot
   })
   
+  output$air_quality_pie <- renderPlotly({
+    plots()$air_quality_pie
+  })
+  
+  output$water_quality_pie <- renderPlotly({
+    plots()$water_quality_pie
+  })
+  
+  output$tree_coverage_pie <- renderPlotly({
+    plots()$tree_coverage_pie
+  })
+  
+  output$cleanliness_pie <- renderPlotly({
+    plots()$cleanliness_pie
+  })
+  
+  # Render maps using pre-saved maps
   output$air_quality_map <- renderLeaflet({
     maps()$air_quality_map
   })
@@ -223,7 +108,89 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
     maps()$water_quality_map
   })
   
-  # Download handler for environment maps
+  # Render percentage values for value boxes
+  output$air_quality_pct <- renderText({
+    percentages()$air_quality_pct
+  })
+  
+  output$water_quality_pct <- renderText({
+    percentages()$water_quality_pct
+  })
+  
+  output$tree_coverage_pct <- renderText({
+    percentages()$tree_coverage_pct
+  })
+  
+  output$cleanliness_pct <- renderText({
+    percentages()$cleanliness_pct
+  })
+  
+  # Download handlers using pre-saved PNG files
+  output$download_air_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_medio_ambiente_Aire_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      map_path <- data_manager$get_map_path("mapa_medio_ambiente_Aire", selectedYear())
+      
+      if (file.exists(map_path)) {
+        file.copy(map_path, file)
+      } else {
+        warning(paste("Map file not found:", map_path))
+        file.create(file)
+      }
+    }
+  )
+  
+  output$download_water_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_medio_ambiente_Agua_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      map_path <- data_manager$get_map_path("mapa_medio_ambiente_Agua", selectedYear())
+      
+      if (file.exists(map_path)) {
+        file.copy(map_path, file)
+      } else {
+        warning(paste("Map file not found:", map_path))
+        file.create(file)
+      }
+    }
+  )
+  
+  output$download_tree_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_medio_ambiente_Arbolado_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      map_path <- data_manager$get_map_path("mapa_medio_ambiente_Arbolado", selectedYear())
+      
+      if (file.exists(map_path)) {
+        file.copy(map_path, file)
+      } else {
+        warning(paste("Map file not found:", map_path))
+        file.create(file)
+      }
+    }
+  )
+  
+  output$download_cleanliness_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_medio_ambiente_Limpieza_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      map_path <- data_manager$get_map_path("mapa_medio_ambiente_Limpieza", selectedYear())
+      
+      if (file.exists(map_path)) {
+        file.copy(map_path, file)
+      } else {
+        warning(paste("Map file not found:", map_path))
+        file.create(file)
+      }
+    }
+  )
+  
+  # Combined download handler for environment maps (if you have a single download button that changes based on tabs)
   output$download_environment_map <- downloadHandler(
     filename = function() {
       # Get map type for filename based on active tab
@@ -236,56 +203,27 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
       } else {
         "Agua"
       }
-      paste("mapa_medio_ambiente_", map_type, "_", Sys.Date(), ".png", sep = "")
+      paste("mapa_medio_ambiente_", map_type, "_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
     },
     content = function(file) {
-      tmp_html <- tempfile(fileext = ".html")
-      
-      # Create the appropriate map based on active tab
-      if(input$env_satisfaction_tabs == "Calidad del Aire") {
-        map <- maps()$air_quality_map
-        title_text <- "Satisfacción con la Calidad del Aire"
+      # Get the appropriate PNG file based on active tab
+      map_filename <- if(input$env_satisfaction_tabs == "Calidad del Aire") {
+        "mapa_medio_ambiente_Aire"
       } else if(input$env_satisfaction_tabs == "Arbolado Urbano") {
-        map <- maps()$urban_trees_map
-        title_text <- "Satisfacción con el Arbolado Urbano"
+        "mapa_medio_ambiente_Arbolado"
       } else if(input$env_satisfaction_tabs == "Limpieza de Calles") {
-        map <- maps()$street_cleanliness_map
-        title_text <- "Satisfacción con la Limpieza de Calles"
+        "mapa_medio_ambiente_Limpieza"
       } else {
-        map <- maps()$water_quality_map
-        title_text <- "Satisfacción con la Calidad del Agua"
+        "mapa_medio_ambiente_Agua"
       }
       
-      # Add title and footer
-      map <- map %>%
-        addControl(
-          html = paste("<div style='background-color:white; padding:10px; border-radius:5px; font-weight:bold;'>", 
-                      title_text, 
-                      "</div>"),
-          position = "topright"
-        ) %>%
-        addControl(
-          html = paste("<div style='background-color:white; padding:8px; border-radius:5px; font-size:12px;'>", 
-                      paste("Resultados de la Encuesta de Percepción y Participación Ciudadana y Buen Gobierno", selectedYear()),
-                      "</div>"),
-          position = "bottomright"
-        )
+      map_path <- data_manager$get_map_path(map_filename, selectedYear())
       
-      # Save and convert
-      htmlwidgets::saveWidget(map, tmp_html, selfcontained = TRUE)
-      
-      pagedown::chrome_print(
-        input = tmp_html,
-        output = file,
-        options = list(printBackground = TRUE, scale = 2.0),
-        format = "png",
-        browser = "/usr/bin/google-chrome",
-        extra_args = c("--no-sandbox", "--disable-dev-shm-usage")
-      )
-      
-      # Clean up
-      if (file.exists(tmp_html)) {
-        file.remove(tmp_html)
+      if (file.exists(map_path)) {
+        file.copy(map_path, file)
+      } else {
+        warning(paste("Map file not found:", map_path))
+        file.create(file)
       }
     }
   )

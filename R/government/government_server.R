@@ -1,4 +1,4 @@
-# government_server.R - Updated with Enhanced Data Management
+# government_server.R - Simplified with Data Manager Integration
 
 governmentServer <- function(input, output, session, current_theme = NULL) {
   # Get dependencies from userData
@@ -16,143 +16,22 @@ governmentServer <- function(input, output, session, current_theme = NULL) {
     }
   })
   
-  # Try to load pre-saved plots first, then create if needed
+  # Load pre-saved plots
   plots <- reactive({
     req(selectedYear())
-    
-    # Try to load saved plots
-    saved_plots <- data_manager$load_saved_plots("government", selectedYear())
-    
-    if (!is.null(saved_plots)) {
-      return(saved_plots)
-    }
-    
-    # If no saved plots, create them
-    survey_id_per <- paste0("PER_", selectedYear())
-    survey_id_par <- paste0("PAR_", selectedYear())
-    
-    # Create plots using data manager
-    plot_list <- list()
-    
-    # Knowledge of Officials Plots
-    plot_key <- paste0("officials_knowledge_regidor_", survey_id_par)
-    plot_list$officials_knowledge_regidor <- data_manager$get_or_create_plot(
-      plot_key = plot_key,
-      plot_function = function() {
-        survey_data <- data_manager$get_survey_data(survey_id_par)
-        create_officials_knowledge_pie(survey_data$responses, "Q5", "Regidor/a", active_theme()) %>% 
-          apply_plotly_theme(custom_theme = active_theme())
-      }
-    )
-    
-    plot_key <- paste0("officials_knowledge_sindico_", survey_id_par)
-    plot_list$officials_knowledge_sindico <- data_manager$get_or_create_plot(
-      plot_key = plot_key,
-      plot_function = function() {
-        survey_data <- data_manager$get_survey_data(survey_id_par)
-        create_officials_knowledge_pie(survey_data$responses, "Q7", "Síndico/a", active_theme()) %>% 
-          apply_plotly_theme(custom_theme = active_theme())
-      }
-    )
-    
-    plot_key <- paste0("officials_knowledge_dipupadol_", survey_id_par)
-    plot_list$officials_knowledge_dipupadol <- data_manager$get_or_create_plot(
-      plot_key = plot_key,
-      plot_function = function() {
-        survey_data <- data_manager$get_survey_data(survey_id_par)
-        create_officials_knowledge_pie(survey_data$responses, "Q8", "Diputado/a Local y/o Estatal", active_theme()) %>% 
-          apply_plotly_theme(custom_theme = active_theme())
-      }
-    )
-    
-    plot_key <- paste0("officials_knowledge_diputadof_", survey_id_par)
-    plot_list$officials_knowledge_diputadof <- data_manager$get_or_create_plot(
-      plot_key = plot_key,
-      plot_function = function() {
-        survey_data <- data_manager$get_survey_data(survey_id_par)
-        create_officials_knowledge_pie(survey_data$responses, "Q10", "Diputado/a Federal", active_theme()) %>% 
-          apply_plotly_theme(custom_theme = active_theme())
-      }
-    )
-    
-    # Inequality Perception Plot
-    plot_key <- paste0("inequality_perception_", survey_id_per)
-    plot_list$inequality_perception <- data_manager$get_or_create_plot(
-      plot_key = plot_key,
-      plot_function = function() {
-        survey_data <- data_manager$get_survey_data(survey_id_per)
-        create_inequality_perception_pie(survey_data$responses, active_theme()) %>% 
-          apply_plotly_theme(custom_theme = active_theme())
-      }
-    )
-    
-    # Government Expectations Plot
-    plot_key <- paste0("government_expectations_", survey_id_par)
-    plot_list$government_expectations <- data_manager$get_or_create_plot(
-      plot_key = plot_key,
-      plot_function = function() {
-        survey_data <- data_manager$get_survey_data(survey_id_par)
-        create_government_expectations_plot(survey_data$responses, active_theme()) %>% 
-          apply_plotly_theme(custom_theme = active_theme())
-      }
-    )
-    
-    # Important Problems Plot
-    plot_key <- paste0("important_problems_", survey_id_per)
-    plot_list$important_problems <- data_manager$get_or_create_plot(
-      plot_key = plot_key,
-      plot_function = function() {
-        survey_data <- data_manager$get_survey_data(survey_id_per)
-        create_important_problems_plot(survey_data$responses, active_theme()) %>% 
-          apply_plotly_theme(custom_theme = active_theme())
-      }
-    )
-    
-    # Save plots for future use
-    data_manager$save_plots(plot_list, "government", selectedYear())
-    
-    return(plot_list)
+    data_manager$get_plots("government", selectedYear())
   })
   
-  # Maps - create separately since they use geo data
+  # Load pre-saved maps (if any)
   maps <- reactive({
-    req(selectedYear(), geo_data())
-    
-    # Try to load saved maps first
-    map_cache_key <- paste0("government_maps_", selectedYear())
-    if (!is.null(data_manager$cache[[map_cache_key]])) {
-      return(data_manager$cache[[map_cache_key]])
-    }
-    
-    # If no saved maps, we would create them here
-    # For now, returning an empty list as the current government module doesn't have maps
-    map_list <- list()
-    
-    # Cache maps
-    data_manager$cache[[map_cache_key]] <- map_list
-    
-    return(map_list)
+    req(selectedYear())
+    data_manager$get_maps("government", selectedYear())
   })
   
-  # Value box calculations
-  calculations <- reactive({
+  # Load pre-calculated percentages (if any)
+  percentages <- reactive({
     req(selectedYear())
-    
-    calc_cache_key <- paste0("government_calculations_", selectedYear())
-    if (!is.null(data_manager$cache[[calc_cache_key]])) {
-      return(data_manager$cache[[calc_cache_key]])
-    }
-    
-    survey_id_per <- paste0("PER_", selectedYear())
-    survey_id_par <- paste0("PAR_", selectedYear())
-    
-    # Calculate any metrics needed for value boxes
-    calc_list <- list()
-    
-    # Cache calculations
-    data_manager$cache[[calc_cache_key]] <- calc_list
-    
-    return(calc_list)
+    data_manager$get_percentages("government", selectedYear())
   })
   
   # Update tooltip content based on selected tab
@@ -191,34 +70,35 @@ governmentServer <- function(input, output, session, current_theme = NULL) {
     update_tooltip_content(session, "knowledge_pub_tooltip", initial_tooltip)
   }, once = TRUE)
   
-  # Render outputs using the cached plots
+  # Render outputs using pre-saved plots
   output$officials_knowledge_regidor_plot <- renderPlotly({
-    plots()$officials_knowledge_regidor
+    plots()$officials_knowledge_regidor_plot
   })
   
   output$officials_knowledge_sindico_plot <- renderPlotly({
-    plots()$officials_knowledge_sindico
+    plots()$officials_knowledge_sindico_plot
   })
   
   output$officials_knowledge_dipupadol_plot <- renderPlotly({
-    plots()$officials_knowledge_dipupadol
+    plots()$officials_knowledge_dipupadol_plot
   })
   
   output$officials_knowledge_diputadof_plot <- renderPlotly({
-    plots()$officials_knowledge_diputadof
+    plots()$officials_knowledge_diputadof_plot
   })
   
   output$inequality_perception_plot <- renderPlotly({
-    plots()$inequality_perception
+    plots()$inequality_perception_plot
   })
   
   output$government_expectations_plot <- renderPlotly({
-    plots()$government_expectations
+    plots()$government_expectations_plot
   })
   
   output$important_problems_plot <- renderPlotly({
-    plots()$important_problems
+    plots()$important_problems_plot
   })
   
-  # Add download handlers if needed (for maps or other outputs)
+  # Note: This module doesn't have maps or value boxes in the current implementation
+  # but the structure is maintained for consistency and future expansion
 }

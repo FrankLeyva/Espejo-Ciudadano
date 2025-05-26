@@ -103,7 +103,6 @@ ui <- page_navbar(
     )
   ),
   id = "navbar",
-  navbar_options = navbar_options(theme = "dark"),
   
   header = tags$head(
     tags$link(rel = "stylesheet", href = "styles.css"),
@@ -366,24 +365,62 @@ server <- function(input, output, session) {
   })
   
   # Initialize the enhanced data manager
-  data_manager <- EnhancedDataManager$new()
+  data_manager <- DataManager$new()
+
+  # Trigger preloading of common data in the background
+  observe({
+    # Use priority = -1 so this runs after other initialization
+    data_manager$preload_data(
+      years = c(2023, 2024),
+      sections = c("wellness", "economic", "cultural", "identity", "environment")
+    )
+  }, priority = -1)
+
+  # Optional: Log cache performance periodically
+  observe({
+    # Run every 5 minutes (300000 milliseconds)
+    invalidateLater(300000)
+    
+    stats <- data_manager$get_cache_stats()
+    if (length(stats) > 0) {
+      message(sprintf("Cache performance - Hits: %d, Misses: %d, Hit rate: %.1f%%, Cache size: %d items", 
+                      stats$hits, stats$misses, stats$hit_rate, stats$cache_size))
+    }
+  }, priority = -2)
   
-  # Create reactive functions for survey data using the data manager
+  # Create reactive functions for survey data using the existing data loader
   perSurveyData <- reactive({
     req(selectedYear())
     survey_id <- paste0("PER_", selectedYear())
-    data_manager$get_survey_data(survey_id)
+    
+    tryCatch({
+      load_survey_data(survey_id)
+    }, error = function(e) {
+      warning(paste("Failed to load PER survey data for", selectedYear(), ":", e$message))
+      return(NULL)
+    })
   })
 
   parSurveyData <- reactive({
     req(selectedYear())
     survey_id <- paste0("PAR_", selectedYear())
-    data_manager$get_survey_data(survey_id)
+    
+    tryCatch({
+      load_survey_data(survey_id)
+    }, error = function(e) {
+      warning(paste("Failed to load PAR survey data for", selectedYear(), ":", e$message))
+      return(NULL)
+    })
   })
   
   # Geographic data reactive
   geoData <- reactive({
-    data_manager$get_geo_data()
+    tryCatch({
+      load_geo_data("data/spatial/Distritos_Juarez.shp")
+    }, error = function(e) {
+      warning(paste("Failed to load geographic data:", e$message))
+      return(NULL)
+    })
   })
   
   # Store reactive functions in session$userData for module access
@@ -393,21 +430,24 @@ server <- function(input, output, session) {
   session$userData$selectedYear <- selectedYear
   session$userData$data_manager <- data_manager
   
-  # Preload data when the app starts
-  observe({
-    data_manager$preload_data(
-      years = c(2023, 2024),
-      sections = c("wellness", "economic", "cultural", "identity", "environment",
-                  "urban", "mobility", "transportation", "government", "inequality",
-                  "accountability", "representation", "expectations", "trust",
-                  "infrastructure", "public_services", "education", "healthcare",
-                  "housing", "participation", "civic", "community"),
-      survey_types = c("PER", "PAR")
-    )
-  }, priority = -1)
+  # Update the reactiveVal when user selects a year
+  observeEvent(input$surveyYear, {
+    if (!is.null(input$surveyYear)) {
+      selectedYearVal(input$surveyYear)
+      session$sendCustomMessage("updateYearDropdown", input$surveyYear)
+    }
+  }, ignoreInit = FALSE)
   
-  # Clear cache when year changes
- 
+  # Set initial dropdown text on load
+  observe({
+    session$sendCustomMessage("setCurrentYear", selectedYear())
+  })
+  
+  # Handle navigation between tabs
+  observeEvent(input$nav_target, {
+    nav_value <- input$nav_target
+    updateNavbarPage(session, "navbar", selected = nav_value)
+  })
   
   # UI Container outputs for all sections
   output$wellness_ui_container <- renderUI({
@@ -536,27 +576,8 @@ server <- function(input, output, session) {
   })
   
   output$dashboard_map_ui_container <- renderUI({
-    load_module("extras", "dashboard_map")
+    load_ui_module("extras", "dashboard_map")
     dashboardMapUI('dashboard_map')
-  })
-    
-  # Update the reactiveVal when user selects a year
-  observeEvent(input$surveyYear, {
-    if (!is.null(input$surveyYear)) {
-      selectedYearVal(input$surveyYear)
-      session$sendCustomMessage("updateYearDropdown", input$surveyYear)
-    }
-  }, ignoreInit = FALSE)
-  
-  # Set initial dropdown text on load
-  observe({
-    session$sendCustomMessage("setCurrentYear", selectedYear())
-  })
-  
-  # Handle navigation between tabs
-  observeEvent(input$nav_target, {
-    nav_value <- input$nav_target
-    updateNavbarPage(session, "navbar", selected = nav_value)
   })
   
   # Initialize servers based on the current tab
@@ -641,6 +662,7 @@ server <- function(input, output, session) {
       load_server_module("extras", "explorer")
       explorerServer("survey_explorer")
     } else if (current_tab == "dashboard_map") {
+      load_server_module("extras", "dashboard_map")
       dashboardMapServer("dashboard_map")
     }
   })

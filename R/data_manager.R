@@ -1,418 +1,298 @@
-# R/enhanced_data_manager.R
 
-#' Enhanced DataManager Class for Full Dashboard
-#' 
-#' An R6 class for efficiently loading, processing, and caching all dashboard data
-#' 
 #' @export
-EnhancedDataManager <- R6::R6Class("EnhancedDataManager",
+DataManager <- R6::R6Class("DataManager",
   public = list(
-    #' @field cache A list to store cached data
-    cache = list(),
-    
-    #' @field plot_cache A list to store cached plots
-    plot_cache = list(),
-    
-    #' @field survey_cache A list to store cached survey data
-    survey_cache = list(),
+    #' @field session_cache A list to store session-specific cached data
+    session_cache = list(),
     
     #' @description
-    #' Create a new EnhancedDataManager object
-    #' @return A new EnhancedDataManager object
+    #' Create a new DataManager object and initialize global cache if needed
+    #' @return A new DataManager object
     initialize = function() {
-      # Initialize memoized functions for survey data loading
-      private$memoised_load_survey_data <- memoise::memoise(function(survey_id) {
-        message(paste("Loading survey data for", survey_id))
-        data <- load_survey_data(survey_id)
-        
-        # Store in survey cache
-        self$survey_cache[[survey_id]] <- data
-        return(data)
-      })
-      
-      # Initialize memoized functions for different data types
-      private$memoised_prepare_binary_data <- memoise::memoise(function(survey_id, question_id) {
-        survey_data <- self$get_survey_data(survey_id)
-        if (!is.null(survey_data)) {
-          return(prepare_binary_data(
-            data = survey_data$responses,
-            question_id = question_id,
-            metadata = survey_data$metadata
-          ))
-        }
-        return(NULL)
-      })
-      
-      private$memoised_prepare_categorical_data <- memoise::memoise(function(survey_id, question_id) {
-        survey_data <- self$get_survey_data(survey_id)
-        if (!is.null(survey_data)) {
-          return(prepare_categorical_data(
-            data = survey_data$responses,
-            question_id = question_id,
-            metadata = survey_data$metadata
-          ))
-        }
-        return(NULL)
-      })
-      
-      private$memoised_prepare_interval_data <- memoise::memoise(function(survey_id, question_id) {
-        survey_data <- self$get_survey_data(survey_id)
-        if (!is.null(survey_data)) {
-          return(prepare_interval_data(
-            data = survey_data$responses,
-            question_id = question_id,
-            metadata = survey_data$metadata
-          ))
-        }
-        return(NULL)
-      })
-      
-      private$memoised_prepare_ordinal_data <- memoise::memoise(function(survey_id, question_id) {
-        survey_data <- self$get_survey_data(survey_id)
-        if (!is.null(survey_data)) {
-          return(prepare_ordinal_data(
-            data = survey_data$responses,
-            question_id = question_id,
-            metadata = survey_data$metadata
-          ))
-        }
-        return(NULL)
-      })
-      
-      private$memoised_prepare_nominal_data <- memoise::memoise(function(survey_id, question_id) {
-        survey_data <- self$get_survey_data(survey_id)
-        if (!is.null(survey_data)) {
-          return(prepare_nominal_data(
-            data = survey_data$responses,
-            question_id = question_id,
-            metadata = survey_data$metadata
-          ))
-        }
-        return(NULL)
-      })
-      
-      private$memoised_prepare_razon_data <- memoise::memoise(function(survey_id, question_id) {
-        survey_data <- self$get_survey_data(survey_id)
-        if (!is.null(survey_data)) {
-          return(prepare_razon_data(
-            data = survey_data$responses,
-            question_id = question_id,
-            metadata = survey_data$metadata
-          ))
-        }
-        return(NULL)
-      })
-      
-      message("Enhanced DataManager initialized")
-    },
-    
-    #' @description
-    #' Get survey data with caching
-    #' @param survey_id Survey identifier (e.g., "PER_2024", "PAR_2024")
-    #' @return Survey data object
-    get_survey_data = function(survey_id) {
-      if (is.null(self$survey_cache[[survey_id]])) {
-        return(private$memoised_load_survey_data(survey_id))
-      }
-      return(self$survey_cache[[survey_id]])
-    },
-    
-    #' @description
-    #' Get processed data for any question type
-    #' @param survey_id Survey identifier
-    #' @param question_id Question identifier
-    #' @param data_type Type of data processing ("binary", "categorical", "interval", "ordinal", "nominal", "razon")
-    #' @return Processed data
-    get_processed_data = function(survey_id, question_id, data_type = "auto") {
-      # Determine data type automatically if not specified
-      if (data_type == "auto") {
-        survey_data <- self$get_survey_data(survey_id)
-        if (!is.null(survey_data)) {
-          question_meta <- survey_data$metadata[survey_data$metadata$variable == question_id, ]
-          if (nrow(question_meta) > 0) {
-            data_type <- classify_question(question_meta)
-          } else {
-            data_type <- "categorical"  # Default fallback
-          }
-        }
+      # Initialize the global cache if it doesn't exist yet
+      if (!exists("GLOBAL_CACHE", envir = .GlobalEnv)) {
+        assign("GLOBAL_CACHE", new.env(), envir = .GlobalEnv)
+        # Add a simple stats tracker
+        assign("CACHE_STATS", list(
+          hits = 0,
+          misses = 0,
+          created = Sys.time()
+        ), envir = .GlobalEnv$GLOBAL_CACHE)
       }
       
-      # Call appropriate memoized function
-      switch(data_type,
-        "binary" = private$memoised_prepare_binary_data(survey_id, question_id),
-        "categorical" = private$memoised_prepare_categorical_data(survey_id, question_id),
-        "interval" = private$memoised_prepare_interval_data(survey_id, question_id),
-        "ordinal" = private$memoised_prepare_ordinal_data(survey_id, question_id),
-        "nominal" = private$memoised_prepare_nominal_data(survey_id, question_id),
-        "razon" = private$memoised_prepare_razon_data(survey_id, question_id),
-        private$memoised_prepare_categorical_data(survey_id, question_id)  # Default
-      )
+      message("DataManager initialized with shared cache")
     },
     
     #' @description
-    #' Get or create a plot with caching
-    #' @param plot_key Unique key for the plot
-    #' @param plot_function Function to create the plot
-    #' @param ... Arguments to pass to plot_function
-    #' @return Plotly object
-    get_or_create_plot = function(plot_key, plot_function, ...) {
-      if (is.null(self$plot_cache[[plot_key]])) {
-        message(paste("Creating plot:", plot_key))
-        self$plot_cache[[plot_key]] <- plot_function(...)
+    #' Load plot data from RDS files based on section and year using shared cache
+    #' @param section Section name (e.g., "wellness", "economic", "cultural", "identity", "environment")
+    #' @param year Survey year (numeric)
+    #' @return A list of plots
+    get_plots = function(section, year) {
+      key <- paste0("plots_", section, "_", year)
+      
+      # Try to get from global cache first
+      if (exists(key, envir = .GlobalEnv$GLOBAL_CACHE)) {
+        # Cache hit
+        .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits + 1
+        return(get(key, envir = .GlobalEnv$GLOBAL_CACHE))
       }
-      return(self$plot_cache[[plot_key]])
+      
+      # Cache miss
+      .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses + 1
+      
+      # If not in cache, load it
+      message(paste("Loading plots for", section, year, "from RDS"))
+      path <- paste0("data/plots/", section, "_", year, ".rds")
+      
+      result <- tryCatch({
+        if (file.exists(path)) {
+          readRDS(path)
+        } else {
+          warning(paste("Plot file not found:", path))
+          list()
+        }
+      }, error = function(e) {
+        warning(paste("Failed to load plots for", section, year, ":", e$message))
+        return(list())
+      })
+      
+      # Store in global cache
+      assign(key, result, envir = .GlobalEnv$GLOBAL_CACHE)
+      
+      return(result)
     },
     
     #' @description
-    #' Get section-specific data and plots
-    #' @param section Section name
+    #' Load map data from RDS files based on section and year using shared cache
+    #' @param section Section name (e.g., "wellness", "economic", "cultural", "identity", "environment")
+    #' @param year Survey year (numeric)
+    #' @return A list of maps
+    get_maps = function(section, year) {
+      key <- paste0("maps_", section, "_", year)
+      
+      # Try to get from global cache first
+      if (exists(key, envir = .GlobalEnv$GLOBAL_CACHE)) {
+        .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits + 1
+        return(get(key, envir = .GlobalEnv$GLOBAL_CACHE))
+      }
+      
+      # Cache miss
+      .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses + 1
+      
+      message(paste("Loading maps for", section, year, "from RDS"))
+      path <- paste0("data/plots/map_", section, "_", year, ".rds")
+      
+      result <- tryCatch({
+        if (file.exists(path)) {
+          readRDS(path)
+        } else {
+          warning(paste("Map file not found:", path))
+          list()
+        }
+      }, error = function(e) {
+        warning(paste("Failed to load maps for", section, year, ":", e$message))
+        return(list())
+      })
+      
+      # Store in global cache
+      assign(key, result, envir = .GlobalEnv$GLOBAL_CACHE)
+      
+      return(result)
+    },
+    
+    #' @description
+    #' Get static percentages for a section and year with shared caching
+    #' @param section Section name (e.g., "cultural", "wellness", "economic")
+    #' @param year Survey year (numeric)
+    #' @return A list of percentages
+    get_percentages = function(section, year) {
+      key <- paste0("pct_", section, "_", year)
+      
+      # Try to get from global cache
+      if (exists(key, envir = .GlobalEnv$GLOBAL_CACHE)) {
+        .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits + 1
+        return(get(key, envir = .GlobalEnv$GLOBAL_CACHE))
+      }
+      
+      # Cache miss
+      .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses + 1
+      
+      # Load from RDS file if available, otherwise use hardcoded values
+      rds_path <- paste0("data/percentages/", section, "_", year, ".rds")
+      
+      result <- tryCatch({
+        if (file.exists(rds_path)) {
+          readRDS(rds_path)
+        } else {
+          # Fallback to hardcoded percentages
+          private$get_hardcoded_percentages(section, year)
+        }
+      }, error = function(e) {
+        warning(paste("Failed to load percentages for", section, year, ":", e$message))
+        private$get_hardcoded_percentages(section, year)
+      })
+      
+      # Store in global cache
+      assign(key, result, envir = .GlobalEnv$GLOBAL_CACHE)
+      
+      return(result)
+    },
+    
+    #' @description
+    #' Get the path to a map PNG file
+    #' @param map_name Name of the map file (without extension)
     #' @param year Survey year
-    #' @param survey_type Survey type ("PER" or "PAR")
-    #' @return List of data and plots for the section
-    get_section_data = function(section, year, survey_type = "PER") {
-      survey_id <- paste0(survey_type, "_", year)
-      section_key <- paste0(section, "_", survey_id)
-      
-      if (is.null(self$cache[[section_key]])) {
-        message(paste("Loading section data for", section, year))
-        
-        # Get questions for this section from thematic classification
-        section_questions <- self$get_section_questions(section, survey_type)
-        
-        # Process data for each question in the section
-        section_data <- list()
-        
-        for (question in section_questions$variable) {
-          processed_data <- self$get_processed_data(survey_id, question)
-          if (!is.null(processed_data)) {
-            section_data[[question]] <- processed_data
-          }
-        }
-        
-        self$cache[[section_key]] <- section_data
-      }
-      
-      return(self$cache[[section_key]])
+    #' @return File path to the PNG
+    get_map_path = function(map_name, year) {
+      paste0("data/maps/", map_name, "_", year, ".png")
     },
     
     #' @description
-    #' Get questions for a specific section based on thematic classification
-    #' @param section Section name
-    #' @param survey_type Survey type
-    #' @return Data frame of questions for the section
-    get_section_questions = function(section, survey_type = "PER") {
-      # Map dashboard sections to thematic classifications
-      section_mapping <- list(
-        "wellness" = "Social & Economic Wellbeing",
-        "economic" = "Social & Economic Wellbeing", 
-        "cultural" = "Social & Economic Wellbeing",
-        "identity" = "Social & Economic Wellbeing",
-        "environment" = "Urban Mobility & Environment",
-        "urban" = "Urban Mobility & Environment",
-        "mobility" = "Urban Mobility & Environment", 
-        "transportation" = "Urban Mobility & Environment",
-        "government" = "Governance & Civic Engagement",
-        "inequality" = "Governance & Civic Engagement",
-        "accountability" = "Governance & Civic Engagement",
-        "representation" = "Governance & Civic Engagement",
-        "expectations" = "Governance & Civic Engagement",
-        "trust" = "Governance & Civic Engagement",
-        "infrastructure" = "Public Services",
-        "public_services" = "Public Services",
-        "education" = "Public Services",
-        "healthcare" = "Public Services",
-        "housing" = "Public Services",
-        "participation" = "Community Participation",
-        "civic" = "Community Participation",
-        "community" = "Community Participation"
-      )
-      
-      main_theme <- section_mapping[[section]]
-      
-      if (!is.null(main_theme)) {
-        # Use thematic classification to get questions
-        questions <- get_questions_by_theme(main_theme)
-        # Filter by survey type
-        questions <- questions[questions$survey_id == paste0(survey_type, "_2024"), ]
-        return(questions)
-      }
-      
-      return(data.frame())
-    },
-    
-    #' @description
-    #' Preload data for multiple sections and years
+    #' Preload common data to improve responsiveness with shared caching
     #' @param years Vector of years to preload
     #' @param sections Vector of sections to preload
-    #' @param survey_types Vector of survey types to preload
     preload_data = function(years = c(2023, 2024), 
-                           sections = c("wellness", "economic", "cultural", "identity", "environment",
-                                      "urban", "mobility", "transportation", "government", "inequality",
-                                      "accountability", "representation", "expectations", "trust",
-                                      "infrastructure", "public_services", "education", "healthcare",
-                                      "housing", "participation", "civic", "community"),
-                           survey_types = c("PER", "PAR")) {
+                           sections = c("wellness", "economic", "cultural", "identity", "environment")) {
+      start_time <- Sys.time()
       
       message("Starting data preloading...")
       
-      # First, preload survey data
-      for (year in years) {
-        for (survey_type in survey_types) {
-          survey_id <- paste0(survey_type, "_", year)
-          tryCatch({
-            self$get_survey_data(survey_id)
-          }, error = function(e) {
-            warning(paste("Failed to preload survey:", survey_id, "-", e$message))
-          })
-        }
-      }
+      total_items <- 0
+      loaded_items <- 0
       
-      # Then preload section data
       for (year in years) {
         for (section in sections) {
-          for (survey_type in survey_types) {
-            tryCatch({
-              self$get_section_data(section, year, survey_type)
-            }, error = function(e) {
-              warning(paste("Failed to preload section:", section, year, survey_type, "-", e$message))
-            })
+          total_items <- total_items + 1
+          
+          # Trigger loading by calling the methods
+          plots <- self$get_plots(section, year)
+          if (length(plots) > 0) loaded_items <- loaded_items + 1
+          
+          # Load maps for sections that have them
+          if (section %in% c("wellness", "economic", "identity", "environment")) {
+            maps <- self$get_maps(section, year)
+            if (length(maps) > 0) loaded_items <- loaded_items + 1
+            total_items <- total_items + 1
+          }
+          
+          # Load percentages for sections that have them
+          if (section %in% c("cultural", "wellness", "economic")) {
+            percentages <- self$get_percentages(section, year)
+            if (length(percentages) > 0) loaded_items <- loaded_items + 1
+            total_items <- total_items + 1
           }
         }
       }
       
-      message("Data preloading completed")
-    },
-    
-    #' @description
-    #' Load pre-saved plots if they exist
-    #' @param section Section name
-    #' @param year Survey year
-    #' @return List of plots or NULL
-    load_saved_plots = function(section, year) {
-      plot_path <- paste0("data/plots/", section, "_", year, ".rds")
+      end_time <- Sys.time()
+      duration <- difftime(end_time, start_time, units = "secs")
+      message(sprintf("Data preloading completed in %.2f seconds", as.numeric(duration)))
+      message(sprintf("Loaded %d/%d items successfully", loaded_items, total_items))
       
-      if (file.exists(plot_path)) {
-        tryCatch({
-          plots <- readRDS(plot_path)
-          message(paste("Loaded saved plots for", section, year))
-          return(plots)
-        }, error = function(e) {
-          warning(paste("Failed to load saved plots:", e$message))
-          return(NULL)
-        })
-      }
-      
-      return(NULL)
-    },
-    
-    #' @description
-    #' Save plots to RDS file
-    #' @param plots List of plots
-    #' @param section Section name
-    #' @param year Survey year
-    save_plots = function(plots, section, year) {
-      # Create plots directory if it doesn't exist
-      plots_dir <- "data/plots"
-      if (!dir.exists(plots_dir)) {
-        dir.create(plots_dir, recursive = TRUE, showWarnings = FALSE)
-      }
-      
-      plot_path <- paste0(plots_dir, "/", section, "_", year, ".rds")
-      
-      tryCatch({
-        saveRDS(plots, plot_path)
-        message(paste("Saved plots for", section, year))
-      }, error = function(e) {
-        warning(paste("Failed to save plots:", e$message))
-      })
-    },
-    
-    #' @description
-    #' Get geographic data with caching
-    #' @return SF object with geographic data
-    get_geo_data = function() {
-      if (is.null(private$geo_data_cache)) {
-        tryCatch({
-          private$geo_data_cache <- sf::st_read('data/geo/Jrz_Map.geojson', quiet = TRUE)
-          message("Geographic data loaded and cached")
-        }, error = function(e) {
-          warning(paste("Failed to load geographic data:", e$message))
-          private$geo_data_cache <- NULL
-        })
-      }
-      return(private$geo_data_cache)
-    },
-    
-    #' @description
-    #' Clear all caches
-    clear_cache = function() {
-      self$cache <- list()
-      self$plot_cache <- list()
-      self$survey_cache <- list()
-      private$geo_data_cache <- NULL
-      
-      # Clear memoized function caches
-      if (!is.null(private$memoised_load_survey_data)) {
-        memoise::forget(private$memoised_load_survey_data)
-      }
-      if (!is.null(private$memoised_prepare_binary_data)) {
-        memoise::forget(private$memoised_prepare_binary_data)
-      }
-      if (!is.null(private$memoised_prepare_categorical_data)) {
-        memoise::forget(private$memoised_prepare_categorical_data)
-      }
-      if (!is.null(private$memoised_prepare_interval_data)) {
-        memoise::forget(private$memoised_prepare_interval_data)
-      }
-      if (!is.null(private$memoised_prepare_ordinal_data)) {
-        memoise::forget(private$memoised_prepare_ordinal_data)
-      }
-      if (!is.null(private$memoised_prepare_nominal_data)) {
-        memoise::forget(private$memoised_prepare_nominal_data)
-      }
-      if (!is.null(private$memoised_prepare_razon_data)) {
-        memoise::forget(private$memoised_prepare_razon_data)
-      }
-      
-      message("All caches cleared")
+      # Return the object for method chaining
+      return(invisible(self))
     },
     
     #' @description
     #' Get cache statistics
-    #' @return List with cache information
+    #' @return List with cache stats
     get_cache_stats = function() {
-      return(list(
-        survey_cache_items = length(self$survey_cache),
-        section_cache_items = length(self$cache),
-        plot_cache_items = length(self$plot_cache),
-        geo_data_loaded = !is.null(private$geo_data_cache)
-      ))
+      if (exists("GLOBAL_CACHE", envir = .GlobalEnv) && 
+          exists("CACHE_STATS", envir = .GlobalEnv$GLOBAL_CACHE)) {
+        stats <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS
+        total <- stats$hits + stats$misses
+        hit_rate <- if(total > 0) stats$hits/total*100 else 0
+        
+        return(list(
+          hits = stats$hits,
+          misses = stats$misses,
+          hit_rate = round(hit_rate, 2),
+          total_requests = total,
+          cache_size = length(ls(.GlobalEnv$GLOBAL_CACHE)) - 1, # -1 for CACHE_STATS
+          created = stats$created
+        ))
+      }
+      return(list())
+    },
+    
+    #' @description
+    #' Clear the cache (both session and global)
+    #' @param global Boolean, whether to clear global cache
+    clear_cache = function(global = FALSE) {
+      self$session_cache <- list()
+      
+      if (global && exists("GLOBAL_CACHE", envir = .GlobalEnv)) {
+        # Save stats before clearing
+        stats <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS
+        
+        # Clear everything but stats
+        rm(list = setdiff(ls(.GlobalEnv$GLOBAL_CACHE), "CACHE_STATS"), envir = .GlobalEnv$GLOBAL_CACHE)
+        
+        # Reset stats
+        .GlobalEnv$GLOBAL_CACHE$CACHE_STATS <- list(
+          hits = 0,
+          misses = 0,
+          created = Sys.time()
+        )
+        
+        message("Global cache cleared")
+      } else {
+        message("Session cache cleared")
+      }
+      
+      return(invisible(self))
     }
   ),
   
   private = list(
-    #' @field memoised_load_survey_data Memoised function for loading survey data
-    memoised_load_survey_data = NULL,
-    
-    #' @field memoised_prepare_binary_data Memoised function for preparing binary data
-    memoised_prepare_binary_data = NULL,
-    
-    #' @field memoised_prepare_categorical_data Memoised function for preparing categorical data
-    memoised_prepare_categorical_data = NULL,
-    
-    #' @field memoised_prepare_interval_data Memoised function for preparing interval data
-    memoised_prepare_interval_data = NULL,
-    
-    #' @field memoised_prepare_ordinal_data Memoised function for preparing ordinal data
-    memoised_prepare_ordinal_data = NULL,
-    
-    #' @field memoised_prepare_nominal_data Memoised function for preparing nominal data
-    memoised_prepare_nominal_data = NULL,
-    
-    #' @field memoised_prepare_razon_data Memoised function for preparing razon data
-    memoised_prepare_razon_data = NULL,
-    
-    #' @field geo_data_cache Cached geographic data
-    geo_data_cache = NULL
+    #' @description
+    #' Get hardcoded percentages as fallback
+    #' @param section Section name
+    #' @param year Survey year
+    #' @return List of percentages
+    get_hardcoded_percentages = function(section, year) {
+      if (section == "cultural") {
+        if (year == 2024) {
+          return(list(
+            home_activities_pct = "82.7%", 
+            exercise_activities_pct = "57.9%",
+            nature_activities_pct = "62.6%"
+          ))
+        } else if (year == 2023) {
+          return(list(
+            home_activities_pct = "95.2%", 
+            exercise_activities_pct = "25.9%",
+            nature_activities_pct = "74.8%"
+          ))
+        }
+      } else if (section == "wellness") {
+        if (year == 2024) {
+          return(list(
+            migration_intention_pct = "45.2%"
+          ))
+        } else if (year == 2023) {
+          return(list(
+            migration_intention_pct = "48.1%"
+          ))
+        }
+      } else if (section == "identity") {
+        if (year == 2024) {
+          return(list(
+            neighborhood_connection_pct = "67.3%",
+            neighbors_connection_pct = "58.9%",
+            city_pride_pct = "74.1%"
+          ))
+        } else if (year == 2023) {
+          return(list(
+            neighborhood_connection_pct = "65.8%",
+            neighbors_connection_pct = "56.2%",
+            city_pride_pct = "71.9%"
+          ))
+        }
+      }
+      
+      return(list())
+    }
   )
 )

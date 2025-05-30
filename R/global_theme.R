@@ -50,53 +50,53 @@ theme_config <- list(
   # Section-specific themes
   sections = list(
     bienestar = list(
-      primary = "#1E88E5",
-      secondary = "#90CAF9",
-      accent = "#FFA000",
+      primary ="#d7a4d2",
+      secondary = "#eccfe9",
+      accent = "#a4d7a9",
       palettes = list(
-        sequential = c("#BFD3E6", "#9EBCDA", "#8C96C6", "#6BAED6", "#4292C6", "#2171B5", "#084594"),
-        categorical = c("#1E88E5", "#42A5F5", "#90CAF9", "#FFA000", "#FFCA28", "#FFE082"),
-        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#1E88E5"))(9)
+        sequential = c("#f8ebf6","#eccfe9","#dfb4dd","#d19ad0","#d6a4d0","#d7a4d2","#bb89b6","#9f709c","#845581","#6c3d67"),
+        categorical  = c("#d7a4d2","#a4d7a9","#b9d7a4","#a4d7c2","#d7a4b9","#c2a4d7"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#d7a4d2"))(9)
       )
     ),
     movilidad = list(
-      primary = "#43A047",
-      secondary = "#A5D6A7",
-      accent = "#052F5F",
+      primary ="#FFA058",
+      secondary = "#FEC08E",
+      accent = "#58b7ff",
       palettes = list(
-        sequential = c("#C7E9C0", "#A1D99B", "#74C476", "#41AB5D", "#238B45", "#006D2C", "#00441B"),
-        categorical =c("#43A047", "#66BB6A", "#A5D6A7", "#052F5F", "#2D4A70", "#5788A0"),
-        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#43A047"))(9)
+        sequential = c("#FFF1E7","#FED8BA","#FEC08E","#FEA970","#FD9F5D","#FFA058","#DF864C","#C16D3A","#A3552D","#854122"),
+        categorical  = c("#FFA058","#58fff4","#5863ff","#fff458","#ff5863","#58b7ff"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#FFA058"))(9)
       )
     ),
     gobierno = list(
-      primary = "#984334",
-      secondary = "#BA7568",
-      accent = "#FB8C00",
+      primary ="#ff769d",
+      secondary = "#fdb8ca",
+      accent = "#76ffd8",
       palettes = list(
-        sequential = c("#BA7568", "#AD655A", "#A0574C", "#934B3F", "#984334", "#7D362A", "#622A21"),
-        categorical = c("#984334", "#AD655A", "#BA7568", "#FB8C00", "#FFA726", "#FFCC80"),
-        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#984334"))(9)
+        sequential = c("#fee5ec","#fdb8ca","#fd8aa6","#fc6b90","#fc749a","#ff769d","#e15d82","#c5486b","#a93455","#8d2340"),
+        categorical  = c("#ff769d","#76ffd8","#76ff94","#76e1ff","#ff9476","#ff76e1"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#ff769d"))(9)
       )
     ),
     participacion = list(
-      primary = "#F57C00",  # Changed from E64A19 to be more distinct from danger color
-      secondary = "#FFCC80",
-      accent = "#039BE5",
+      primary ="#ffc9de",
+      secondary = "#dfadc0",
+      accent = "#c9ffcf",
       palettes = list(
-        sequential = c("#FBB582", "#FA954F", "#F57C00", "#E66D00", "#D45F00", "#B65200", "#8F3F00"),
-        categorical = c("#F57C00", "#FB8C00", "#FFCC80", "#039BE5", "#29B6F6", "#81D4FA"),
-        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#F57C00"))(9)
+        sequential = c("#fff0f5","#fedce7","#fec8d8","#fdb4c9","#fec9dd","#ffc9de","#dfadc0","#c092a3","#a27787","#855c6c"),
+        categorical  = c("#ffc9de","#c9ffea","#c9f9ff","#c9ffcf","#ffeac9","#ffc9f9"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#ffc9de"))(9)
       )
     ),
      infraestructura= list(
-      primary = "#8E24AA",
-      secondary = "#CE93D8",
-      accent = "#00ACC1",
+      primary ="#00c5c1",
+      secondary = "#87d7d6",
+      accent = "#0066c5",
       palettes = list(
-        sequential = c("#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77", "#8E24AA", "#980043", "#67001F"),
-        categorical = c("#8E24AA", "#AB47BC", "#CE93D8", "#00ACC1", "#26C6DA", "#80DEEA"),
-        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#8E24AA"))(9)
+        sequential = c("#e0f6f6","#b4e7e6","#87d7d6","#5bc6c5","#3ac5c2","#00c5c1","#30a7a4","#288a86","#1f6e6a","#175350"),
+        categorical  = c("#00c5c1","#c50004","#c50066","#c55f00","#00c55f","#0066c5"),
+        diverging = colorRampPalette(c("#DC3545", "#DEE2E6", "#00c5c1"))(9)
       )
     )
   )

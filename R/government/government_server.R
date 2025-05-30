@@ -22,17 +22,7 @@ governmentServer <- function(input, output, session, current_theme = NULL) {
     data_manager$get_plots("government", selectedYear())
   })
   
-  # Load pre-saved maps (if any)
-  maps <- reactive({
-    req(selectedYear())
-    data_manager$get_maps("government", selectedYear())
-  })
-  
-  # Load pre-calculated percentages (if any)
-  percentages <- reactive({
-    req(selectedYear())
-    data_manager$get_percentages("government", selectedYear())
-  })
+ 
   
   # Update tooltip content based on selected tab
   observe({
@@ -72,33 +62,31 @@ governmentServer <- function(input, output, session, current_theme = NULL) {
   
   # Render outputs using pre-saved plots
   output$officials_knowledge_regidor_plot <- renderPlotly({
-    plots()$officials_knowledge_regidor_plot
+    plots()$officials_knowledge_regidor
   })
   
   output$officials_knowledge_sindico_plot <- renderPlotly({
-    plots()$officials_knowledge_sindico_plot
+    plots()$officials_knowledge_sindico
   })
   
   output$officials_knowledge_dipupadol_plot <- renderPlotly({
-    plots()$officials_knowledge_dipupadol_plot
+    plots()$officials_knowledge_dipupadol
   })
   
   output$officials_knowledge_diputadof_plot <- renderPlotly({
-    plots()$officials_knowledge_diputadof_plot
+    plots()$officials_knowledge_diputadof
   })
   
   output$inequality_perception_plot <- renderPlotly({
-    plots()$inequality_perception_plot
+    plots()$inequality_perception
   })
   
   output$government_expectations_plot <- renderPlotly({
-    plots()$government_expectations_plot
+    plots()$government_expectations
   })
   
   output$important_problems_plot <- renderPlotly({
-    plots()$important_problems_plot
+    plots()$important_problems
   })
   
-  # Note: This module doesn't have maps or value boxes in the current implementation
-  # but the structure is maintained for consistency and future expansion
 }

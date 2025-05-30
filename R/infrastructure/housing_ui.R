@@ -110,7 +110,7 @@ navset_pill(
         
         card(
 
-          plotlyOutput("comparison_plot", height = "500px")
+          plotlyOutput("housing_comparison_plot", height = "500px")
         )
       )
     )

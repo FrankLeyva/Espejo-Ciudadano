@@ -136,20 +136,20 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
     
     # Map the service to the pre-saved map
     service_map_name <- switch(input$selected_service,
-      "Q29" = "service_agua_map",
-      "Q30" = "service_drenaje_map", 
-      "Q35" = "service_cfe_map",
-      "Q40" = "service_basura_map",
-      "Q45" = "service_alumbrado_map",
-      "Q51" = "service_calles_map",
-      "Q55" = "service_semaforizacion_map",
-      "Q56" = "service_areas_verdes_map",
-      "Q58" = "service_deportivas_map",
-      "Q59" = "service_bibliotecas_map",
-      "Q60" = "service_comunitarios_map",
-      "Q61" = "service_banquetas_map",
-      "Q62" = "service_discapacidad_map",
-      "service_agua_map"  # default
+      "Q29" = "service_Q29_map",
+      "Q30" = "service_Q30_map", 
+      "Q35" = "service_Q35_map",
+      "Q40" = "service_Q40_map",
+      "Q45" = "service_Q45_map",
+      "Q51" = "service_Q51_map",
+      "Q55" = "service_Q55_map",
+      "Q56" = "service_Q56_map",
+      "Q58" = "service_Q58_map",
+      "Q59" = "service_Q59_map",
+      "Q60" = "service_Q60_map",
+      "Q61" = "service_Q61_map",
+      "Q62" = "service_Q62_map",
+      "service_Q29_map"  # default
     )
     
     maps()[[service_map_name]]

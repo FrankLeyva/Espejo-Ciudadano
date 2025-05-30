@@ -73,44 +73,45 @@ educationServer <- function(input, output, session, current_theme = NULL) {
     update_tooltip_content(session, "education_tooltip", initial_tooltip)
   }, once = TRUE)
   
-  # Render outputs using pre-saved plots
-  output$students_by_level_plot <- renderPlotly({
-    plots()$students_by_level_plot
-  })
+ 
   
-  output$education_satisfaction_plot <- renderPlotly({
-    plots()$education_satisfaction_plot
-  })
+ 
   
   # Render maps using pre-saved maps
-  output$students_general_map <- renderLeaflet({
-    maps()$students_general_map
+  output$students_map <- renderLeaflet({
+    maps()$students_map
   })
   
-  output$students_basica_map <- renderLeaflet({
-    maps()$students_basica_map
+  output$basic_students_map <- renderLeaflet({
+    maps()$basic_students_map
   })
   
-  output$students_media_superior_map <- renderLeaflet({
-    maps()$students_media_superior_map
+  output$highschool_students_map <- renderLeaflet({
+    maps()$highschool_students_map
   })
   
-  output$students_superior_map <- renderLeaflet({
-    maps()$students_superior_map
+  output$college_students_map <- renderLeaflet({
+    maps()$college_students_map
   })
   
-  output$satisfaction_basica_map <- renderLeaflet({
-    maps()$satisfaction_basica_map
+  output$basic_education_map <- renderLeaflet({
+    maps()$basic_education_map
   })
   
-  output$satisfaction_media_superior_map <- renderLeaflet({
-    maps()$satisfaction_media_superior_map
+  output$highschool_education_map <- renderLeaflet({
+    maps()$highschool_education_map
   })
   
-  output$satisfaction_superior_map <- renderLeaflet({
-    maps()$satisfaction_superior_map
+  output$college_education_map <- renderLeaflet({
+    maps()$college_education_map
   })
   
+
+
+  output$education_comparison_plot <- renderPlotly({
+    plots()$education_comparison_plot
+  })
+
   # Render percentage values for value boxes
   output$students_general_pct <- renderText({
     percentages()$students_general_pct

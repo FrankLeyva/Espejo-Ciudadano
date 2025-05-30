@@ -2,7 +2,7 @@ explorerUI <- function(id) {
   ns <- NS(id)
   
   tagList(
-    # CSS for the warning banner
+    # CSS for the warning banner and improved styling
     tags$style(HTML("
       .warning-banner {
         background-color: #fff3cd;
@@ -52,48 +52,87 @@ explorerUI <- function(id) {
       .download-btn {
         margin-top: 10px;
       }
-         .value-box-border-left {
-    border-left-width: 0 !important; 
-  }
-  
-  .value-box-title {
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-  }
-  
-  .value-box-value {
-    font-size: 1.5rem !important;
-    font-weight: 700 !important;
-  }
-  
-  .dataTables_wrapper .dataTable {
-    width: 100% !important;
-  }
-  
-  /* Improve table aesthetics */
-  .dataTables_wrapper {
-    padding: 0;
-    margin-bottom: 20px;
-  }
-  
-  .dataTables_wrapper .dataTable thead th {
-    background-color: #f5f5f5;
-    color: #333;
-    font-weight: 600;
-  }
-  
-  .dataTables_wrapper .dataTable.stripe tbody tr.odd {
-    background-color: rgba(0,0,0,.02);
-  }
-  
-  /* Add spacing */
-  .mb-3 {
-    margin-bottom: 1rem;
-  }
-  
-  .mt-4 {
-    margin-top: 1.5rem;
-  }
+      
+      .value-box-border-left {
+        border-left-width: 0 !important; 
+      }
+      
+      .value-box-title {
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+      }
+      
+      .value-box-value {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+      }
+      
+      .dataTables_wrapper .dataTable {
+        width: 100% !important;
+      }
+      
+      /* Improve table aesthetics */
+      .dataTables_wrapper {
+        padding: 0;
+        margin-bottom: 20px;
+      }
+      
+      .dataTables_wrapper .dataTable thead th {
+        background-color: #f5f5f5;
+        color: #333;
+        font-weight: 600;
+      }
+      
+      .dataTables_wrapper .dataTable.stripe tbody tr.odd {
+        background-color: rgba(0,0,0,.02);
+      }
+      
+      /* Add spacing */
+      .mb-3 {
+        margin-bottom: 1rem;
+      }
+      
+      .mt-4 {
+        margin-top: 1.5rem;
+      }
+      
+      /* Theme indicator styling */
+      .theme-indicator {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-left: 8px;
+      }
+      
+      .theme-bienestar { background-color: #e3f2fd; color: #1976d2; }
+      .theme-movilidad { background-color: #e8f5e8; color: #388e3c; }
+      .theme-gobierno { background-color: #fce4ec; color: #c2185b; }
+      .theme-infraestructura { background-color: #f3e5f5; color: #7b1fa2; }
+      .theme-participacion { background-color: #fff3e0; color: #f57c00; }
+      
+      /* Search results styling */
+      .search-results-info {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        color: #0c5460;
+      }
+      
+      /* Tab content styling */
+      .search-tab-content {
+        min-height: 400px;
+      }
+      
+      /* Search button styling */
+      .search-btn-container {
+        margin-top: 10px;
+        margin-bottom: 15px;
+      }
     ")),
     
     div(
@@ -105,17 +144,15 @@ explorerUI <- function(id) {
         div(
           class = "col-12",
           h1("Explorador de Encuestas", class = "mb-3"),
-          p("Esta herramienta le permite explorar los datos de las encuestas de manera interactiva. Seleccione los parámetros de interés y visualice los resultados.", class = "lead")
+          p("Esta herramienta le permite explorar preguntas de ambas encuestas. Use la búsqueda por tema para navegar por categorías o la búsqueda por texto para encontrar preguntas específicas.", class = "lead")
         )
       ),
-      
-
       
       # Main content
       div(
         class = "row",
         
-        # Left sidebar with controls
+        # Left sidebar with search tabs
         div(
           class = "col-md-4",
           div(
@@ -123,70 +160,98 @@ explorerUI <- function(id) {
             div(
               class = "card-body",
               
-              # Survey and year selection
-              h4("Selección de Encuesta", class = "card-title mb-3"),
-              div(
-                class = "filter-panel",
-                div(
-                  class = "row mb-3",
+              # Navigation tabs
+              navset_tab(
+                id = ns("search_tabs"),
+                
+                # Theme-based navigation tab
+                nav_panel(
+                  title = "Búsqueda por Tema",
+                  value = "theme_search",
                   div(
-                    class = "col-sm-6",
-                    selectInput(
-                      ns("survey_type"),
-                      "Tipo de Encuesta:",
-                      choices = c(
-                        "Percepción Ciudadana" = "PER",
-                        "Participación Ciudadana y Buen Gobierno" = "PAR"
+                    class = "search-tab-content",
+                    h5("Navegación por Temas", class = "mb-3"),
+                    div(
+                      class = "filter-panel",
+                      selectInput(
+                        ns("theme_filter"),
+                        "Seleccionar Tema:",
+                        choices = c("Seleccione un tema..." = ""),
+                        selected = ""
                       ),
-                      selected = "PER"
+                      selectInput(
+                        ns("subtheme_filter"),
+                        "Seleccionar Subtema:",
+                        choices = c("Primero seleccione un tema" = ""),
+                        selected = ""
+                      ),
+                      selectInput(
+                        ns("question_select_theme"),
+                        "Seleccionar Pregunta:",
+                        choices = c("Primero seleccione un subtema" = ""),
+                        width = "100%"
+                      )
                     )
-                  ),
+                  )
+                ),
+                
+                # Text search tab
+                nav_panel(
+                  title = "Búsqueda por Texto",
+                  value = "text_search",
                   div(
-                    class = "col-sm-6",
-                    selectInput(
-                      ns("survey_year"),
-                      "Año:",
-                      choices = c("2023", "2024"),
-                      selected = "2024"
+                    class = "search-tab-content",
+                    h5("Búsqueda de Preguntas", class = "mb-3"),
+                    div(
+                      class = "filter-panel",
+                      textInput(
+                        ns("search_query"),
+                        "Buscar preguntas:",
+                        placeholder = "Ingrese palabras clave...",
+                        width = "100%"
+                      ),
+                      div(
+                        class = "search-btn-container",
+                        actionButton(
+                          ns("search_button"),
+                          "Buscar",
+                          class = "btn btn-primary",
+                          icon = icon("search")
+                        )
+                      ),
+                      div(
+                        id = ns("search_results_container"),
+                        uiOutput(ns("search_results_info")),
+                        selectInput(
+                          ns("question_select_search"),
+                          "Resultados de búsqueda:",
+                          choices = c("Haga clic en 'Buscar' para ver resultados" = ""),
+                          width = "100%"
+                        )
+                      )
+                    ),
+                    tags$small(
+                      class = "form-text text-muted",
+                      "La búsqueda incluye ambas encuestas (PER y PAR) de 2023 y 2024."
                     )
                   )
                 )
               ),
               
-              # Search and filter
-              h4("Búsqueda de Preguntas", class = "card-title mt-4 mb-3"),
-              div(
-                class = "filter-panel",
-                textInput(
-                  ns("search_query"),
-                  "Buscar:",
-                  placeholder = "Ingrese palabras clave...",
-                  width = "100%"
-                ),
-                div(class = "mb-2"),
-                selectInput(
-                  ns("theme_filter"),
-                  "Filtrar por Tema:",
-                  choices = c("Todos" = "all"),
-                  selected = "all"
-                ),
-                div(class = "mb-2"),
-                selectInput(
-                  ns("subtheme_filter"),
-                  "Filtrar por Subtema:",
-                  choices = c("Todos" = "all"),
-                  selected = "all"
-                ),
-                div(class = "mb-3"),
-                selectInput(
-                  ns("question_select"),
-                  "Seleccionar Pregunta:",
-                  choices = NULL,
-                  width = "100%"
+              # Data source indicator (shown for both tabs)
+              conditionalPanel(
+                condition = sprintf("(input['%s'] != '' && input['%s'] != 'Primero seleccione un subtema') || (input['%s'] != '' && input['%s'] != 'Haga clic en \\'Buscar\\' para ver resultados')", 
+                                  ns("question_select_theme"), ns("question_select_theme"),
+                                  ns("question_select_search"), ns("question_select_search")),
+                div(
+                  class = "mt-3 p-2",
+                  style = "background-color: #f8f9fa; border-radius: 4px;",
+                  h6("Fuente de Datos:", class = "mb-1"),
+                  textOutput(ns("data_source_info"))
                 )
               ),
               
-              # Visualization options
+              # Visualization options (shown for both tabs)
               h4("Opciones de Visualización", class = "card-title mt-4 mb-3"),
               div(
                 class = "filter-panel viz-selector",
@@ -194,7 +259,9 @@ explorerUI <- function(id) {
                 
                 # Filter options (hidden until a question is selected)
                 conditionalPanel(
-                  condition = sprintf("input['%s'] != null", ns("question_select")),
+                  condition = sprintf("(input['%s'] != '' && input['%s'] != 'Primero seleccione un subtema') || (input['%s'] != '' && input['%s'] != 'Haga clic en \\'Buscar\\' para ver resultados')", 
+                                    ns("question_select_theme"), ns("question_select_theme"),
+                                    ns("question_select_search"), ns("question_select_search")),
                   hr(),
                   h5("Filtros"),
                   selectInput(
@@ -222,11 +289,23 @@ explorerUI <- function(id) {
               h4(textOutput(ns("viz_title")), class = "card-title mb-3"),
               div(
                 class = "card-text",
-                p(htmlOutput(ns("question_text"))),
+                # Question information panel
+                conditionalPanel(
+                  condition = sprintf("(input['%s'] != '' && input['%s'] != 'Primero seleccione un subtema') || (input['%s'] != '' && input['%s'] != 'Haga clic en \\'Buscar\\' para ver resultados')", 
+                                    ns("question_select_theme"), ns("question_select_theme"),
+                                    ns("question_select_search"), ns("question_select_search")),
+                  div(
+                    class = "alert alert-info",
+                    htmlOutput(ns("question_text"))
+                  )
+                ),
+                
+                # Visualization container
                 div(
                   id = ns("viz_container"),
                   uiOutput(ns("visualization"))
                 ),
+                
                 # Download options
                 uiOutput(ns("download_options"))
               )
@@ -234,17 +313,19 @@ explorerUI <- function(id) {
           )
         )
       ),
-            # Warning banner
-            div(
-              class = "row",
-              div(
-                class = "col-12",
-                div(
-                  class = "warning-banner",
-                  p(icon("exclamation-triangle"), " Las conclusiones derivadas de las visualizaciones generadas por esta herramienta NO son representativas de Plan Estratégico de Juárez y deben ser interpretadas cuidadosamente. Este es solo un explorador de datos para referencia.")
-                )
-              )
-            ),
+      
+      # Warning banner
+      div(
+        class = "row mt-4",
+        div(
+          class = "col-12",
+          div(
+            class = "warning-banner",
+            p(icon("exclamation-triangle"), " Las conclusiones derivadas de las visualizaciones generadas por esta herramienta NO son representativas de Plan Estratégico de Juárez y deben ser interpretadas cuidadosamente. Este es solo un explorador de datos para referencia.")
+          )
+        )
+      ),
+      
       # Footer
       div(
         class = "row mt-4",

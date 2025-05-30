@@ -1,0 +1,42 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# IDE files
+.vscode/
+.idea/
+*.Rproj
+.Rproj.user/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+logs/
+
+# R specific (keep renv files)
+.Rhistory
+.RData
+.Renviron
+
+# Node modules if any
+node_modules/
+
+# Large data files that aren't needed
+*.zip
+*.tar.gz
+*.csv.bak
+
+# Build artifacts
+Dockerfile
+docker-compose.yml

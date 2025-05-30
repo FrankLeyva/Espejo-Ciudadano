@@ -1,4 +1,3 @@
-# housing_server.R - Simplified with Data Manager Integration
 
 housingServer <- function(input, output, session, current_theme = NULL) {
   # Get dependencies from userData
@@ -71,21 +70,21 @@ housingServer <- function(input, output, session, current_theme = NULL) {
   }, once = TRUE)
   
   # Render outputs using pre-saved plots
-  output$comparison_plot <- renderPlotly({
+  output$housing_comparison_plot <- renderPlotly({
     plots()$housing_comparison_plot
   })
   
   # Render maps using pre-saved maps
   output$materials_map <- renderLeaflet({
-    maps()$housing_materials_map
+    maps()$materials_map
   })
   
   output$spaces_map <- renderLeaflet({
-    maps()$housing_spaces_map
+    maps()$spaces_map
   })
   
   output$location_map <- renderLeaflet({
-    maps()$housing_location_map
+    maps()$location_map
   })
   
   # Render percentage values for value boxes

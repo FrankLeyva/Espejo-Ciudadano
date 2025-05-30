@@ -19,34 +19,23 @@ trustServer <- function(input, output, session, current_theme = NULL) {
   # Load pre-saved plots
   plots <- reactive({
     req(selectedYear())
-    data_manager$get_plots("government", selectedYear())
+    data_manager$get_plots("trust", selectedYear())
   })
   
-  # Load pre-saved maps (if any)
-  maps <- reactive({
-    req(selectedYear())
-    data_manager$get_maps("government", selectedYear())
-  })
-  
-  # Load pre-calculated percentages (if any)
-  percentages <- reactive({
-    req(selectedYear())
-    data_manager$get_percentages("government", selectedYear())
-  })
+
   
   # Render outputs using pre-saved plots
   output$popular_election_institutions_plot <- renderPlotly({
-    plots()$popular_election_institutions_plot
+    plots()$popular_election_institutions
   })
   
   output$public_institutions_media_plot <- renderPlotly({
-    plots()$public_institutions_media_plot
+    plots()$public_institutions_media
   })
   
   output$public_safety_institutions_plot <- renderPlotly({
-    plots()$public_safety_institutions_plot
+    plots()$public_safety_institutions
   })
   
-  # Note: This module doesn't have maps or value boxes in the current implementation
-  # but the structure is maintained for consistency and future expansion
+
 }

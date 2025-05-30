@@ -36,22 +36,22 @@ infrastructureServer <- function(input, output, session, current_theme = NULL) {
   
   # Render Education Map (overview of students)
   output$education_plot <- renderLeaflet({
-    maps()$education_overview_map
+    maps()$education_map
   })
   
   # Render Healthcare Plot (overview chart)
   output$healthcare_plot <- renderPlotly({
-    plots()$healthcare_overview_plot
+    plots()$healthcare_plot
   })
   
   # Render Utilities Plot (overview chart)
   output$utilities_plot <- renderPlotly({
-    plots()$utilities_overview_plot
+    plots()$utilities_plot
   })
   
   # Render Housing Map (overview)
   output$housing_map <- renderLeaflet({
-    maps()$housing_overview_map
+    maps()$housing_map
   })
   
   # Render percentage values for value boxes (if any)

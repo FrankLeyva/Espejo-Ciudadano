@@ -76,40 +76,35 @@ healthcareServer <- function(input, output, session, current_theme = NULL) {
     update_tooltip_content(session, "healthcare_tooltip", initial_tooltip)
   }, once = TRUE)
   
-  # Render outputs using pre-saved plots
-  output$healthcare_satisfaction_plot <- renderPlotly({
-    plots()$healthcare_satisfaction_plot
-  })
-  
-  output$healthcare_aspects_plot <- renderPlotly({
-    plots()$healthcare_aspects_plot
-  })
+
   
   # Render maps using pre-saved maps
-  output$healthcare_general_map <- renderLeaflet({
-    maps()$healthcare_general_map
+  output$health_services_map <- renderLeaflet({
+    maps()$health_services_map
   })
   
-  output$healthcare_tiempo_map <- renderLeaflet({
-    maps()$healthcare_tiempo_map
+  output$attention_time_map <- renderLeaflet({
+    maps()$attention_time_map
   })
   
-  output$healthcare_instalaciones_map <- renderLeaflet({
-    maps()$healthcare_instalaciones_map
+  output$facilities_map <- renderLeaflet({
+    maps()$facilities_map
   })
   
-  output$healthcare_medicamentos_map <- renderLeaflet({
-    maps()$healthcare_medicamentos_map
+  output$medication_map <- renderLeaflet({
+    maps()$medication_map
   })
   
-  output$healthcare_servicio_map <- renderLeaflet({
-    maps()$healthcare_servicio_map
+  output$service_quality_map <- renderLeaflet({
+    maps()$service_quality_map
   })
   
-  output$healthcare_distancia_map <- renderLeaflet({
-    maps()$healthcare_distancia_map
+  output$distance_map <- renderLeaflet({
+    maps()$distance_map
   })
-  
+  output$healthcare_providers_chart <- renderPlotly({
+    plots()$healthcare_providers_chart
+  })
   # Render percentage values for value boxes
   output$healthcare_general_avg <- renderText({
     percentages()$healthcare_general_avg

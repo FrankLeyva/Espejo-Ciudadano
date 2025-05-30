@@ -1,0 +1,245 @@
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘bslib’
+
+The following object is masked from ‘package:utils’:
+
+    page
+
+
+Attaching package: ‘DT’
+
+The following objects are masked from ‘package:shiny’:
+
+    dataTableOutput, renderDataTable
+
+Loading required package: ggplot2
+
+Attaching package: ‘plotly’
+
+The following object is masked from ‘package:ggplot2’:
+
+    last_plot
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+The following object is masked from ‘package:graphics’:
+
+    layout
+
+Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ lubridate 1.9.4     ✔ tibble    3.2.1
+✔ purrr     1.0.4     ✔ tidyr     1.3.1
+✔ readr     2.1.5     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ plotly::filter() masks dplyr::filter(), stats::filter()
+✖ dplyr::lag()     masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+Attaching package: ‘igraph’
+
+The following objects are masked from ‘package:lubridate’:
+
+    %--%, union
+
+The following objects are masked from ‘package:purrr’:
+
+    compose, simplify
+
+The following object is masked from ‘package:tidyr’:
+
+    crossing
+
+The following object is masked from ‘package:tibble’:
+
+    as_data_frame
+
+The following object is masked from ‘package:plotly’:
+
+    groups
+
+The following objects are masked from ‘package:dplyr’:
+
+    as_data_frame, groups, union
+
+The following objects are masked from ‘package:stats’:
+
+    decompose, spectrum
+
+The following object is masked from ‘package:base’:
+
+    union
+
+
+Attaching package: ‘shinyjs’
+
+The following object is masked from ‘package:lubridate’:
+
+    show
+
+The following object is masked from ‘package:shiny’:
+
+    runExample
+
+The following objects are masked from ‘package:methods’:
+
+    removeClass, show
+
+
+Attaching package: ‘colourpicker’
+
+The following objects are masked from ‘package:shinyjs’:
+
+    colourInput, colourPicker, runExample, updateColourInput
+
+The following object is masked from ‘package:shiny’:
+
+    runExample
+
+Loaded module: R/binary_module.R
+Loaded module: R/categorical_module.R
+Loaded module: R/interval_module.R
+Loaded module: R/ordinal_module.R
+Loaded module: R/nominal_module.R
+Loaded module: R/razon_module.R
+Loaded module: R/special_module.R
+Warning: Navigation containers expect a collection of `bslib::nav_panel()`/`shiny::tabPanel()`s and/or `bslib::nav_menu()`/`shiny::navbarMenu()`s. Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents.
+
+Listening on http://127.0.0.1:46467
+DataManager initialized with shared cache
+Starting data preloading...
+Loading plots for wellness 2023 from RDS
+Loading maps for wellness 2023 from RDS
+Loading plots for economic 2023 from RDS
+Loading maps for economic 2023 from RDS
+Loading plots for cultural 2023 from RDS
+Loading plots for identity 2023 from RDS
+Loading maps for identity 2023 from RDS
+Loading plots for environment 2023 from RDS
+Loading maps for environment 2023 from RDS
+Loading plots for wellness 2024 from RDS
+Loading maps for wellness 2024 from RDS
+Loading plots for economic 2024 from RDS
+Loading maps for economic 2024 from RDS
+Loading plots for cultural 2024 from RDS
+Loading plots for identity 2024 from RDS
+Loading maps for identity 2024 from RDS
+Loading plots for environment 2024 from RDS
+Loading maps for environment 2024 from RDS
+Data preloading completed in 0.77 seconds
+Loaded 24/24 items successfully
+Cache performance - Hits: 0, Misses: 24, Hit rate: 0.0%, Cache size: 24 items
+Loaded module: R/wellness/wellness_server.R
+Loaded module: R/wellness/wellness_ui.R
+Loaded module: R/government/government_server.R
+Loaded module: R/government/government_ui.R
+Loading plots for government 2024 from RDS
+Loaded module: R/government/inequality_server.R
+Loaded module: R/government/inequality_ui.R
+Loading plots for inequality 2024 from RDS
+Loading maps for inequality 2024 from RDS
+Warning: Error in value[[3L]]: Couldn't normalize path in `addResourcePath`, with arguments: `prefix` = 'leaflet-providers-2.0.0'; `directoryPath` = 'C:/Users/Frank/AppData/Local/R/cache/R/renv/cache/v5/windows/R-4.5/x86_64-w64-mingw32/leaflet.providers/2.0.0/c0b81ad9d5d932772f7a457ac398cf36/leaflet.providers'
+  111: stop
+  110: value[[3L]]
+  109: tryCatchOne
+  108: tryCatchList
+  107: tryCatch
+  106: addResourcePath
+  105: FUN
+  104: lapply
+  103: renderWidget
+  102: transform
+  101: func
+   99: f
+   98: Reduce
+   89: do
+   88: hybrid_chain
+   87: renderFunc
+   86: output$rights_violation_map
+    1: runApp
+Warning: Error in value[[3L]]: Couldn't normalize path in `addResourcePath`, with arguments: `prefix` = 'leaflet-providers-2.0.0'; `directoryPath` = 'C:/Users/Frank/AppData/Local/R/cache/R/renv/cache/v5/windows/R-4.5/x86_64-w64-mingw32/leaflet.providers/2.0.0/c0b81ad9d5d932772f7a457ac398cf36/leaflet.providers'
+  111: stop
+  110: value[[3L]]
+  109: tryCatchOne
+  108: tryCatchList
+  107: tryCatch
+  106: addResourcePath
+  105: FUN
+  104: lapply
+  103: renderWidget
+  102: transform
+  101: func
+   99: f
+   98: Reduce
+   89: do
+   88: hybrid_chain
+   87: renderFunc
+   86: output$inequality_perception_map
+    1: runApp
+Loaded module: R/government/trust_server.R
+Loaded module: R/government/trust_ui.R
+Loading plots for trust 2024 from RDS
+Loaded module: R/government/accountability_server.R
+Loaded module: R/government/accountability_ui.R
+Loading plots for accountability 2024 from RDS
+Loaded module: R/government/representation_server.R
+Loaded module: R/government/representation_ui.R
+Loading plots for representation 2024 from RDS
+Loading maps for representation 2024 from RDS
+Warning: Error in value[[3L]]: Couldn't normalize path in `addResourcePath`, with arguments: `prefix` = 'leaflet-providers-2.0.0'; `directoryPath` = 'C:/Users/Frank/AppData/Local/R/cache/R/renv/cache/v5/windows/R-4.5/x86_64-w64-mingw32/leaflet.providers/2.0.0/c0b81ad9d5d932772f7a457ac398cf36/leaflet.providers'
+  111: stop
+  110: value[[3L]]
+  109: tryCatchOne
+  108: tryCatchList
+  107: tryCatch
+  106: addResourcePath
+  105: FUN
+  104: lapply
+  103: renderWidget
+  102: transform
+  101: func
+   99: f
+   98: Reduce
+   89: do
+   88: hybrid_chain
+   87: renderFunc
+   86: output$regidor_knowledge_map
+    1: runApp
+Loaded module: R/government/expectations_server.R
+Loaded module: R/government/expectations_ui.R
+Loading plots for expectations 2024 from RDS
+Loading maps for expectations 2024 from RDS
+Warning: Error in value[[3L]]: Couldn't normalize path in `addResourcePath`, with arguments: `prefix` = 'leaflet-providers-2.0.0'; `directoryPath` = 'C:/Users/Frank/AppData/Local/R/cache/R/renv/cache/v5/windows/R-4.5/x86_64-w64-mingw32/leaflet.providers/2.0.0/c0b81ad9d5d932772f7a457ac398cf36/leaflet.providers'
+  111: stop
+  110: value[[3L]]
+  109: tryCatchOne
+  108: tryCatchList
+  107: tryCatch
+  106: addResourcePath
+  105: FUN
+  104: lapply
+  103: renderWidget
+  102: transform
+  101: func
+   99: f
+   98: Reduce
+   89: do
+   88: hybrid_chain
+   87: renderFunc
+   86: output$municipal_expectations_map
+    1: runApp
+

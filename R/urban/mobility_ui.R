@@ -1,31 +1,11 @@
+# mobility_ui.R - Updated to follow new styling patterns
 mobilityUI <- function() {
   page_fluid(
-    class = "section-movilidad",
-
+    class = "section-movilidad", 
     useShinyjs(),
     init_tooltips(),
 
-    tags$head(
-      tags$style(HTML("
-        /* Override pill navigation styling for this page */
-        .movilidad-pills .nav-pills .nav-link:not(.active) {
-          background-color: rgba(240, 240, 240, 0.8);
-color: var(--movilidad-color) !important;
-            border: 1px solid rgba(30, 229, 57, 0.2);
-          font-weight: bold !important;
-        }
-        
-        .movilidad-pills .nav-pills .nav-link:hover:not(.active) {
-          background-color: rgba(67, 160, 71, 0.1);
-        }
-             .movilidad-pills .nav-pills .nav-link.active {
-          background-color: var(--movilidad-color) !important; /* Bienestar primary color */
-          color: white !important;
-          font-weight: bold !important;
-          border: none !important;
-        }
-      "))
-    ),
+    # Back navigation
     div(
       class = "mb-4",
       tags$a(
@@ -33,79 +13,152 @@ color: var(--movilidad-color) !important;
         class = "text-decoration-none",
         onclick = "Shiny.setInputValue('nav_target', 'urban', {priority: 'event'}); return false;",
         tags$i(class = "fas fa-arrow-left me-2"),
-        "Volver a Desarrollo Urbano"
+        "Volver a Movilidad Urbana"
       )
     ),
+    
     # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
-          style="border-top: 4px solid var(--movilidad-color)",
-
-          h2("Movilidad Urbana", class = "text-center")
+          style = paste0("background-color: var(--movilidad-color) !important; 
+            color: white !important; 
+            font-family: var(--font-display) !important;
+            font-weight: bolder !important; 
+            text-align: center !important; 
+            border-bottom: none !important;"),
+          h1("Movilidad", class = "dashboard-header")
         )
       )
     ),
     
-    # Vehicle and bicycle distribution
-    layout_columns(
-      col_widths = c(6, 6),
+    # Vehicle and bicycle distribution - using plot cards grid
+    div(
+      class = "plot-cards-grid two-columns",
       
-      # Bicycles card
-      card(
-        card_header(
+      # Bicycles Plot Card
+      div(
+        class = "plot-card plot-card-movilidad",
+        
+        # Plot Header
         div(
-          class = "d-flex align-items-center",
-          "Bicicletas por Hogar",
-    create_tooltip("<b>ID</b>: Suma de PER Q68, Q69, Q70 <br>
-          <b>Pregunta</b>: Cuantas bicicletas para NIÑOS/ADOLESCENTES/ADULTOS hay disponibles en su hogar? (poner 0 si no se cuenta con ninguna de este tipo) <br>
-           <b>Escala</b>: Numérica")
-     )
-    ),
-        plotlyOutput("bicycles_pie", height = "400px")
+          class = "plot-header",
+          div(
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
+              "Bicicletas por Hogar",
+              create_tooltip("<b>ID</b>: Suma de PER Q68, Q69, Q70 <br>
+                <b>Pregunta</b>: Cuantas bicicletas para NIÑOS/ADOLESCENTES/ADULTOS hay disponibles en su hogar? (poner 0 si no se cuenta con ninguna de este tipo) <br>
+                 <b>Escala</b>: Numérica")
+            )
+          )
+        ),
+        
+        # Plot Content
+        div(
+          class = "plot-content",
+          plotlyOutput("bicycles_pie", height = "400px")
+        )
       ),
       
-      # Vehicles card
-      card(
-        card_header(
-            div(
-              class = "d-flex align-items-center",
+      # Vehicles Plot Card
+      div(
+        class = "plot-card plot-card-movilidad",
+        
+        # Plot Header
+        div(
+          class = "plot-header",
+          div(
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
               "Vehículos Motorizados por Hogar",
-        create_tooltip("<b>ID</b>: PER Q66 <br>
-              <b>Pregunta</b>: 	Cuantos vehiculos de motor hay disponibles en su hogar? (Si no tiene ninguno, poner 0) <br>
-               <b>Escala</b>: Numérica")
-         )
+              create_tooltip("<b>ID</b>: PER Q66 <br>
+                <b>Pregunta</b>: Cuantos vehiculos de motor hay disponibles en su hogar? (Si no tiene ninguno, poner 0) <br>
+                 <b>Escala</b>: Numérica")
+            )
+          )
         ),
-        plotlyOutput("vehicles_pie", height = "400px")
+        
+        # Plot Content
+        div(
+          class = "plot-content",
+          plotlyOutput("vehicles_pie", height = "400px")
+        )
       )
     ),
     
-    # Transportation modes tabset panel
-    card(
-      card_header(
-        div(
-          class = "d-flex justify-content-between align-items-center",
+    # Transportation modes tabset - using new tab structure
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
+        id = "transport_modes_tabs",
+        
+        # Work Transport Tab
+        nav_panel(
+          title = "Transporte al Trabajo",
+          value = "work_transport",
+          
           div(
-            class = "d-flex align-items-center",
-          "Modos de Transporte",
-          create_dynamic_tooltip("transportation_tooltip")
-        )
-      )
-    ),
-      div(class = "movilidad-pills",
-      navset_pill(
-        id = "transport_tabs",
-        tabPanel(
-          "Transporte al Trabajo",
-          plotlyOutput("work_transport_plot", height = "550px")
+            class = "plot-card plot-card-movilidad",
+            
+            # Plot Header
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Modos de Transporte Utilizados para ir al Trabajo",
+                  create_tooltip("<b>ID</b>: PER Q72.1-Q72.12 <br>
+                    <b>Pregunta</b>: ¿Cuáles de los siguientes medios de transporte utiliza para ir al trabajo? <br>
+                     <b>Escala</b>: 1=Sí; 2=No (múltiples opciones)")
+                )
+              )
+            ),
+            
+            # Plot Content
+            div(
+              class = "plot-content",
+              plotlyOutput("work_transport_plot", height = "550px")
+            )
+          )
         ),
-        tabPanel(
-          "Transporte General",
-          plotlyOutput("general_transport_plot", height = "550px")
+        
+        # General Transport Tab
+        nav_panel(
+          title = "Transporte General",
+          value = "general_transport",
+          
+          div(
+            class = "plot-card plot-card-movilidad",
+            
+            # Plot Header
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Modos de Transporte Utilizados de Manera General",
+                  create_tooltip("<b>ID</b>: PER Q172.1-Q172.12 <br>
+                    <b>Pregunta</b>: ¿Cuáles de los siguientes medios de transporte utiliza de manera general? <br>
+                     <b>Escala</b>: 1=Sí; 2=No (múltiples opciones)")
+                )
+              )
+            ),
+            
+            # Plot Content
+            div(
+              class = "plot-content",
+              plotlyOutput("general_transport_plot", height = "550px")
+            )
+          )
         )
       )
-    )
     )
   )
 }

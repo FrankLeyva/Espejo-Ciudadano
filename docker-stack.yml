@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      - --api.dashboard=true
+      - --api.insecure=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --providers.docker=true
+      - --providers.docker.swarmmode=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=espejo_espejo-network  # Note: swarm prefixes network name
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --log.level=DEBUG  # Temporarily increase logging
+      - --accesslog=true
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+      - target: 443
+        published: 443
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-data:/data
+    networks:
+      - espejo-network
+    deploy:
+      placement:
+        constraints: 
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  espejo-ciudadano:
+    image: espejo-ciudadano:latest
+    environment:
+      - SHINY_LOG_STDERR=1
+    networks:
+      - espejo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3838/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.espejo-app.rule=Host(`${DOMAIN}`)
+        - traefik.http.routers.espejo-app.entrypoints=websecure
+        - traefik.http.routers.espejo-app.tls.certresolver=letsencrypt
+        - traefik.http.routers.espejo-app.service=espejo-app
+        - traefik.http.services.espejo-app.loadbalancer.server.port=3838
+        - traefik.http.routers.espejo-app.priority=200
+
+networks:
+  espejo-network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  traefik-data:
+    driver: local

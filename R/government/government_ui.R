@@ -1,29 +1,30 @@
-# government_ui.R
+# government_ui.R - Updated to match new styling system
 governmentUI <- function() {
+  svg_icon <- function(filename, class = "nav-card-icon", width = "48", height = "48") {
+    svg_path <- file.path("svg", filename)
+    
+    # Check if file exists
+    full_path <- file.path("www", svg_path)
+    if (!file.exists(full_path)) {
+      warning(paste("SVG file not found:", full_path))
+      return(div(class = class, "⚠️"))  # Fallback icon
+    }
+    
+    tags$div(
+      class = class,
+      tags$img(
+        src = svg_path,
+        alt = tools::file_path_sans_ext(filename),
+        width = width,
+        height = height,
+        style = "max-width: 100%; height: auto;"
+      )
+    )
+  }
+  
   page_fluid(
     class = "section-gobierno",
     useShinyjs(),
-    tags$head(
-      tags$style(HTML("
-        /* Override pill navigation styling for this page */
-        .gobierno-pills .nav-pills .nav-link:not(.active) {
-          background-color: rgba(240, 240, 240, 0.8);
-color: var(--gobierno-color) !important;
-            border: 1px solid rgba(229, 126, 30, 0.2);
-          font-weight: bold !important;
-        }
-        
-        .gobierno-pills .nav-pills .nav-link:hover:not(.active) {
-          background-color: rgba(160, 115, 67, 0.1);
-        }
-             .gobierno-pills .nav-pills .nav-link.active {
-          background-color: var(--gobierno-color) !important; 
-          color: white !important;
-          font-weight: bold !important;
-          border: none !important;
-        }
-      "))
-    ),
     init_tooltips(),
 
     # Header
@@ -32,167 +33,319 @@ color: var(--gobierno-color) !important;
       card(
         card_header(
           style = paste0("background-color: var(--gobierno-color) !important; 
-        color: white !important; 
-        font-weight: bolder !important; 
-        text-align: center !important; 
-        border-bottom: none !important;"),
-          h2("Percepción General del Gobierno", class = "text-center")
+            color: white !important; 
+            font-family: var(--font-display) !important;
+            font-weight: bolder !important; 
+            text-align: center !important; 
+            border-bottom: none !important;"),
+          h1("Instituciones", class = "dashboard-header")
         )
       )
     ),
-       
-    layout_columns(
-      col_widths = c(4,4,4),
+    
+    # Navigation Cards Section
+    div(
+      class = "section-nav-grid",
       
-      # Inequality Dashboard Card
+      # Inequality Card
       div(
-        id = "nav_inequality_card",
+        class = "page-card page-card-gobierno section-nav-card",
         onclick = "Shiny.setInputValue('nav_target', 'inequality', {priority: 'event'})",
-        card(
-          class = "nav-card-gobierno",
-
-          card_body(
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("slash-circle")),
-            h4(class = "nav-card-title text-center", "Desigualdad"),
-            p(class = "text-center", "Análisis de indicadores de desigualdad")
+        
+        div(
+          class = "page-header",
+          div(
+            class = "page-header-content",
+            h4(class = "page-card-title", "Desigualdad"),
+            p(class = "page-card-subtitle", "¿Cómo perciben los ciudadanos la desigualdad en la ciudad?")
+          ),
+          div(
+            class = "page-icon",
+            svg_icon("Cap--12.svg", width = "40", height = "40")
           )
         )
       ),
+      
+      # Trust Card
       div(
-
-        id = "nav_trust_card",
+        class = "page-card page-card-gobierno section-nav-card",
         onclick = "Shiny.setInputValue('nav_target', 'trust', {priority: 'event'})",
-        card(
-          card_body(
-            class = "nav-card-gobierno",
-
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("bar-chart")),
-            h4(class = "nav-card-title text-center", "Confianza"),
-            p(class = "text-center", "Análisis de indicadores de confianza en las instituciones")
+        
+        div(
+          class = "page-header",
+          div(
+            class = "page-header-content",
+            h4(class = "page-card-title", "Confianza Institucional"),
+            p(class = "page-card-subtitle", "¿Qué tan confiables son las instituciones públicas?")
+          ),
+          div(
+            class = "page-icon",
+            svg_icon("Cap--44.svg", width = "40", height = "40")
           )
         )
       ),
-      # Accountability Dashboard Card
+      
+      # Accountability Card
       div(
-
-        id = "nav_accountability_card",
+        class = "page-card page-card-gobierno section-nav-card",
         onclick = "Shiny.setInputValue('nav_target', 'accountability', {priority: 'event'})",
-        card(
-          class = "nav-card-gobierno",
-
-          card_body(
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("file-earmark-check")),
-            h4(class = "nav-card-title text-center", "Rendición de Cuentas"),
-            p(class = "text-center", "Estadísticas sobre transparencia y rendición")
+        
+        div(
+          class = "page-header",
+          div(
+            class = "page-header-content",
+            h4(class = "page-card-title", "Rendición de Cuentas"),
+            p(class = "page-card-subtitle", "¿Cómo evalúan la transparencia gubernamental?")
+          ),
+          div(
+            class = "page-icon",
+            svg_icon("Cap--45.svg", width = "40", height = "40")
           )
         )
-      )
-    ),
-    layout_columns(
-      col_widths = c(-2,4,4,-2),
+      ),
+      
+      # Political Representation Card
       div(
-
-        id = "nav_political_card",
+        class = "page-card page-card-gobierno section-nav-card",
         onclick = "Shiny.setInputValue('nav_target', 'representation', {priority: 'event'})",
-        card(
-          class = "nav-card-gobierno",
-
-          card_body(
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("person-vcard")),
-            h4(class = "nav-card-title text-center", "Representación Política"),
-            p(class = "text-center", "Evaluación de la representación política")
+        
+        div(
+          class = "page-header",
+          div(
+            class = "page-header-content",
+            h4(class = "page-card-title", "Representación Política"),
+            p(class = "page-card-subtitle", "¿Conocen los ciudadanos a sus representantes?")
+          ),
+          div(
+            class = "page-icon",
+            svg_icon("Cap--46.svg", width = "40", height = "40")
           )
         )
       ),
       
-      # Government Expectations Dashboard Card
+      # Government Expectations Card
       div(
-
-        id = "nav_gov_expectations_card",
+        class = "page-card page-card-gobierno section-nav-card",
         onclick = "Shiny.setInputValue('nav_target', 'expectations', {priority: 'event'})",
-        card(
-          class = "nav-card-gobierno",
-
-          card_body(
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("graph-up")),
-            h4(class = "nav-card-title text-center", "Expectativas de Gobierno"),
-            p(class = "text-center", "Análisis de las expectativas ciudadanas")
+        
+        div(
+          class = "page-header",
+          div(
+            class = "page-header-content",
+            h4(class = "page-card-title", "Expectativas de Gobierno"),
+            p(class = "page-card-subtitle", "¿Qué esperan los ciudadanos de sus gobiernos?")
+          ),
+          div(
+            class = "page-icon",
+            svg_icon("Cap--18.svg", width = "40", height = "40")
           )
         )
       )
     ),
     
-    layout_columns(
-      col_widths = c(6, 6),
+    # Content Section 1: Knowledge of Officials (Tabbed Content)
+    div(
+      class = "plot-tabs-container",
       
-      # Card 1: Knowledge of officials (tabset with pie charts)
-      card(
-        card_header(
+      navset_tab(
+        id = "officials_knowledge_tabs",
+        
+        # Regidor Tab
+        nav_panel(
+          title = "Conocimiento de Regidor/a",
+          value = "regidor_knowledge",
+          
           div(
-          class = "d-flex align-items-center",
-          "Conocimiento de Funcionarios Públicos",
-          create_dynamic_tooltip("knowledge_pub_tooltip")
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento del Regidor/a por Distrito",
+                  create_tooltip("<b>ID</b>: PAR Q16.3 <br>
+                    <b>Pregunta</b>: ¿Conoce usted el nombre de su regidor/a? <br>
+                     <b>Escala</b>: 1=Sí; 2=No")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("officials_knowledge_regidor_plot", height = "450px")
+            )
           )
         ),
-        div(class = "gobierno-pills",
-        navset_pill(
-          tabPanel("Regidor/a", plotlyOutput("officials_knowledge_regidor_plot", height = "400px")),
-          tabPanel("Síndico/a", plotlyOutput("officials_knowledge_sindico_plot", height = "400px")),
-          tabPanel("Diputado/a Local y/o Estatal", plotlyOutput("officials_knowledge_dipupadol_plot", height = "400px")),
-          tabPanel("Diputado/a Federal", plotlyOutput("officials_knowledge_diputadof_plot", height = "400px"))
-        )
-      )
-      ),
-      
-      # Card 2: Perception of inequality
-      card(
-        card_header(
+        
+        # Sindico Tab
+        nav_panel(
+          title = "Conocimiento de Síndico/a",
+          value = "sindico_knowledge",
+          
           div(
-            class = "d-flex align-items-center",
-          "Percepción de la Desigualdad",
-          create_tooltip("<b>ID</b>: PER Q87 <br>
-            <b>Pregunta</b>: Por distintos motivos, no todas las personas que habitan en Juarez pueden acceder en condiciones de igualdad a los bienes y servicios, ni tienen las mismas oportunidades en la vida. Como describiría la desigualdad que se vive hoy en día? <br>
-             <b>Escala</b>: 1=Muy alta;2=Alta;3=Media;4=Baja;5=Muy baja;6=No sabe/No contestó")
-			 )
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento del Síndico/a por Distrito",
+                  create_tooltip("<b>ID</b>: PAR Q16.4 <br>
+                    <b>Pregunta</b>: ¿Conoce usted el nombre de su síndico/a? <br>
+                     <b>Escala</b>: 1=Sí; 2=No")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("officials_knowledge_sindico_plot", height = "450px")
+            )
+          )
         ),
-        plotlyOutput("inequality_perception_plot", height = "400px")
+        
+        # Local/State Deputy Tab
+        nav_panel(
+          title = "Diputado/a Local/Estatal",
+          value = "diputado_local_knowledge",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento del Diputado/a Local/Estatal por Distrito",
+                  create_tooltip("<b>ID</b>: PAR Q16.2 <br>
+                    <b>Pregunta</b>: ¿Conoce usted el nombre de su diputado/a local y/o estatal? <br>
+                     <b>Escala</b>: 1=Sí; 2=No")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("officials_knowledge_dipupadol_plot", height = "450px")
+            )
+          )
+        ),
+        
+        # Federal Deputy Tab
+        nav_panel(
+          title = "Diputado/a Federal",
+          value = "diputado_federal_knowledge",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento del Diputado/a Federal por Distrito",
+                  create_tooltip("<b>ID</b>: PAR Q16.1 <br>
+                    <b>Pregunta</b>: ¿Conoce usted el nombre de su diputado/a federal? <br>
+                     <b>Escala</b>: 1=Sí; 2=No")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("officials_knowledge_diputadof_plot", height = "450px")
+            )
+          )
+        )
       )
     ),
     
-    # Second row of indicators
-    layout_columns(
-      col_widths = c(6, 6),
+    # Content Section 2: Main Government Indicators
+    div(
+      class = "plot-cards-grid two-columns",
       
-      # Card 3: Government expectations
-      card(
-        card_header(
+      # Inequality Perception Plot Card
+      div(
+        class = "plot-card plot-card-gobierno",
+        
+        div(
+          class = "plot-header",
           div(
-            class = "d-flex align-items-center",
-            "Expectativas Ciudadanas sobre el Gobierno",
-            create_tooltip("<b>ID</b>: PAR Q19 Q20 Q21 <br>
-              <b>Pregunta</b>: Como calificaria la expectativa que tiene en este momento del gobierno Municipal  / Estatal / Federal ?<br>
-               <b>Escala</b>: 1-10")
-         )),
-        plotlyOutput("government_expectations_plot", height = "500px")
-      ),
-      
-      # Card 4: Important problems
-      card(
-        card_header(
-          div(
-            class = "d-flex align-items-center",
-          "Problemas Importantes de Ciudad Juárez",
-          create_tooltip("<b>ID</b>: PER Q81 Q82 <br>
-              <b>Pregunta</b>: Para usted, cuales son los 2 problemas mas importantes de Juarez? <br>
-               <b>Escala</b>: 19 categorías")
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
+              "Percepción de la Desigualdad en Ciudad Juárez",
+              create_tooltip("<b>ID</b>: PER Q87 <br>
+                <b>Pregunta</b>: Por distintos motivos, no todas las personas que habitan en Juárez pueden acceder en condiciones de igualdad a los bienes y servicios, ni tienen las mismas oportunidades en la vida. ¿Cómo describiría la desigualdad que se vive hoy en día? <br>
+                 <b>Escala</b>: 1=Muy alta; 2=Alta; 3=Media; 4=Baja; 5=Muy baja; 6=No sabe/No contestó")
+            )
           )
         ),
-        plotlyOutput("important_problems_plot", height = "500px")
+        
+        div(
+          class = "plot-content",
+          plotlyOutput("inequality_perception_plot", height = "450px")
+        )
+      ),
+      
+      # Government Expectations Plot Card
+      div(
+        class = "plot-card plot-card-gobierno",
+        
+        div(
+          class = "plot-header",
+          div(
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
+              "Expectativas Ciudadanas sobre el Gobierno",
+              create_tooltip("<b>ID</b>: PAR Q19, Q20, Q21 <br>
+                <b>Pregunta</b>: ¿Cómo calificaría la expectativa que tiene en este momento del gobierno Municipal/Estatal/Federal? <br>
+                 <b>Escala</b>: 1-10")
+            )
+          )
+        ),
+        
+        div(
+          class = "plot-content",
+          plotlyOutput("government_expectations_plot", height = "450px")
+        )
+      )
+    ),
+    
+    # Content Section 3: Important Problems (Full Width)
+    div(
+      class = "plot-cards-grid single-column",
+      
+      div(
+        class = "plot-card plot-card-gobierno",
+        
+        div(
+          class = "plot-header",
+          div(
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
+              "Principales Problemas de Ciudad Juárez",
+              create_tooltip("<b>ID</b>: PER Q81, Q82 <br>
+                <b>Pregunta</b>: Para usted, ¿cuáles son los 2 problemas más importantes de Juárez? <br>
+                 <b>Escala</b>: 19 categorías")
+            )
+          )
+        ),
+        
+        div(
+          class = "plot-content",
+          plotlyOutput("important_problems_plot", height = "550px")
+        )
       )
     )
   )

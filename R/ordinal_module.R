@@ -996,7 +996,7 @@ create_ordinal_gender_dumbbell <- function(data, custom_theme = NULL) {
     layout(showlegend = TRUE)
 }
 
-create_ordinal_bars <- function(data, orientation = "v", custom_theme = NULL) {
+create_ordinal_bars <- function(data, orientation = "v", custom_theme = NULL, title="") {
   # Check if we have valid data
   if (nrow(data) == 0) {
     return(plot_ly() %>% 
@@ -1067,7 +1067,7 @@ create_ordinal_bars <- function(data, orientation = "v", custom_theme = NULL) {
       marker = list(color = district_colors)
     ) %>%
       apply_plotly_theme(
-        title = "Distribución por Distrito",
+        title = title,
         xlab = "Valor Promedio",
         ylab = "Distrito",
         custom_theme = custom_theme

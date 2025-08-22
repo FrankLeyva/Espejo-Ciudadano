@@ -25,14 +25,31 @@ theme_config <- list(
     diverging = colorRampPalette(c("#E76F51", "#F8F9FA", "#0D6EFD"))(11)
   ),
   
-  # Enhanced typography
   typography = list(
-    font_family = "'Montserrat', 'Segoe UI', Arial, sans-serif",
+    # Primary font stack for body text and labels
+    font_family = "'mr-eaves-sans', 'Roboto', 'Segoe UI', Arial, sans-serif",
+    
+    # Heading font for titles
+    heading_family = "'abril-fatface', 'mr-eaves-sans', Georgia, serif",
+    
+    # Display font for special elements
+    display_family = "'Nexus', 'abril-fatface', 'Times New Roman', serif",
+    
+    # Font sizes
     sizes = list(
-      title = 22,
+      title = 18,
       subtitle = 18,
       axis = 12,
-      text = 14
+      text = 14,
+      legend = 12
+    ),
+    
+    # Font weights
+    weights = list(
+      light = 300,
+      normal = 400,
+      medium = 500,
+      bold = 700
     )
   ),
   
@@ -101,6 +118,42 @@ theme_config <- list(
     )
   )
 )
+wrap_text <- function(text, width = 60, use_html = TRUE) {
+  if (is.null(text) || text == "" || nchar(text) <= width) {
+    return(text)
+  }
+  
+  # Split into words
+  words <- strsplit(text, "\\s+")[[1]]
+  
+  if (length(words) <= 1) {
+    return(text)
+  }
+  
+  # Build lines
+  lines <- character()
+  current_line <- words[1]
+  
+  for (i in 2:length(words)) {
+    # Check if adding next word would exceed width
+    test_line <- paste(current_line, words[i])
+    
+    if (nchar(test_line) <= width) {
+      current_line <- test_line
+    } else {
+      # Start new line
+      lines <- c(lines, current_line)
+      current_line <- words[i]
+    }
+  }
+  
+  # Add final line
+  lines <- c(lines, current_line)
+  
+  # Join with appropriate break character
+  break_char <- if (use_html) "<br>" else "\n"
+  return(paste(lines, collapse = break_char))
+}
 
 #' Function to get the current section theme
 #' @param section_name name of the section (bienestar, movilidad, etc.)
@@ -148,16 +201,23 @@ get_section_theme <- function(section_name = NULL) {
 #' @param ylab y-axis label
 #' @param custom_theme optional custom theme to override defaults
 #' @export
-apply_plotly_theme <- function(p, title = "", xlab = "", ylab = "", custom_theme = NULL) {
+apply_plotly_theme <- function(p, title = "", xlab = "", ylab = "", custom_theme = NULL,
+wrap_title = TRUE, title_width = 80) {
   # Use provided custom theme or fall back to default theme_config
   active_theme <- if (!is.null(custom_theme)) custom_theme else theme_config
+  
+  display_title <- if (wrap_title && nchar(title) > title_width) {
+    wrap_text(title, width = title_width, use_html = TRUE)
+  } else {
+    title
+  }
   
   p %>%
     layout(
       title = list(
-        text = title,
+        text = display_title,
         font = list(
-          family = active_theme$typography$font_family,
+          family = active_theme$typography$heading_family,  # Use heading font for titles
           size = active_theme$typography$sizes$title,
           color = active_theme$colors$text
         )

@@ -132,7 +132,6 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
     },
     content = function(file) {
       map_path <- data_manager$get_map_path("mapa_medio_ambiente_Aire", selectedYear())
-      
       if (file.exists(map_path)) {
         file.copy(map_path, file)
       } else {
@@ -148,7 +147,6 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
     },
     content = function(file) {
       map_path <- data_manager$get_map_path("mapa_medio_ambiente_Agua", selectedYear())
-      
       if (file.exists(map_path)) {
         file.copy(map_path, file)
       } else {
@@ -164,7 +162,6 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
     },
     content = function(file) {
       map_path <- data_manager$get_map_path("mapa_medio_ambiente_Arbolado", selectedYear())
-      
       if (file.exists(map_path)) {
         file.copy(map_path, file)
       } else {
@@ -180,7 +177,6 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
     },
     content = function(file) {
       map_path <- data_manager$get_map_path("mapa_medio_ambiente_Limpieza", selectedYear())
-      
       if (file.exists(map_path)) {
         file.copy(map_path, file)
       } else {
@@ -216,7 +212,6 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
       } else {
         "mapa_medio_ambiente_Agua"
       }
-      
       map_path <- data_manager$get_map_path(map_filename, selectedYear())
       
       if (file.exists(map_path)) {
@@ -227,4 +222,12 @@ environmentServer <- function(input, output, session, current_theme = NULL) {
       }
     }
   )
+  observeEvent(input$environment_tabs, {
+  if (!is.null(input$environment_tabs)) {
+    session$sendCustomMessage("tab-transition", list(
+      tab = input$environment_tabs,
+      section = "environment"
+    ))
+  }
+})
 }

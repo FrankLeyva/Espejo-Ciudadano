@@ -112,22 +112,12 @@ transportationServer <- function(input, output, session, current_theme = NULL) {
     maps()$juarez_bus_satisfaction_map
   })
   
-  # Download handler using pre-saved PNG files
-  output$download_transport_map <- downloadHandler(
+output$download_bus_satisfaction_map <- downloadHandler(
     filename = function() {
-      # Get map type for filename based on active tab
-      map_type <- ifelse(input$transport_tabs == "Camión/Rutera", 
-                        "Camion", "Juarez_Bus")
-      paste("mapa_transporte_", map_type, "_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
+      paste("mapa_transporte_camion_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
     },
     content = function(file) {
-      map_name <- if(input$transport_tabs == "Camión/Rutera"){
-        "mapa_transporte_Camion"
-      } else {
-        "mapa_transporte_Juarez_Bus"
-      }
-      
-      map_path <- data_manager$get_map_path(map_name, selectedYear())
+      map_path <- data_manager$get_map_path("mapa_transporte_camion", selectedYear())
       
       if (file.exists(map_path)) {
         file.copy(map_path, file)
@@ -136,5 +126,21 @@ transportationServer <- function(input, output, session, current_theme = NULL) {
         file.create(file)
       }
     }
-  )
+  )  
+  output$download_juarez_bus_satisfaction_map <- downloadHandler(
+    filename = function() {
+      paste("mapa_transporte_juarez_bus_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
+    },
+    content = function(file) {
+      map_path <- data_manager$get_map_path("mapa_transporte_juarez_Bus", selectedYear())
+      
+      if (file.exists(map_path)) {
+        file.copy(map_path, file)
+      } else {
+        warning(paste("Map file not found:", map_path))
+        file.create(file)
+      }
+    }
+  ) 
+ 
 }

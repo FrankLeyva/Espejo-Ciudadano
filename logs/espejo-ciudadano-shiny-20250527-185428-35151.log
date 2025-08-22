@@ -1,4 +1,0 @@
-Error in loadNamespace(x) : there is no package called ‘jsonlite’
-Calls: local ... loadNamespace -> withRestarts -> withOneRestart -> doWithOneRestart
-Execution halted
-

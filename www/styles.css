@@ -1,659 +1,2470 @@
+/* ==============================
+   FONT DEFINITIONS
+   ============================== */
+
+@font-face {
+  font-family: 'Nexus';
+  src: url('nexus/Nexusbold-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ==============================
-   VARIABLE DEFINITIONS
+   CSS VARIABLES
    ============================== */
-   :root {
-    /* Base colors */
-    --primary-color: #0d6efd;
-    --secondary-color: #6c757d;
-    --accent-color: #ffd700;
-    
-    /* UI elements */
-    --bg-color: #f8f9fa;
-    --text-color: #333;
-    --border-radius: 8px;
-    --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    
-    /* Section-specific colors */
-    --bienestar-color: #1E88E5;
-    --movilidad-color: #43A047;
-    --gobierno-color: #984334;
-    --participacion-color: #F57C00;
-    --infraestructura-color: #8E24AA;
-    --extras-color: #2d2d2d;
-    
-    /* Navbar */
-    --navbar-bg: #2D2D2D;
-    --navbar-height: 56px;
+:root {
+  /* Base colors */
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --accent-color: #ffd700;
+  
+  /* UI elements */
+  --bg-color: #f8f9fa;
+  --text-color: #333;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+  /* Typography */
+  --font-primary: 'ff-din-paneuropean', 'Roboto', sans-serif;
+  --font-heading: 'abril-display', 'mr-eaves-sans', serif;
+  --font-display: 'avenir-next-lt-pro', 'abril-fatface', serif;
+  --font-fallback: 'Roboto', system-ui, -apple-system, sans-serif;
+      
+  /* Section-specific colors */
+  --bienestar-color: #d7a4d2;
+  --movilidad-color: #FFA058;
+  --gobierno-color: #ff769d;
+  --participacion-color: #ffc9de;
+  --infraestructura-color: #00c5c1;
+  --extras-color: #2d2d2d;
+  
+  /* Navbar */
+  --navbar-bg: #2D2D2D;
+  --navbar-height: 56px;
+  
+  /* Hero colors - charcoal gradient per style guide */
+  --hero-gradient-start: #2d3748;
+  --hero-gradient-mid: #4a5568;
+  --hero-gradient-end: #2d3748;
+  
+  /* Spacing scale */
+  --spacing-xs: 0.4rem;
+  --spacing-sm: 0.8rem;
+  --spacing-md: 1.2rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 2.5rem;
+
+  /* Transition variables */
+  --transition-duration: 300ms;
+  --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --stagger-delay: 100ms;
+  --fade-duration: 250ms;
+}
+
+/* ==============================
+   SECTION COLOR INJECTION - Works with existing body classes
+   ============================== */
+
+body.section-bienestar { 
+  --section-primary: var(--bienestar-color);
+  --section-secondary: rgba(236, 207, 233, 0.8);
+}
+
+body.section-movilidad { 
+  --section-primary: var(--movilidad-color);
+  --section-secondary: rgba(254, 192, 142, 0.8);
+}
+
+body.section-gobierno { 
+  --section-primary: var(--gobierno-color);
+  --section-secondary: rgba(253, 184, 202, 0.8);
+}
+
+body.section-infraestructura { 
+  --section-primary: var(--infraestructura-color);
+  --section-secondary: rgba(135, 215, 214, 0.8);
+}
+
+body.section-participacion { 
+  --section-primary: var(--participacion-color);
+  --section-secondary: rgba(223, 173, 192, 0.8);
+}
+
+body.section-extras { 
+  --section-primary: var(--extras-color);
+  --section-secondary: rgba(68, 68, 68, 0.8);
+}
+
+/* ==============================
+   BASE STYLING & TYPOGRAPHY
+   ============================== */
+
+html, body {
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  width: 100%;
+  max-width: 100vw;
+  padding-top: 0;
+  line-height: 1.6;
+}
+
+/* Typography Hierarchy */
+h1, .main-title, .dashboard-header h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.07em;
+}
+
+h2, h3, h4, h5, .navbar-brand, .nav-card-title, .card-header {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: 0.07em;
+}
+
+h6, .page-card-title, .plot-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+}
+
+/* Body text uses primary font */
+p, span, div, .card-body, .nav-link, .btn, .form-control, .dropdown-item {
+  font-family: var(--font-primary);
+}
+
+/* Fallback for font loading issues */
+.font-fallback {
+  font-family: var(--font-fallback);
+}
+
+/* ==============================
+   NAVBAR STYLING
+   ============================== */
+
+.navbar {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  background-color: var(--navbar-bg) !important;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  position: relative !important;
+  overflow: visible !important;
+  min-height: var(--navbar-height);
+  z-index: 1050 !important;
+}
+
+.navbar > .container-fluid {
+  overflow: visible !important;
+}
+
+/* Ensure navbar text is white in all sections */
+.navbar-nav .nav-link,
+.navbar .dropdown-toggle,
+.navbar-brand,
+.navbar .navbar-toggler-icon {
+  color: white !important;
+}
+
+/* Active/selected items */
+.navbar-nav .nav-item.active .nav-link,
+.navbar-nav .active > .nav-link,
+.navbar-nav .nav-link.active {
+  color: white !important;
+  font-weight: bold !important;
+  opacity: 1 !important;
+}
+
+/* Dropdown menu styling */
+.navbar .dropdown-menu {
+  background-color: var(--navbar-bg) !important;
+}
+
+.navbar .dropdown-menu .dropdown-item {
+  color: white !important;
+}
+
+.navbar .dropdown-menu .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Navbar structure */
+.navbar-title-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.navbar-toggle-right {
+  margin-left: auto !important;
+}
+
+.navbar-brand-container {
+  display: flex;
+  align-items: center;
+  overflow: visible !important;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+  padding: 0;
+  color: white !important;
+  font-weight: bold;
+  line-height: 1.5;
+}
+
+/* Year selector */
+.year-selector {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+  margin-right: 1.5rem;
+  overflow: visible !important;
+  height: 100%;
+  position: relative !important;
+  z-index: 1050 !important;
+}
+
+.year-selector .dropdown {
+  position: relative !important;
+  z-index: 1050 !important;
+}
+
+.year-dropdown-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  min-width: 90px;
+  height: 38px;
+}
+
+.year-dropdown-btn:hover, 
+.year-dropdown-btn:focus, 
+.year-dropdown-btn:active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.year-selector .dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: auto !important;
+  z-index: 1051 !important;
+  background-color: var(--navbar-bg) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  min-width: 90px !important;
+  margin-top: 2px !important;
+  transform: none !important;
+}
+
+.year-selector .dropdown-menu .dropdown-item {
+  color: white !important;
+  padding: 0.5rem 1rem !important;
+  transition: background-color 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.year-selector .dropdown-menu .dropdown-item:hover,
+.year-selector .dropdown-menu .dropdown-item:focus {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  text-decoration: none !important;
+}
+
+.year-selector .dropdown-menu .dropdown-item.active {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  font-weight: bold !important;
+}
+
+.year-selector .dropdown-menu.show {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Navbar SVG Icons */
+.navbar-svg-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.navbar-svg-icon img {
+  transition: all 0.2s ease;
+  vertical-align: middle;
+  filter: brightness(0) invert(1);
+}
+
+.navbar-nav .nav-link:hover .navbar-svg-icon img {
+  filter: brightness(0) invert(1) opacity(0.8);
+  transform: scale(1.05);
+}
+
+/* ==============================
+   HERO SECTION - Style Guide Implementation
+   ============================== */
+
+.hero-section {
+  background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-mid) 50%, var(--hero-gradient-end) 100%);
+  color: white;
+  padding: 4rem 0;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--spacing-xxl);
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+/* Geometric pattern overlay */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="geometric" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse"><polygon points="20,5 35,15 35,25 20,35 5,25 5,15" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23geometric)"/></svg>') repeat;
+  opacity: 0.4;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.main-title {
+  font-size: 3.5rem;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 0.02em;
+}
+
+.hero-subtitle {
+  font-size: 1.4rem;
+  opacity: 0.9;
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+
+.year-badge {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 0.7rem 2rem;
+  border-radius: 30px;
+  font-weight: 500;
+  display: inline-block;
+  margin-bottom: 2rem;
+  letter-spacing: 0.5px;
+}
+
+/* ==============================
+   PAGE CARDS - Style Guide Implementation
+   ============================== */
+
+.page-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 8px 25px rgba(0,0,0,0.08);
+  transition: all var(--transition-duration) var(--transition-easing);
+  cursor: pointer;
+  height: 100%;
+  border: none;
+  overflow: hidden;
+  position: relative;
+  will-change: transform, opacity;
+}
+
+.page-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+}
+
+/* Gradient accent bars per section */
+.page-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  transition: all 0.3s ease;
+}
+
+.page-card:hover::before {
+  height: 6px;
+}
+
+/* Section-specific gradient bars */
+.page-card-bienestar::before {
+  background: linear-gradient(90deg, var(--bienestar-color), rgba(236, 207, 233, 0.8));
+}
+
+.page-card-movilidad::before {
+  background: linear-gradient(90deg, var(--movilidad-color), rgba(254, 192, 142, 0.8));
+}
+
+.page-card-gobierno::before {
+  background: linear-gradient(90deg, var(--gobierno-color), rgba(253, 184, 202, 0.8));
+}
+
+.page-card-infraestructura::before {
+  background: linear-gradient(90deg, var(--infraestructura-color), rgba(135, 215, 214, 0.8));
+}
+
+.page-card-participacion::before {
+  background: linear-gradient(90deg, var(--participacion-color), rgba(223, 173, 192, 0.8));
+}
+
+.page-card-extras::before {
+  background: linear-gradient(90deg, var(--extras-color), rgba(68, 68, 68, 0.8));
+}
+
+/* Page card structure */
+.page-header {
+  padding: var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  background: linear-gradient(135deg, #fff 0%, #fafafa 100%);
+}
+
+.page-header-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.page-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-color);
+  line-height: 1.3;
+}
+
+.page-card-subtitle {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0.25rem 0 0 0;
+  font-style: italic;
+}
+
+.page-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+  margin-left: var(--spacing-lg);
+}
+
+.page-content {
+  padding: var(--spacing-lg);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.page-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #495057;
+  margin-bottom: var(--spacing-lg);
+}
+
+.page-question {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Highlight tags */
+.highlight-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: var(--spacing-lg);
+}
+
+.highlight-tag {
+  background: #f8f9fa;
+  color: #555;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Section-specific tag hover colors - using CSS variables */
+.highlight-tag:hover {
+  background: color-mix(in srgb, var(--section-primary, var(--primary-color)) 10%, transparent);
+  border-color: var(--section-primary, var(--primary-color));
+  color: var(--section-primary, var(--primary-color));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Page card footer */
+.page-footer {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  text-align: right;
+}
+
+.page-action {
+  color: #6c757d;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-action:hover {
+  text-decoration: none;
+  transform: translateX(3px);
+  color: var(--section-primary, var(--primary-color));
+}
+
+/* ==============================
+   PLOT CARDS - Framed Display Style
+   ============================== */
+
+.plot-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: var(--spacing-xl);
+  transition: all var(--transition-duration) var(--transition-easing);
+  will-change: transform, opacity;
+}
+
+/* Top accent bar using section colors */
+.plot-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 1;
+  background: var(--section-primary, var(--primary-color));
+}
+
+/* Plot card header */
+.plot-card .plot-header {
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 1.25rem var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.plot-card .plot-header-content {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.plot-card .plot-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plot-card .plot-subtitle {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0.25rem 0 0 0;
+  font-style: italic;
+}
+
+.plot-card .plot-content {
+  background: white;
+  position: relative;
+}
+
+.plot-card .plot-content.with-padding {
+  padding: var(--spacing-lg);
+}
+
+/* Action buttons in header - using CSS variables */
+.plot-card .plot-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.plot-card .plot-action-btn {
+  background: none;
+  border: 1px solid var(--section-primary, var(--primary-color));
+  color: var(--section-primary, var(--primary-color));
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: auto;
+  white-space: nowrap;
+}
+
+.plot-card .plot-action-btn:hover {
+  background: var(--section-primary, var(--primary-color));
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* ==============================
+   UNIVERSAL THEMING - Automatically inherits section colors
+   ============================== */
+
+/* Info tooltips */
+.info-tooltip-icon {
+  color: var(--section-primary, var(--primary-color));
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+}
+
+.info-tooltip-icon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Tab navigation */
+.nav-tabs .nav-link {
+  color: #495057;
+  transition: all 0.2s;
+  border-radius: 0.375rem 0.375rem 0 0;
+  padding: 0.5rem 1rem;
+}
+
+.nav-tabs .nav-link.active {
+  font-weight: 600;
+  color: var(--section-primary, var(--primary-color));
+  border-bottom: 3px solid var(--section-primary, var(--primary-color));
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+  background-color: color-mix(in srgb, var(--section-primary, var(--primary-color)) 5%, transparent);
+}
+
+/* ==============================
+   PLOT TABS - File Folder Style
+   ============================== */
+
+.plot-tabs-container {
+  margin-bottom: var(--spacing-xl);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  position: relative;
+}
+
+.plot-tabs-container .nav-tabs {
+  border-bottom: none;
+  background: transparent;
+  padding: 0;
+  margin-bottom: -1px;
+  gap: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+
+.plot-tabs-container .nav-tabs .nav-link {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-bottom: none;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  color: #6c757d;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem 1rem 1.25rem;
+  margin-bottom: 0;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.08);
+}
+
+.plot-tabs-container .nav-tabs .nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--section-primary, var(--primary-color));
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.plot-tabs-container .nav-tabs .nav-link:hover:not(.active) {
+  background-color: color-mix(in srgb, var(--section-primary, var(--primary-color)) 5%, white);
+  color: var(--section-primary, var(--primary-color));
+  transform: translateY(-2px);
+  box-shadow: 0 -4px 8px rgba(0,0,0,0.12);
+}
+
+.plot-tabs-container .nav-tabs .nav-link:hover:not(.active)::before {
+  opacity: 0.6;
+}
+
+.plot-tabs-container .nav-tabs .nav-link.active {
+  background-color: white;
+  color: var(--section-primary, var(--primary-color));
+  font-weight: 700;
+  transform: translateY(-2px);
+  box-shadow: 0 -6px 16px rgba(0,0,0,0.15);
+  border-color: #e9ecef;
+  border-left-color: var(--section-primary, var(--primary-color));
+  border-right-color: var(--section-primary, var(--primary-color));
+  border-top-color: var(--section-primary, var(--primary-color));
+  z-index: 3;
+}
+
+.plot-tabs-container .nav-tabs .nav-link.active::before {
+  opacity: 1;
+}
+
+.plot-tabs-container .nav-tabs .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+  height: 2px;
+  background: white;
+  z-index: 1;
+}
+
+.plot-tabs-container .tab-content {
+  background: transparent;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.plot-tabs-container .tab-pane {
+  padding: 0;
+}
+
+/* ==============================
+   LAYOUT SYSTEMS
+   ============================== */
+
+/* Grid for page cards */
+.page-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: var(--spacing-xxl);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.insights-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+/* Grid for plot cards */
+.plot-cards-grid {
+  display: grid;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.plot-cards-grid.two-columns {
+  grid-template-columns: 1fr 1fr;
+}
+
+.plot-cards-grid.single-column {
+  grid-template-columns: 1fr;
+}
+
+.plot-cards-grid.three-columns {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Universal section navigation grid */
+.section-nav-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* ==============================
+   UTILITY COMPONENTS
+   ============================== */
+
+.card {
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: all 0.3s ease;
+  border: none;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: var(--section-primary, rgba(13, 110, 253, 0.05));
+  border-bottom: 4px solid var(--section-primary, rgba(13, 110, 253, 0.1));
+  font-weight: 500;
+  padding: 1rem;
+}
+
+/* Extras section special styling */
+.section-extras .card-header {
+  background-color: var(--extras-color) !important;
+  color: white !important;
+  border-bottom: none !important;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px 16px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s;
+  color: var(--section-primary, var(--primary-color));
+}
+
+.back-link:hover {
+  background-color: #e9ecef;
+  text-decoration: none;
+}
+
+.back-link i {
+  margin-right: 8px;
+}
+
+/* Value box hover effect */
+.card.bslib-value-box {
+  transition: all 0.3s ease;
+}
+
+.card.bslib-value-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+/* ==============================
+   TRANSITION STYLES
+   ============================== */
+
+/* Loading overlay styles */
+.section-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(248, 249, 250, 0.95);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999; /* Lower than navbar */
+  opacity: 0;
+  transition: opacity var(--transition-duration) var(--transition-easing);
+}
+
+/* Prevent loading overlay from appearing on navbar */
+.navbar .section-loading-overlay,
+header .section-loading-overlay,
+.navbar-nav .section-loading-overlay {
+  display: none !important;
+}
+
+.loading-content {
+  text-align: center;
+  max-width: 300px;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.loading-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1.5rem;
+}
+
+.spinner-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.spinner-ring:nth-child(1) {
+  border-top-color: var(--section-primary, var(--primary-color));
+  animation-delay: -0.45s;
+}
+
+.spinner-ring:nth-child(2) {
+  border-top-color: var(--section-secondary, var(--secondary-color));
+  animation-delay: -0.3s;
+}
+
+.spinner-ring:nth-child(3) {
+  border-top-color: rgba(13, 110, 253, 0.3);
+  animation-delay: -0.15s;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 1;
+  }
+}
+
+.loading-text {
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.loading-progress {
+  width: 200px;
+  height: 3px;
+  background: rgba(13, 110, 253, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    var(--section-primary, var(--primary-color)) 0%, 
+    var(--section-secondary, var(--secondary-color)) 100%);
+  border-radius: 2px;
+  transition: width 1.5s var(--transition-easing);
+}
+
+/* Global transitioning state */
+body.section-transitioning {
+  overflow-x: hidden;
+}
+
+body.section-transitioning .navbar {
+  pointer-events: none;
+}
+
+body.section-transitioning .navbar .year-selector {
+  pointer-events: auto;
+}
+
+/* Card fade states */
+.page-card.fade-out,
+.plot-card.fade-out,
+.card.fade-out {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
+.page-card.fade-in,
+.plot-card.fade-in,
+.card.fade-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: slideUpFadeIn var(--fade-duration) var(--transition-easing) forwards;
+}
+
+@keyframes slideUpFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Tab transitions */
+.tab-pane {
+  transition: all var(--transition-duration) var(--transition-easing);
+}
+
+.tab-pane.tab-fade-out {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.tab-pane.tab-fade-in {
+  animation: tabSlideIn var(--transition-duration) var(--transition-easing) forwards;
+}
+
+@keyframes tabSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Enhanced card interactions */
+.page-card.card-hover,
+.plot-card.card-hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* ==============================
+   EXPLORER-SPECIFIC ENHANCEMENTS
+   ============================== */
+
+/* Explorer uses display font for card headings */
+.section-extras .plot-title,
+.section-extras h6.plot-title {
+  font-family: var(--font-display) !important;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Search results info styling */
+.alert-success {
+  background-color: #d1edcc;
+  border-color: #badbcc;
+  color: #0f5132;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffecb5;
+  color: #664d03;
+}
+
+.alert-secondary {
+  background-color: #e2e3e5;
+  border-color: #d3d6d8;
+  color: #383d41;
+}
+
+/* Explorer visualization container */
+.section-extras #viz_container {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-extras #viz_container:empty::before {
+  content: "Seleccione una pregunta para ver la visualización";
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Form controls in explorer */
+.section-extras .form-control,
+.section-extras .form-select {
+  border-radius: 0.375rem;
+  border: 1px solid #ced4da;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.section-extras .form-control:focus,
+.section-extras .form-select:focus {
+  border-color: var(--extras-color);
+  box-shadow: 0 0 0 0.2rem rgba(45, 45, 45, 0.25);
+}
+
+/* Tab navigation styling for explorer */
+.section-extras .nav-tabs .nav-link {
+  color: #495057;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.375rem 0.375rem 0 0;
+  padding: 0.5rem 1rem;
+  margin-bottom: -1px;
+  transition: all 0.2s ease;
+}
+
+.section-extras .nav-tabs .nav-link:hover {
+  background-color: rgba(45, 45, 45, 0.05);
+  border-color: rgba(45, 45, 45, 0.1);
+}
+
+.section-extras .nav-tabs .nav-link.active {
+  color: var(--extras-color);
+  background-color: white;
+  border-color: #dee2e6 #dee2e6 white;
+  font-weight: 600;
+  border-bottom: 3px solid var(--extras-color);
+}
+
+/* Search button styling */
+.section-extras .btn-primary {
+  background-color: var(--extras-color);
+  border-color: var(--extras-color);
+  color: white;
+}
+
+.section-extras .btn-primary:hover,
+.section-extras .btn-primary:focus {
+  background-color: rgba(45, 45, 45, 0.9);
+  border-color: rgba(45, 45, 45, 0.9);
+  color: white;
+}
+
+/* Vista Rápida Heading Styles */
+.vista-rapida-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.vista-rapida-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.vista-rapida-subtitle {
+  font-family: var(--font-primary);
+  font-size: 1.2rem;
+  color: #6c757d;
+  margin: 0;
+  font-weight: 300;
+  line-height: 1.4;
+}
+
+.vista-rapida-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  margin: 0.5rem auto 0;
+  border-radius: 2px;
+}
+
+/* DataTable improvements in explorer */
+.section-extras .dataTables_wrapper {
+  margin: 1rem !important;
+  padding: 0.75rem !important;
+  background: white;
+  border-radius: 0.375rem;
+  border: 1px solid #e9ecef;
+}
+
+.section-extras .dataTables_wrapper .dataTable {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  box-shadow: none;
+  border: none;
+  margin-bottom: 0 !important;
+}
+
+.section-extras .dataTables_wrapper .dataTable thead th {
+  background-color: var(--extras-color);
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem;
+  border: none;
+  font-size: 0.85rem;
+}
+
+.section-extras .dataTables_wrapper .dataTable tbody td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.85rem;
+}
+
+.section-extras .dataTables_wrapper .dataTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.section-extras .dataTables_wrapper .dataTable tbody tr:hover {
+  background-color: rgba(45, 45, 45, 0.05);
+}
+
+/* Enhanced value boxes for explorer */
+.section-extras .bslib-value-box {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+  margin: 0.75rem 0.5rem !important;
+  padding: 0.75rem !important;
+}
+
+.section-extras .bslib-value-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.section-extras .bslib-value-box .bslib-value-box-body {
+  text-align: center !important;
+  padding: 0.5rem !important;
+}
+
+.section-extras .bslib-value-box .bslib-value-box-showcase {
+  font-size: 1.2rem !important;
+  color: var(--extras-color) !important;
+  opacity: 0.8;
+  margin-bottom: 0.5rem !important;
+}
+
+.section-extras .bslib-value-box .bslib-value-box-value {
+  font-size: 2.2rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  color: var(--extras-color) !important;
+  font-family: var(--font-display) !important;
+  margin: 0.25rem 0 !important;
+}
+
+.section-extras .bslib-value-box .bslib-value-box-title {
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  color: #6c757d !important;
+  font-family: var(--font-primary) !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Hide unnecessary description paragraphs */
+.section-extras .bslib-value-box .bslib-value-box-body > p:not([class]),
+.section-extras .bslib-value-box .bslib-value-box-body > p.mb-1:not(.bslib-value-box-title):not(.bslib-value-box-value) {
+  display: none !important;
+}
+
+/* ==============================
+   RESPONSIVE DESIGN
+   ============================== */
+
+/* Desktop and large tablets - 3 columns */
+@media (min-width: 1024px) {
+  .section-nav-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
   }
   
-  /* ==============================
-     BASE STYLING
-     ============================== */
-  body {
-    font-family: 'Roboto', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    overflow-x: hidden;
-    width: 100%;
-    max-width: 100vw;
-    padding-top: 0;
+  .section-nav-grid.has-many-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Medium tablets */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .section-nav-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
   }
   
-  html, body {
-    overflow-x: hidden;
+  .section-nav-grid.has-many-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
   }
   
-  /* ==============================
-     NAVBAR STYLING
-     ============================== */
-  .navbar {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    background-color: var(--navbar-bg) !important;
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: visible !important;
-    min-height: var(--navbar-height);
+  .year-selector .dropdown-menu {
+    position: fixed !important;
+    top: 60px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 120px !important;
+    z-index: 1060 !important;
+  }
+}
+
+/* Tablet and mobile responsive */
+@media (max-width: 992px) {
+  .navbar-collapse {
+    background-color: var(--navbar-bg);
+    padding: 0.5rem;
+    max-height: calc(100vh - 56px);
+    overflow-y: auto !important;
   }
   
-  .navbar > .container-fluid {
-    overflow: visible !important;
+  .navbar-toggler {
+    border-color: rgba(255,255,255,0.4) !important;
+    background: transparent !important;
   }
   
-  /* Ensure navbar text is white in all sections */
-  .navbar-nav .nav-link,
-  .navbar .dropdown-toggle,
-  .navbar-brand,
-  .navbar .navbar-toggler-icon {
-    color: white !important;
-  }
-  
-  /* Make active/selected items in navbar have proper emphasis */
-  .navbar-nav .nav-item.active .nav-link,
-  .navbar-nav .active > .nav-link,
-  .navbar-nav .nav-link.active {
-    color: white !important;
-    font-weight: bold !important;
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255,255,255,1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+    filter: none !important;
     opacity: 1 !important;
   }
   
-  /* Fix for dropdown menu items */
-  .navbar .dropdown-menu .dropdown-item {
-    color: white !important;
-  }
-  
-  /* Override any section-specific styling that might affect navbar */
-  .section-extras .navbar .nav-link,
-  .section-extras .navbar .dropdown-toggle,
-  .section-extras .navbar .navbar-brand,
-  .section-extras .navbar .nav-item.active .nav-link,
-  .section-extras .navbar .active > .nav-link,
-  .section-extras .navbar .nav-link.active {
-    color: white !important;
-  }
-  
-  /* Ensure the dropdown menu has proper background color */
-  .navbar .dropdown-menu {
-    background-color: var(--navbar-bg) !important;
-  }
-  
-  .navbar-title-container {
-    display: flex;
-    align-items: center;
-    padding: 0;
-    overflow: visible !important;
-  }
-  
-  .navbar-brand-container {
-    display: flex;
-    align-items: center;
-    overflow: visible !important;
-  }
-  
-  .navbar-brand {
-    display: flex;
-    align-items: center;
-    margin-right: 1rem;
-    padding: 0;
-    color: white !important;
-    font-weight: bold;
-    line-height: 1.5;
-  }
-  
-  .year-selector {
-    display: flex;
-    align-items: center;
-    margin-left: 1rem;
-    margin-right: 1.5rem;
-    overflow: visible !important;
-    height: 100%;
-  }
-  
-  .year-dropdown-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .navbar-nav .nav-link {
     padding: 0.5rem 1rem;
-    margin: 0;
+  }
+  
+  .navbar-nav .dropdown-menu {
+    border: none;
     background-color: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 4px;
+    padding: 0.5rem;
+  }
+  
+  .navbar-nav .dropdown-item {
     color: white;
-    font-weight: bold;
-    min-width: 90px;
-    height: 38px;
+    padding: 0.5rem 1rem;
   }
   
-  .year-dropdown-btn:hover, 
-  .year-dropdown-btn:focus, 
-  .year-dropdown-btn:active {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
+  .navbar-nav .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.15);
   }
   
-  .dropdown-menu {
-    min-width: 5rem;
-    border-radius: 10px;
-    border: none;
-    box-shadow: var(--box-shadow);
-    position: absolute;
+  .plot-cards-grid.two-columns,
+  .plot-cards-grid.three-columns {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   
-  .navbar-nav {
-    display: flex;
-    align-items: center;
-    overflow: visible !important;
-  }
-  
-  .navbar-collapse {
-    padding: 0;
-    overflow: visible !important;
-  }
-  
-  /* For the extras subsection buttons in dropdown */
-  .navbar .dropdown-menu .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-  }
-  
-  /* ==============================
-     CARD STYLING
-     ============================== */
-  .card {
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    transition: all 0.3s ease;
-    border: none;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  
-  .card-header {
-    background-color: rgba(13, 110, 253, 0.05);
-    border-bottom: 4px solid rgba(13, 110, 253, 0.1);
-    font-weight: 500;
+  .plot-card .plot-header {
     padding: 1rem;
   }
   
-  /* ==============================
-     NAVIGATION CARDS
-     ============================== */
-  .nav-card {
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-    height: 100%;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    padding: 20px;
+  .plot-card .plot-title {
+    font-size: 1rem;
   }
   
-  .nav-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  /* Explorer responsive adjustments */
+  .section-extras .col-md-4,
+  .section-extras .col-md-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container, .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
   
-  .nav-card-icon {
+  .main-title {
     font-size: 2.5rem;
-    margin-bottom: 15px;
-    text-align: center;
   }
   
-  .nav-card-title {
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    text-align: center;
+  .hero-section {
+    padding: 3rem 0;
+    min-height: 60vh;
   }
   
-  /* Section-specific nav cards */
-  .nav-card-bienestar .nav-card-icon {
-    color: var(--bienestar-color);
-  }
-  .nav-card-bienestar:hover {
-    background-color: rgba(30, 136, 229, 0.05);
-    border-top: 3px solid var(--bienestar-color);
+  .page-cards-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
   }
   
-  .nav-card-movilidad .nav-card-icon {
-    color: var(--movilidad-color);
-  }
-  .nav-card-movilidad:hover {
-    background-color: rgba(67, 160, 71, 0.05);
-    border-top: 3px solid var(--movilidad-color);
+  .insights-section {
+    padding: 2rem 1rem;
   }
   
-  .nav-card-gobierno .nav-card-icon {
-    color: var(--gobierno-color);
-  }
-  .nav-card-gobierno:hover {
-    background-color: rgba(152, 67, 52, 0.05);
-    border-top: 3px solid var(--gobierno-color);
-  }
-  
-  .nav-card-infraestructura .nav-card-icon {
-    color: var(--infraestructura-color);
-  }
-  .nav-card-infraestructura:hover {
-    background-color: rgba(142, 36, 170, 0.05);
-    border-top: 3px solid var(--infraestructura-color);
-  }
-  
-  .nav-card-participacion .nav-card-icon {
-    color: var(--participacion-color);
-  }
-  .nav-card-participacion:hover {
-    background-color: rgba(245, 124, 0, 0.05);
-    border-top: 3px solid var(--participacion-color);
-  }
-  
-  /* ==============================
-     PILL NAVIGATION
-     ============================== */
-  .nav-pills .nav-link {
-    border-radius: 4px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    padding: 8px 16px;
-    transition: all 0.2s;
-    font-family: Roboto, sans-serif;
-    font-size: 16px;
-  }
-  
-  .nav-pills .nav-link:not(.active) {
-    background-color: rgba(240, 240, 240, 0.7);
-    color: #495057;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-  }
-  
-  .nav-pills .nav-link:hover:not(.active) {
-    background-color: rgba(220, 220, 220, 0.9);
-  }
-  
-  .nav-pills .nav-link.active {
-    background-color: var(--primary-color);
-    color: white;
-    font-weight: 500;
-    border: none;
-  }
-  
-  /* Section-specific styling for pills */
-  .section-bienestar .nav-pills .nav-link.active {
-    background-color: var(--bienestar-color);
-  }
-  .section-bienestar .nav-pills .nav-link:not(.active) {
-    color: var(--bienestar-color);
-    
-  }
-  
-  .section-movilidad .nav-pills .nav-link.active {
-    background-color: var(--movilidad-color);
-  }
-  .section-movilidad .nav-pills .nav-link:not(.active) {
-    color: var(--movilidad-color);
-  }
-  
-  .section-gobierno .nav-pills .nav-link.active {
-    background-color: var(--gobierno-color);
-  }
-  .section-gobierno .nav-pills .nav-link:not(.active) {
-    color: var(--gobierno-color);
-  }
-  
-  .section-infraestructura .nav-pills .nav-link.active {
-    background-color: var(--infraestructura-color);
-  }
-  .section-infraestructura .nav-pills .nav-link:not(.active) {
-    color: var(--infraestructura-color);
-  }
-  
-  .section-participacion .nav-pills .nav-link.active {
-    background-color: var(--participacion-color);
-  }
-  .section-participacion .nav-pills .nav-link:not(.active) {
-    color: var(--participacion-color);
-  }
-
-  .section-extras .nav-pills .nav-link.active {
-    background-color: var(--extras-color);
-  }
-  .section-extras .nav-pills .nav-link:not(.active) {
-    color: var(--extras-color);
-  }
-  
-  .nav-pills .nav-link .bs-icon {
-    margin-right: 8px;
-    opacity: 0.75;
-  }
-  
-  .nav-pills .nav-link.active .bs-icon {
-    opacity: 1;
-  }
-  
-  /* ==============================
-     TAB NAVIGATION
-     ============================== */
-  .nav-tabs .nav-link {
-    color: #495057;
-    transition: all 0.2s;
-    border-radius: 0.375rem 0.375rem 0 0;
-    padding: 0.5rem 1rem;
-  }
-  
-  .nav-tabs .nav-link.active {
-    font-weight: 600;
-    color: var(--primary-color);
-    border-bottom: 3px solid var(--primary-color);
-  }
-  
-  .nav-tabs .nav-link:hover:not(.active) {
-    background-color: rgba(13, 110, 253, 0.05);
-  }
-  
-  /* Section-specific tab styling */
-  .section-bienestar .nav-tabs .nav-link.active {
-    color: var(--bienestar-color);
-    border-bottom-color: var(--bienestar-color);
-  }
-  
-  .section-movilidad .nav-tabs .nav-link.active {
-    color: var(--movilidad-color);
-    border-bottom-color: var(--movilidad-color);
-  }
-  
-  .section-gobierno .nav-tabs .nav-link.active {
-    color: var(--gobierno-color);
-    border-bottom-color: var(--gobierno-color);
-  }
-  
-  .section-infraestructura .nav-tabs .nav-link.active {
-    color: var(--infraestructura-color);
-    border-bottom-color: var(--infraestructura-color);
-  }
-  
-  .section-participacion .nav-tabs .nav-link.active {
-    color: var(--participacion-color);
-    border-bottom-color: var(--participacion-color);
-  }
-
-  .section-extras .nav-tabs .nav-link.active {
-    color: var(--extras-color);
-    border-bottom-color: var(--extras-color);
-  }
-  
-  /* ==============================
-     UTILITY COMPONENTS
-     ============================== */
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    margin-bottom: 15px;
-    padding: 8px 16px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    text-decoration: none;
-    transition: all 0.2s;
-    color: var(--primary-color);
-  }
-  
-  .back-link:hover {
-    background-color: #e9ecef;
-    text-decoration: none;
-  }
-  
-  .back-link i {
-    margin-right: 8px;
-  }
-  
-  .info-box {
-    padding: 15px;
-    border-radius: var(--border-radius);
-    margin-bottom: 15px;
-    display: flex;
+  .page-header {
+    flex-direction: column;
     align-items: flex-start;
+    gap: var(--spacing-md);
   }
   
-  .info-box-icon {
-    margin-right: 15px;
-    font-size: 24px;
-    padding-top: 3px;
+  .page-icon {
+    margin-left: 0;
+    margin-top: var(--spacing-sm);
   }
   
-  .info-box-content {
+  .page-card-title {
+    font-size: 1.3rem;
+  }
+  
+  .highlight-tags {
+    gap: 0.3rem;
+  }
+  
+  .highlight-tag {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+  }
+  
+  .plot-tabs-container .nav-tabs {
+    gap: 0.3rem;
+  }
+  
+  .plot-tabs-container .nav-tabs .nav-link {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
     flex-grow: 1;
+    text-align: center;
   }
   
-  .info-box-title {
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 16px;
+  .page-card,
+  .plot-action-btn,
+  .page-action,
+  .btn {
+    min-height: 44px;
+    touch-action: manipulation;
   }
   
-  .info-box-value {
-    font-size: 18px;
-    line-height: 1.4;
+  .page-card {
+    transition: transform 0.2s ease;
   }
   
-  /* Section-specific card headers */
-  .section-bienestar .card-header {
-    background-color: rgba(30, 136, 229, 0.1);
-    border-bottom: 4px solid var(--bienestar-color);
+  .page-card:hover {
+    transform: translateY(-4px);
   }
   
-  .section-movilidad .card-header {
-    background-color: rgba(67, 160, 71, 0.1);
-    border-bottom: 4px solid var(--movilidad-color);
+  .vista-rapida-title {
+    font-size: 2rem;
   }
   
-  .section-gobierno .card-header {
-    background-color: rgba(152, 67, 52, 0.05);
-    border-bottom: 4px solid var(--gobierno-color);
+  .vista-rapida-subtitle {
+    font-size: 1.1rem;
   }
   
-  .section-infraestructura .card-header {
-    background-color: rgba(142, 36, 170, 0.1);
-    border-bottom: 4px solid var(--infraestructura-color);
+  .vista-rapida-header {
+    margin-bottom: 1.5rem;
   }
   
-  .section-participacion .card-header {
-    background-color: rgba(245, 124, 0, 0.1);
-    border-bottom: 4px solid var(--participacion-color);
+  .loading-content {
+    padding: 1.5rem;
+    max-width: 250px;
   }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .loading-progress {
+    width: 150px;
+  }
+  
+  .navbar-collapse {
+    z-index: 1051 !important;
+  }
+  
+  /* Explorer mobile specific */
+  .section-extras .nav-tabs {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .section-extras .nav-tabs .nav-link {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0;
+    border-radius: 0.375rem;
+  }
+  
+  .section-extras .nav-tabs .nav-link.active {
+    border: 2px solid var(--extras-color);
+    border-bottom: 2px solid var(--extras-color);
+  }
+  
+  .section-extras .bslib-value-box {
+    margin: 0.5rem 0.25rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  .section-extras .bslib-value-box .bslib-value-box-body {
+    padding: 0.25rem !important;
+  }
+  
+  .section-extras .bslib-value-box .bslib-value-box-value {
+    font-size: 1.8rem !important;
+  }
+  
+  .section-extras .bslib-value-box .bslib-value-box-title {
+    font-size: 0.8rem !important;
+  }
+  
+  .section-extras h4 {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    font-size: 1rem;
+  }
+}
 
-  /* Extras section-specific styling */
-  .section-extras .card-header {
-    background-color: var(--extras-color) !important;
-    color: white !important;
-    border-bottom: none !important;
+@media (max-width: 576px) {
+  .container, .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
   
-  .section-extras .btn-primary {
-    background-color: var(--extras-color);
-    border-color: var(--extras-color);
+  .navbar-brand {
+    font-size: 1rem;
+    margin-right: 0.5rem;
   }
   
-  .section-extras .btn-primary:hover {
-    background-color: #444444;
-    border-color: #444444;
+  .main-title {
+    font-size: 2rem;
   }
   
-  .section-extras .callout-info {
-    border-left-color: var(--extras-color);
+  .hero-subtitle {
+    font-size: 1.1rem;
   }
   
-  .section-extras .formula-box {
-    border-left-color: var(--extras-color);
+  .year-badge {
+    padding: 0.5rem 1.5rem;
   }
   
-  .section-extras .download-icon {
-    color: var(--extras-color);
+  .section-nav-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
-  .section-extras .year-tabs .nav-link.active {
-    background-color: var(--extras-color);
-    border-color: var(--extras-color);
-  }
-  
-  .section-extras a:not(.btn):not(.nav-link) {
-    color: var(--extras-color);
-  }
-  
-  .section-extras a:not(.btn):not(.nav-link):hover {
-    color: #444444;
-  }
-  
-  /* Value box hover effect */
-  .card.bslib-value-box {
-    transition: all 0.3s ease;
-  }
-  
-  .card.bslib-value-box:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-  }
-  
-  /* ==============================
-     RESPONSIVE STYLES
-     ============================== */
-  @media (max-width: 992px) {
-    .navbar-collapse {
-      background-color: var(--navbar-bg);
-      padding: 0.5rem;
-      max-height: calc(100vh - 56px);
-      overflow-y: auto !important;
-    }
-    
-    .navbar-toggler {
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    .navbar-toggler:focus {
-      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.2);
-    }
-    
-    .navbar-nav .nav-link {
-      padding: 0.5rem 1rem;
-    }
-    
-    .navbar-nav .dropdown-menu {
-      border: none;
-      background-color: rgba(255, 255, 255, 0.1);
-      padding: 0.5rem;
-    }
-    
-    .navbar-nav .dropdown-item {
-      color: white;
-      padding: 0.5rem 1rem;
-    }
-    
-    .navbar-nav .dropdown-item:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .nav-card-icon {
-      font-size: 2rem;
-    }
-    
-    .nav-card-title {
-      font-size: 1rem;
-    }
-    
-    .container, .container-fluid {
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
-    }
-    
-    .row {
-      margin-left: -0.5rem;
-      margin-right: -0.5rem;
-    }
-    
-    .col, [class*="col-"] {
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
-    }
-  }
-  
-  @media (max-width: 576px) {
-    .container, .container-fluid {
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
-    }
-    
-    .navbar-brand {
-      font-size: 1rem;
-      margin-right: 0.5rem;
-    }
-    
-    .card-body {
-      padding: 0.75rem;
-    }
-    
-    .card-header {
-      padding: 0.75rem;
-    }
-  }
-
-  .info-tooltip-icon {
-    display: inline-flex;
+  .page-header {
+    padding: var(--spacing-md);
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    opacity: 0.8;
-    transition: opacity 0.2s, transform 0.2s;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    margin-left: 6px;
+    gap: var(--spacing-sm);
   }
   
-  .info-tooltip-icon:hover {
+  .page-card-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .page-card-subtitle {
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
+  
+  .page-icon {
+    width: 32px;
+    height: 32px;
+    margin-left: var(--spacing-sm);
+    margin-top: 0;
+  }
+  
+  .page-icon img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .page-content {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+  }
+  
+  .highlight-tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+  }
+  
+  .plot-cards-grid {
+    gap: 1rem;
+  }
+  
+  .plot-card .plot-header {
+    padding: 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .plot-card .plot-actions {
+    align-self: flex-end;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .plot-card .plot-title {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  
+  .plot-card .plot-action-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  .plot-tabs-container .nav-tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .plot-tabs-container .nav-tabs .nav-link {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    width: 100%;
+  }
+  
+  .page-card-subtitle {
+    color: #495057;
+  }
+  
+  .highlight-tag {
+    border-color: #ced4da;
+  }
+  
+  .vista-rapida-title {
+    font-size: 1.75rem;
+  }
+  
+  .vista-rapida-subtitle {
+    font-size: 1rem;
+  }
+  
+  .vista-rapida-header {
+    margin-bottom: 1rem;
+  }
+}
+
+/* iPhone SE and very small screens */
+@media (max-width: 375px) {
+  .section-nav-grid {
+    gap: 0.75rem;
+  }
+  
+  .page-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .page-card-title {
+    font-size: 1rem;
+  }
+  
+  .page-card-subtitle {
+    font-size: 0.7rem;
+  }
+  
+  .page-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .page-icon img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .page-content {
+    padding: 0 var(--spacing-sm) var(--spacing-sm);
+  }
+  
+  .page-cards-grid .page-card {
+    min-height: 170px;
+  }
+  
+  .hero-section {
+    min-height: 15vh !important;
+  }
+}
+
+/* ==============================
+   ACCESSIBILITY
+   ============================== */
+
+/* Focus indicators for keyboard navigation */
+.page-card:focus-within,
+.plot-action-btn:focus,
+.page-action:focus {
+  outline: 2px solid var(--section-primary, var(--primary-color));
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .section-loading-overlay {
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px solid var(--text-color);
+  }
+  
+  .loading-content {
+    border: 2px solid var(--text-color);
+  }
+  
+  .loading-text {
+    color: var(--text-color);
+    font-weight: 700;
+  }
+  
+  .progress-bar {
+    background: var(--text-color);
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-duration: 100ms;
+    --stagger-delay: 0ms;
+    --fade-duration: 50ms;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .page-card,
+  .plot-card,
+  .highlight-tag,
+  .plot-action-btn {
+    transition: none;
+  }
+  
+  .page-card:hover,
+  .plot-card:hover {
+    transform: none;
+  }
+  
+  .page-card.card-hover,
+  .plot-card.card-hover {
+    transform: none;
+  }
+  
+  .loading-spinner .spinner-ring {
+    animation: none;
+    border-top-color: var(--section-primary, var(--primary-color));
+  }
+  
+  .loading-text {
+    animation: none;
+  }
+  
+  .year-selector.updating {
+    animation: none;
+  }
+  
+  .section-loading-overlay {
+    transition: opacity 100ms ease;
+  }
+}
+
+/* ==============================
+   PRINT STYLES
+   ============================== */
+
+@media print {
+  .section-loading-overlay,
+  .loading-content,
+  .spinner-ring {
+    display: none !important;
+  }
+}
+
+/* ==============================
+   ENHANCED TRANSITION STYLES FOR CACHED SECTIONS
+   ============================== */
+
+/* Cached section transitions - very subtle */
+.cached-transition {
+  animation: subtleFadeRefresh 0.3s ease-out;
+}
+
+@keyframes subtleFadeRefresh {
+  0% {
     opacity: 1;
-    transform: scale(1.1);
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Navigation processing indicator */
+.nav-processing {
+  position: relative;
+  opacity: 0.9;
+}
+
+.nav-processing::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  transform: translateY(-50%);
+}
+
+/* Enhanced loading overlay with better messaging */
+.section-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(248, 249, 250, 0.95);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity var(--transition-duration) var(--transition-easing);
+}
+
+.loading-content {
+  text-align: center;
+  max-width: 320px;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.loading-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 1.5rem;
+}
+
+.spinner-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.spinner-ring:nth-child(1) {
+  border-top-color: var(--section-primary, var(--primary-color));
+  animation-delay: -0.45s;
+}
+
+.spinner-ring:nth-child(2) {
+  border-top-color: var(--section-secondary, var(--secondary-color));
+  animation-delay: -0.3s;
+}
+
+.spinner-ring:nth-child(3) {
+  border-top-color: rgba(13, 110, 253, 0.3);
+  animation-delay: -0.15s;
+}
+
+.loading-text {
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-hint {
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
+/* Enhanced clicking state */
+.clicking {
+  transform: scale(0.98) !important;
+  opacity: 0.8 !important;
+  transition: all 0.1s ease !important;
+}
+
+/* Year changing states */
+.year-changing .year-selector {
+  opacity: 0.8;
+}
+
+.year-selector.updating {
+  animation: buttonPulse 1s infinite;
+}
+
+@keyframes buttonPulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Enhanced fade-in for loaded content */
+.fade-in {
+  animation: enhancedFadeIn 0.4s ease forwards;
+}
+
+@keyframes enhancedFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Refresh fade for visualizations */
+.refresh-fade {
+  animation: refreshFade 0.4s ease;
+}
+
+@keyframes refreshFade {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Enhanced card hover states */
+.card-hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth section transitions */
+body.section-transitioning {
+  overflow-x: hidden;
+}
+
+body.section-transitioning .navbar {
+  pointer-events: none;
+}
+
+body.section-transitioning .navbar .year-selector {
+  pointer-events: auto;
+}
+
+/* Ready state indicators */
+.section-ready {
+  position: relative;
+}
+
+.section-ready::before {
+  content: '●';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: #28a745;
+  border-radius: 50%;
+  font-size: 6px;
+  color: white;
+  text-align: center;
+  line-height: 8px;
+}
+
+/* Loading state indicators */
+.section-loading {
+  position: relative;
+  opacity: 0.7;
+}
+
+.section-loading::before {
+  content: '⟳';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  font-size: 8px;
+  color: var(--section-primary, var(--primary-color));
+  animation: spin 1s linear infinite;
+}
+
+/* Enhanced dropdown positioning */
+.year-selector .dropdown-menu {
+  animation: dropdownSlideIn 0.2s ease-out;
+}
+
+@keyframes dropdownSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==============================
+   RESPONSIVE ENHANCEMENTS
+   ============================== */
+
+@media (max-width: 768px) {
+  .loading-content {
+    padding: 1.5rem;
+    max-width: 280px;
   }
   
-  /* Add a subtle glow effect on hover for better visibility */
-  .bslib-value-box .info-tooltip-icon:hover {
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
   }
   
-  /* Value box title alignment with tooltip */
-  .bslib-value-box .bslib-value-box-title {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+  .nav-processing::after {
+    width: 10px;
+    height: 10px;
+    right: 6px;
   }
   
-  /* Special case for light-colored backgrounds */
-  .bslib-value-box[style*="background-color: #f8f9fa"] .info-tooltip-icon,
-  .bslib-value-box[style*="background-color: #ffffff"] .info-tooltip-icon,
-  .bslib-value-box[style*="background-color: #e9ecef"] .info-tooltip-icon {
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 2px;
+  .loading-text {
+    font-size: 0.9rem;
   }
   
-  /* Ensure tooltip text is readable */
-  .tooltip-inner {
-    line-height: 1.4;
+  .loading-hint {
+    font-size: 0.8rem;
   }
+}
+
+/* ==============================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .section-loading-overlay {
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px solid var(--text-color);
+  }
+  
+  .loading-content {
+    border: 2px solid var(--text-color);
+  }
+  
+  .loading-text {
+    color: var(--text-color);
+    font-weight: 700;
+  }
+  
+  .spinner-ring {
+    border-width: 4px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .cached-transition,
+  .clicking,
+  .fade-in,
+  .refresh-fade,
+  .card-hover {
+    animation: none !important;
+    transition: opacity 0.1s ease !important;
+    transform: none !important;
+  }
+  
+  .year-selector.updating {
+    animation: none !important;
+  }
+  
+  .loading-spinner .spinner-ring {
+    animation: none !important;
+    border-top-color: var(--section-primary, var(--primary-color)) !important;
+  }
+  
+  .nav-processing::after {
+    animation: none !important;
+    border: 2px solid var(--section-primary, var(--primary-color)) !important;
+    border-radius: 50% !important;
+  }
+  
+  .section-loading-overlay {
+    transition: opacity 100ms ease !important;
+  }
+}
+
+/* Focus indicators for keyboard navigation */
+.nav-processing:focus-within {
+  outline: 2px solid var(--section-primary, var(--primary-color));
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .section-loading-overlay,
+  .loading-content,
+  .spinner-ring,
+  .nav-processing::after {
+    display: none !important;
+  }
+}
+
+/* ==============================
+   MINIMAL NAVIGATION FIXES - Clean dropdown solution
+   ============================== */
+
+/* Basic nav card styling */
+.page-card, 
+.section-nav-card, 
+[class*="nav-card"] {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+}
+
+/* Prevent child elements from interfering with nav card clicks */
+.page-card *, 
+.section-nav-card *, 
+[class*="nav-card"] * {
+  pointer-events: auto;
+}
+
+/* Re-enable specific interactive elements */
+.highlight-tag,
+.page-action {
+  pointer-events: auto !important;
+  z-index: 2;
+  position: relative;
+}
+
+/* Visual feedback for nav card clicks */
+.page-card.clicking, 
+.section-nav-card.clicking, 
+[class*="nav-card"].clicking {
+  transform: scale(0.98);
+  opacity: 0.9;
+  transition: all 0.1s ease;
+}
+
+/* Year selector dropdown positioning - keep this working */
+.year-selector .dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 1051 !important;
+  min-width: 90px !important;
+  background-color: var(--navbar-bg) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  margin-top: 2px !important;
+}
+
+/* Ensure year selector always works */
+.year-selector {
+  position: relative !important;
+  z-index: 1052 !important;
+}
+
+/* Mobile touch optimization */
+@media (max-width: 768px) {
+  .page-card, 
+  .section-nav-card, 
+  [class*="nav-card"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Focus states for accessibility */
+.page-card:focus-within,
+.section-nav-card:focus-within,
+[class*="nav-card"]:focus-within {
+  outline: 2px solid var(--section-primary, var(--primary-color));
+  outline-offset: 2px;
+}
+
+/* Fix for about and methodology pages - re-enable pointer events for content */
+
+/* Re-enable pointer events for all content within extras section */
+.section-extras .page-card *,
+.section-extras .page-content *,
+.section-extras .card * {
+  pointer-events: auto !important;
+}
+
+/* Ensure specific interactive elements work in extras section */
+.section-extras a,
+.section-extras button,
+.section-extras .btn,
+.section-extras .dropdown-item,
+.section-extras .nav-link,
+.section-extras .nav-tabs .nav-link,
+.section-extras input,
+.section-extras select,
+.section-extras textarea,
+.section-extras .form-control,
+.section-extras .form-select,
+.section-extras [onclick],
+.section-extras [data-bs-toggle],
+.section-extras .downloadButton,
+.section-extras .actionLink {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Ensure page-cards in extras section don't have the navigation behavior */
+.section-extras .page-card {
+  cursor: default !important;
+  pointer-events: auto !important;
+}
+
+/* Remove clicking behavior from content cards in extras */
+.section-extras .page-card:hover {
+  transform: none !important;
+}
+
+/* Ensure download buttons and action links work properly */
+.section-extras .download-card {
+  pointer-events: auto !important;
+}
+
+.section-extras .download-card * {
+  pointer-events: auto !important;
+}
+/* Add this section to your styles.css after the existing pointer-events rules */
+
+/* ==============================
+   POINTER EVENTS FIXES FOR CONTENT SECTIONS
+   ============================== */
+
+/* Basic nav card styling - only for navigation cards */
+.section-nav-card,
+[class*="nav-card"]:not(.page-card) {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+}
+
+/* Prevent child elements from interfering ONLY with navigation cards */
+.section-nav-card *,
+[class*="nav-card"]:not(.page-card) * {
+  pointer-events: none;
+}
+
+/* Content page cards should allow all interactions */
+.page-card {
+  cursor: default !important;
+  pointer-events: auto !important;
+}
+
+/* All children of content page cards should be interactive */
+.page-card * {
+  pointer-events: auto !important;
+}
+
+/* Ensure all interactive elements work properly */
+.page-card a,
+.page-card button,
+.page-card .btn,
+.page-card .dropdown-item,
+.page-card .nav-link,
+.page-card .nav-tabs .nav-link,
+.page-card input,
+.page-card select,
+.page-card textarea,
+.page-card .form-control,
+.page-card .form-select,
+.page-card [onclick],
+.page-card [data-bs-toggle],
+.page-card .downloadButton,
+.page-card .actionLink {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Specific fix for external links */
+.page-card a[href^="http"],
+.page-card a[href^="mailto:"],
+.page-card a[target="_blank"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  text-decoration: underline;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.page-card a[href^="http"]:hover,
+.page-card a[href^="mailto:"]:hover,
+.page-card a[target="_blank"]:hover {
+  color: var(--section-primary, var(--primary-color)) !important;
+  text-decoration: underline;
+}
+
+/* Re-enable specific interactive elements for navigation cards */
+.section-nav-card .highlight-tag,
+.section-nav-card .page-action,
+[class*="nav-card"]:not(.page-card) .highlight-tag,
+[class*="nav-card"]:not(.page-card) .page-action {
+  pointer-events: auto !important;
+  z-index: 2;
+  position: relative;
+}
+
+/* Visual feedback ONLY for navigation cards */
+.section-nav-card.clicking,
+[class*="nav-card"]:not(.page-card).clicking {
+  transform: scale(0.98);
+  opacity: 0.9;
+  transition: all 0.1s ease;
+}
+
+/* Remove navigation behavior from content page cards */
+.page-card:hover {
+  transform: none !important;
+  cursor: default !important;
+}
+
+/* Ensure content in extras section works properly */
+.section-extras .page-card,
+.section-extras .page-card *,
+.section-extras .page-content,
+.section-extras .page-content *,
+.section-extras .card,
+.section-extras .card * {
+  pointer-events: auto !important;
+}
+
+/* Focus states for accessibility - only for navigation cards */
+.section-nav-card:focus-within,
+[class*="nav-card"]:not(.page-card):focus-within {
+  outline: 2px solid var(--section-primary, var(--primary-color));
+  outline-offset: 2px;
+}
+
+/* Mobile touch optimization - only for navigation cards */
+@media (max-width: 768px) {
+  .section-nav-card,
+  [class*="nav-card"]:not(.page-card) {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .page-card {
+    touch-action: auto !important;
+  }
+}
+.navbar-toggler-icon,
+button.navbar-toggler .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255,255,255,1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+  filter: none !important;
+  opacity: 1 !important;
+  background-color: transparent !important;
+}
+
+/* === LEGACY BOOTSTRAP 3 NAVBAR TOGGLER VISIBILITY FIX === */
+.navbar-toggle {
+  display: none !important;
+}
+
+.navbar-toggle .icon-bar {
+  background-color: #fff !important;
+  border-radius: 2px;
+  height: 4px;
+}
+
+.navbar-toggle:focus, .navbar-toggle:hover {
+  background: rgba(255,255,255,0.07) !important;
+  border-color: rgba(255,255,255,0.3) !important;
+}
+
+/* Style for the custom Font Awesome hamburger button */
+.custom-navbar-toggle {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  padding: 8px 16px;
+  margin: 0 8px 0 0;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+}
+
+.custom-navbar-toggle:focus, .custom-navbar-toggle:hover {
+  color: #ffd700;
+  background: rgba(255,255,255,0.08);
+}

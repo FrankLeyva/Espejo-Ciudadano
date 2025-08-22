@@ -1,31 +1,11 @@
+# transportation_ui.R - Updated to follow new styling patterns
 transportationUI <- function() {
   page_fluid(
-    class = "section-movilidad",
-
+    class = "section-movilidad", 
     useShinyjs(),
     init_tooltips(),
 
-    tags$head(
-      tags$style(HTML("
-        /* Override pill navigation styling for this page */
-        .movilidad-pills .nav-pills .nav-link:not(.active) {
-          background-color: rgba(240, 240, 240, 0.8);
-color: var(--movilidad-color) !important;
-            border: 1px solid rgba(30, 229, 57, 0.2);
-          font-weight: bold !important;
-        }
-        
-        .movilidad-pills .nav-pills .nav-link:hover:not(.active) {
-          background-color: rgba(67, 160, 71, 0.1);
-        }
-             .movilidad-pills .nav-pills .nav-link.active {
-          background-color: var(--movilidad-color) !important; /* Bienestar primary color */
-          color: white !important;
-          font-weight: bold !important;
-          border: none !important;
-        }
-      "))
-    ),
+    # Back navigation
     div(
       class = "mb-4",
       tags$a(
@@ -33,79 +13,182 @@ color: var(--movilidad-color) !important;
         class = "text-decoration-none",
         onclick = "Shiny.setInputValue('nav_target', 'urban', {priority: 'event'}); return false;",
         tags$i(class = "fas fa-arrow-left me-2"),
-        "Volver a Desarrollo Urbano"
+        "Volver a Movilidad Urbana"
       )
     ),
+    
     # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
-          style="border-top: 4px solid var(--movilidad-color)",
-
-          h2("Transporte Público", class = "text-center")
+          style = paste0("background-color: var(--movilidad-color) !important; 
+            color: white !important; 
+            font-family: var(--font-display) !important;
+            font-weight: bolder !important; 
+            text-align: center !important; 
+            border-bottom: none !important;"),
+          h1("Transporte Público", class = "dashboard-header")
         )
       )
-    ),
-    layout_columns(
-      col_widths = c(6,6),
-    # Satisfaction maps tabset
-    card(
-      card_header(
-        div(
-          class = "d-flex justify-content-between align-items-center",
-          div(
-            class = "d-flex align-items-center",
-          "Satisfacción con el Servicio de Transporte Público",
-          create_dynamic_tooltip("trans_satisfaction_tooltip")
-          ),
-          downloadButton(
-            "download_transport_map", 
-            "", 
-            icon = icon("download"), 
-            class = "btn-sm"
-          )
-        )
-      ),
-      div(class = "movilidad-pills",
-      navset_pill(
-        id = "transport_tabs",
-        tabPanel(
-          "Camión/Rutera",
-          leafletOutput("bus_satisfaction_map", height = "500px")
-        ),
-        tabPanel(
-          "Juárez Bus",
-          leafletOutput("juarez_bus_satisfaction_map", height = "500px")
-        )
-      )
-    )
     ),
     
-    # Specific issues tabset
-
-      card(
-        card_header(
+    # Tab Navigation with Plot Cards (Transportation Satisfaction)
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
+        id = "transport_satisfaction_tabs",
+        
+        # Bus/Rutera Tab
+        nav_panel(
+          title = "Camión/Rutera",
+          value = "bus_satisfaction",
+          
           div(
-            class = "d-flex align-items-center",
-            "Aspectos con los que no están satisfechos:",
-            create_dynamic_tooltip("trans_dissatisfaction_tooltip")
+            class = "plot-card plot-card-movilidad",
+            
+            # Plot Header
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con el Servicio de Camión/Rutera por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q75 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, que tan satisfecho está con la calidad del servicio del camión/rutera? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_bus_satisfaction_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            # Plot Content
+            div(
+              class = "plot-content",
+              leafletOutput("bus_satisfaction_map", height = "500px")
+            )
           )
         ),
-        div(class = "movilidad-pills",
-        navset_pill(
-          id = "service_issues_tabs",
-          tabPanel(
-            "Camión/Rutera",
-            plotlyOutput("bus_issues_plot", height = "450px")
-          ),
-          tabPanel(
-            "Juárez Bus",
-            plotlyOutput("juarez_bus_issues_plot", height = "450px")
+        
+        # Juarez Bus Tab
+        nav_panel(
+          title = "Juárez Bus",
+          value = "juarez_bus_satisfaction",
+          
+          div(
+            class = "plot-card plot-card-movilidad",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con el Servicio de Juárez Bus por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q78 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, que tan satisfecho está con la calidad del servicio del BravoBus/EcoBus/ViveBus/Juarez Bus? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_juarez_bus_satisfaction_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("juarez_bus_satisfaction_map", height = "500px")
+            )
           )
         )
       )
-    )
+    ),
+    
+    # Second Tab Navigation with Plot Cards (Service Issues)
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
+        id = "service_issues_tabs",
+        
+        # Bus Issues Tab
+        nav_panel(
+          title = "Problemas con Camión/Rutera",
+          value = "bus_issues",
+          
+          div(
+            class = "plot-card plot-card-movilidad",
+            
+            # Plot Header
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Aspectos con los que NO están satisfechos - Camión/Rutera",
+                  create_tooltip("<b>ID</b>: PER Q76 <br>
+                    <b>Pregunta</b>: ¿Con cuáles de los siguientes aspectos del servicio del camión/rutera NO está satisfecho? <br>
+                     <b>Escala</b>: Aspectos múltiples de insatisfacción")
+                )
+              )
+            ),
+            
+            # Plot Content
+            div(
+              class = "plot-content",
+              plotlyOutput("bus_issues_plot", height = "500px")
+            )
+          )
+        ),
+        
+        # Juarez Bus Issues Tab
+        nav_panel(
+          title = "Problemas con Juárez Bus",
+          value = "juarez_bus_issues",
+          
+          div(
+            class = "plot-card plot-card-movilidad",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Aspectos con los que NO están satisfechos - Juárez Bus",
+                  create_tooltip("<b>ID</b>: PER Q79 <br>
+                    <b>Pregunta</b>: ¿Con cuáles de los siguientes aspectos del servicio del BravoBus/EcoBus/ViveBus/Juarez Bus NO está satisfecho? <br>
+                     <b>Escala</b>: Aspectos múltiples de insatisfacción")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("juarez_bus_issues_plot", height = "500px")
+            )
+          )
+        )
+      )
     )
   )
 }

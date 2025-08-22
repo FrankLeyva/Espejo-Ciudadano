@@ -1,100 +1,51 @@
+# representation_ui.R - Updated to match new styling system
 representationUI <- function() {
   page_fluid(
     class = "section-gobierno",
-
     useShinyjs(),
     init_tooltips(),
 
     tags$head(
       tags$script(HTML("
-    $(document).ready(function() {
-      // Function to resize all leaflet maps
-      function resizeLeafletMaps() {
-        setTimeout(function() {
-          $('.leaflet-container').each(function() {
-            var mapId = $(this).closest('[id]').attr('id');
-            if (mapId && window[mapId] && window[mapId].getMap) {
-              window[mapId].getMap().invalidateSize();
-            }
+        $(document).ready(function() {
+          // Function to resize all leaflet maps
+          function resizeLeafletMaps() {
+            setTimeout(function() {
+              $('.leaflet-container').each(function() {
+                var mapId = $(this).closest('[id]').attr('id');
+                if (mapId && window[mapId] && window[mapId].getMap) {
+                  window[mapId].getMap().invalidateSize();
+                }
+              });
+              
+              // Alternative method using HTMLWidgets
+              if (window.HTMLWidgets) {
+                HTMLWidgets.find('.leaflet').forEach(function(widget) {
+                  if (widget.getMap) {
+                    widget.getMap().invalidateSize();
+                  }
+                });
+              }
+            }, 100);
+          }
+          
+          // Trigger resize when tabs change
+          $(document).on('shown.bs.tab', 'a[data-bs-toggle=\"tab\"]', function (e) {
+            resizeLeafletMaps();
           });
           
-          // Alternative method using HTMLWidgets
-          if (window.HTMLWidgets) {
-            HTMLWidgets.find('.leaflet').forEach(function(widget) {
-              if (widget.getMap) {
-                widget.getMap().invalidateSize();
-              }
-            });
-          }
-        }, 100);
-      }
-      
-      // Trigger resize when tabs change
-      $(document).on('shown.bs.tab', 'a[data-bs-toggle=\"pill\"]', function (e) {
-        resizeLeafletMaps();
-      });
-      
-      // Also trigger on window resize
-      $(window).resize(function() {
-        resizeLeafletMaps();
-      });
-      
-      // Initial resize after page load
-      setTimeout(resizeLeafletMaps, 500);
-    });
-  ")),
-      tags$style(HTML("
-        /* Override pill navigation styling for this page */
-        .gobierno-pills .nav-pills .nav-link:not(.active) {
-          background-color: rgba(240, 240, 240, 0.8);
-color: var(--gobierno-color) !important;
-            border: 1px solid rgba(229, 126, 30, 0.2);
-          font-weight: bold !important;
-        }
-        
-        .gobierno-pills .nav-pills .nav-link:hover:not(.active) {
-          background-color: rgba(160, 115, 67, 0.1);
-        }
-             .gobierno-pills .nav-pills .nav-link.active {
-          background-color: var(--gobierno-color) !important; 
-          color: white !important;
-          font-weight: bold !important;
-          border: none !important;
-        }
-          /* Allow chart containers to dynamically resize */
-    .chart-container {
-      min-height: 400px;
-      height: auto !important;
-    }
-    
-    /* Make sure the plotly chart takes up available space */
-    .chart-container .plotly {
-      height: 100% !important;
-    }
-    
-    /* Fix for long labels in horizontal bar charts */
-    .ytick text {
-      text-anchor: end !important;
-    }
-      /* Ensure map containers have proper dimensions */
-    .leaflet-container {
-      height: 400px !important;
-      width: 100% !important;
-    }
-    
-    /* Make sure tab content is visible */
-    .tab-content > .tab-pane {
-      height: auto !important;
-    }
-    
-    /* Fix for chart containers in tabs */
-    .chart-container {
-      min-height: 400px !important;
-      height: 400px !important;
-    }
+          // Also trigger on window resize
+          $(window).resize(function() {
+            resizeLeafletMaps();
+          });
+          
+          // Initial resize after page load
+          setTimeout(resizeLeafletMaps, 500);
+        });
       "))
     ),
 
+    # Back navigation
     div(
       class = "mb-4",
       tags$a(
@@ -102,125 +53,326 @@ color: var(--gobierno-color) !important;
         class = "text-decoration-none",
         onclick = "Shiny.setInputValue('nav_target', 'government', {priority: 'event'}); return false;",
         tags$i(class = "fas fa-arrow-left me-2"),
-        "Volver a Gobierno"
+        "Volver a Instituciones"
       )
     ),
 
+    # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
-          style="border-top: 4px solid var(--gobierno-color)",
-
-          h2("Representación Política", class = "text-center")
+          style = paste0("background-color: var(--gobierno-color) !important; 
+            color: white !important; 
+            font-family: var(--font-display) !important;
+            font-weight: bolder !important; 
+            text-align: center !important; 
+            border-bottom: none !important;"),
+          h1("Representación Política", class = "dashboard-header")
         )
       )
     ),
+    
+    # Value boxes section
     layout_columns(
-      col_widths = c(3, 3,3,3), 
+      col_widths = c(3, 3, 3, 3), 
+      
       value_box_with_title_tooltip(
-        title = "Regidores: Representación de Intereses Ciudadanos",
+        title = "Regidores: Representación de Intereses",
         value = textOutput("regidores_rating"),
         showcase = bsicons::bs_icon("person-check-fill"),
-        theme = value_box_theme(bg = "#984334", fg = "white"),
+        theme = value_box_theme(bg = "var(--gobierno-color)", fg = "white"),
         tooltip_text = "<b>ID</b>: PAR Q11 <br>
-               <b>Pregunta</b>: 	Que tanto cree que los REGIDORES representan los intereses de los ciudadanos?  <br>
+               <b>Pregunta</b>: ¿Qué tanto cree que los REGIDORES representan los intereses de los ciudadanos? <br>
                 <b>Escala</b>: 1-10"
       ),
       
-      # Value box 2: Síndico representation rating
       value_box_with_title_tooltip(
-        title = "Síndico(a): Representación de Intereses Ciudadanos",
+        title = "Síndico(a): Representación de Intereses",
         value = textOutput("sindico_rating"),
         showcase = bsicons::bs_icon("person-check-fill"),
-        theme = value_box_theme(bg = "#BA7568", fg = "white"),
+        theme = value_box_theme(bg = "var(--gobierno-color)", fg = "white"),
         tooltip_text = "<b>ID</b>: PAR Q12 <br>
-               <b>Pregunta</b>: 	¿Que tanto cree que EL/LA SINDICO(A) represente los intereses de los ciudadanos? <br>
+               <b>Pregunta</b>: ¿Qué tanto cree que EL/LA SÍNDICO(A) represente los intereses de los ciudadanos? <br>
                 <b>Escala</b>: 1-10",
         force_icon_color = "rgba(255, 255, 255, 0.8)"
       ),
       
-      # Value box 3: Local deputy representation rating
       value_box_with_title_tooltip(
-        title = "Diputado(a) Local: Representación de Intereses Ciudadanos",
+        title = "Diputado(a) Local: Representación de Intereses",
         value = textOutput("diputado_local_rating"),
         showcase = bsicons::bs_icon("person-check-fill"),
-        theme = value_box_theme(bg = "#984334", fg = "white"),
-        tooltip_text = "<b>ID</b>: PAR Q11 <br>
-               <b>Pregunta</b>: 		¿Que tanto cree que EL/LA DIPUTADO(A) LOCAL represente los intereses de los ciudadanos?  <br>
+        theme = value_box_theme(bg = "var(--gobierno-color)", fg = "white"),
+        tooltip_text = "<b>ID</b>: PAR Q13 <br>
+               <b>Pregunta</b>: ¿Qué tanto cree que EL/LA DIPUTADO(A) LOCAL represente los intereses de los ciudadanos? <br>
                 <b>Escala</b>: 1-10"
       ),
       
-      # Value box 4: Federal deputy representation rating
       value_box_with_title_tooltip(
-        title = "Diputado(a) Federal: Representación de Intereses Ciudadanos",
+        title = "Diputado(a) Federal: Representación de Intereses",
         value = textOutput("diputado_federal_rating"),
         showcase = bsicons::bs_icon("person-check-fill"),
-        theme = value_box_theme(bg = "#BA7568", fg = "white"),
-        tooltip_text = "<b>ID</b>: PAR Q11 <br>
-               <b>Pregunta</b>: 	¿Que tanto cree que EL/LA DIPUTADO(A) LOCAL represente los intereses de los ciudadanos?  <br>
+        theme = value_box_theme(bg = "var(--gobierno-color)", fg = "white"),
+        tooltip_text = "<b>ID</b>: PAR Q14 <br>
+               <b>Pregunta</b>: ¿Qué tanto cree que EL/LA DIPUTADO(A) FEDERAL represente los intereses de los ciudadanos? <br>
                 <b>Escala</b>: 1-10",
         force_icon_color = "rgba(255, 255, 255, 0.8)"
       )
     ),
-    # Main layout with side-by-side columns
-    layout_columns(
-      col_widths = c(6, 6),  
-        card(
-          card_header(
-          div(
-            class = "d-flex justify-content-between align-items-center",
-            div(
-              class = "d-flex align-items-center",
-          "Conocimiento de Representantes por Distrito",
-          create_dynamic_tooltip("political_knowledge_tooltip")
-          ),
-          downloadButton(
-            "download_political_knowledge_map", 
-            "", 
-            icon = icon("download"), 
-            class = "btn-sm"
-          ))),
-          div(class = "gobierno-pills",
-          navset_pill(
-            id = "knowledge_tabs",
-            tabPanel("Regidor(a)", 
-                     leafletOutput("regidor_knowledge_map", height ="auto")),
-            tabPanel("Síndico(a)", 
-                     leafletOutput("sindico_knowledge_map", height ="auto")),
-            tabPanel("Diputado(a) Local y/o Estatal", 
-                     leafletOutput("diputadol_knowledge_map", height ="auto")),
-            tabPanel("Diputado(a) Federal", 
-                     leafletOutput("diputadof_knowledge_map", height ="auto"))
-          )
-        )
-        ),
-        # Add this somewhere in your UI for debugging
-
-        # Second tabset: Representative knowledge bar charts
-        card(
-          card_header(
-            div(
-              class = "d-flex align-items-center",
-              "Conocimiento de Representantes Específicos",
-              create_dynamic_tooltip("specific_knowledge_tooltip")
-            )
-            ),
-          div(class = "gobierno-pills",
-          navset_pill(
-            id = "specific_knowledge_tabs",
-            tabPanel("Regidores", 
-                     div(class = "chart-container", plotlyOutput("regidores_knowledge_chart", height ="auto"))),
-            tabPanel("Diputados Locales", 
-                     div(class = "chart-container", plotlyOutput("diputados_locales_knowledge_chart", height ="auto"))),
-            tabPanel("Diputados Federales", 
-                     div(class = "chart-container", plotlyOutput("diputados_federales_knowledge_chart", height ="auto")))
-          )
-        )
-        )
-      ),
-
-
     
+    # Content Section: Representative Knowledge Maps
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
+        id = "knowledge_tabs",
+        
+        # Regidor Knowledge Tab
+        nav_panel(
+          title = "Conocimiento de Regidor(a)",
+          value = "regidor_knowledge",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento del Regidor(a) por Distrito",
+                  create_tooltip("<b>ID</b>: PAR Q16.3 <br>
+                    <b>Pregunta</b>: ¿Conoce usted el nombre de su regidor/a? <br>
+                     <b>Escala</b>: 1=Sí; 2=No")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_regidor_knowledge_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("regidor_knowledge_map", height = "500px")
+            )
+          )
+        ),
+        
+        # Sindico Knowledge Tab
+        nav_panel(
+          title = "Conocimiento de Síndico(a)",
+          value = "sindico_knowledge",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento del Síndico(a) por Distrito",
+                  create_tooltip("<b>ID</b>: PAR Q16.4 <br>
+                    <b>Pregunta</b>: ¿Conoce usted el nombre de su síndico/a? <br>
+                     <b>Escala</b>: 1=Sí; 2=No")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_sindico_knowledge_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("sindico_knowledge_map", height = "500px")
+            )
+          )
+        ),
+        
+        # Local Deputy Knowledge Tab
+        nav_panel(
+          title = "Diputado(a) Local/Estatal",
+          value = "diputado_local_knowledge",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento del Diputado(a) Local/Estatal por Distrito",
+                  create_tooltip("<b>ID</b>: PAR Q16.2 <br>
+                    <b>Pregunta</b>: ¿Conoce usted el nombre de su diputado/a local y/o estatal? <br>
+                     <b>Escala</b>: 1=Sí; 2=No")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_diputadol_knowledge_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("diputadol_knowledge_map", height = "500px")
+            )
+          )
+        ),
+        
+        # Federal Deputy Knowledge Tab
+        nav_panel(
+          title = "Diputado(a) Federal",
+          value = "diputado_federal_knowledge",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento del Diputado(a) Federal por Distrito",
+                  create_tooltip("<b>ID</b>: PAR Q16.1 <br>
+                    <b>Pregunta</b>: ¿Conoce usted el nombre de su diputado/a federal? <br>
+                     <b>Escala</b>: 1=Sí; 2=No")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_diputadof_knowledge_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("diputadof_knowledge_map", height = "500px")
+            )
+          )
+        )
+      )
+    ),
+    
+    # Content Section: Specific Knowledge Charts
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
+        id = "specific_knowledge_tabs",
+        
+        # Regidores Knowledge Chart Tab
+        nav_panel(
+          title = "Conocimiento Específico - Regidores",
+          value = "regidores_specific",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento Específico de Regidores",
+                  create_tooltip("<b>Descripción</b>: Nivel de conocimiento específico de los regidores por parte de los ciudadanos encuestados")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("regidores_knowledge_chart", height = "500px")
+            )
+          )
+        ),
+        
+        # Local Deputies Knowledge Chart Tab
+        nav_panel(
+          title = "Conocimiento Específico - Diputados Locales",
+          value = "diputados_locales_specific",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento Específico de Diputados Locales",
+                  create_tooltip("<b>Descripción</b>: Nivel de conocimiento específico de los diputados locales por parte de los ciudadanos encuestados")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("diputados_locales_knowledge_chart", height = "500px")
+            )
+          )
+        ),
+        
+        # Federal Deputies Knowledge Chart Tab
+        nav_panel(
+          title = "Conocimiento Específico - Diputados Federales",
+          value = "diputados_federales_specific",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Conocimiento Específico de Diputados Federales",
+                  create_tooltip("<b>Descripción</b>: Nivel de conocimiento específico de los diputados federales por parte de los ciudadanos encuestados")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("diputados_federales_knowledge_chart", height = "500px")
+            )
+          )
+        )
+      )
+    )
   )
 }

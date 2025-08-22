@@ -2,6 +2,9 @@ explorerServer <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # Get selected year from main app
+    selectedYear <- session$userData$selectedYear
+    
     # Track active tab and reset functionality
     activeTab <- reactive({
       if (is.null(input$search_tabs) || length(input$search_tabs) == 0) {
@@ -35,59 +38,109 @@ explorerServer <- function(id) {
       updateSelectInput(session, "district_filter", choices = NULL, selected = character(0))
     }, ignoreNULL = TRUE, ignoreInit = TRUE)
     
-    # Load all survey data and themes at startup
+    # Load survey data for the selected year
     allSurveyData <- reactive({
-      # Load both surveys for both years
-      all_data <- list()
+      req(selectedYear())
       
-      for (year in c("2023", "2024")) {
-        for (type in c("PER", "PAR")) {
-          survey_id <- paste0(type, "_", year)
-          
-          tryCatch({
-            data <- load_survey_data(survey_id)
-            if (!is.null(data)) {
-              all_data[[survey_id]] <- data
+      # Load both surveys for the selected year only
+      all_data <- list()
+      current_year <- selectedYear()
+      
+      message(paste("Loading survey data for year:", current_year))
+      
+      for (type in c("PER", "PAR")) {
+        survey_id <- paste0(type, "_", current_year)
+        
+        tryCatch({
+          message(paste("Attempting to load:", survey_id))
+          data <- load_survey_data(survey_id)
+          if (!is.null(data)) {
+            all_data[[survey_id]] <- data
+            message(paste("Successfully loaded", survey_id, "with", nrow(data$responses), "responses"))
+            if (!is.null(data$metadata)) {
+              message(paste("Metadata has", nrow(data$metadata), "questions"))
             }
-          }, error = function(e) {
-            message(paste("Could not load", survey_id, ":", e$message))
-          })
-        }
+          } else {
+            message(paste("load_survey_data returned NULL for", survey_id))
+          }
+        }, error = function(e) {
+          message(paste("Could not load", survey_id, ":", e$message))
+          showNotification(
+            paste("No se pudo cargar", survey_id, ":", e$message), 
+            type = "warning",
+            duration = 3
+          )
+        })
       }
       
+      message(paste("Total surveys loaded:", length(all_data)))
       return(all_data)
     })
     
     # Load geo data for maps
     geoData <- reactive({
       tryCatch({
-        sf::st_read('data/geo/Jrz_Map.geojson', quiet = TRUE)
+        # Try the .geojson file first, then fall back to .shp
+        if (file.exists('data/geo/Jrz_Map.geojson')) {
+          sf::st_read('data/geo/Jrz_Map.geojson', quiet = TRUE)
+        } else if (file.exists('data/spatial/Distritos_Juarez.shp')) {
+          sf::st_read('data/spatial/Distritos_Juarez.shp', quiet = TRUE)
+        } else {
+          # Use the session data if available
+          session_geo <- session$userData$geoData
+          if (is.function(session_geo)) {
+            session_geo()
+          } else {
+            NULL
+          }
+        }
       }, error = function(e) {
         showNotification(
           paste("Error al cargar datos geográficos:", e$message), 
-          type = "error",
-          duration = 10
+          type = "warning",
+          duration = 5
         )
         NULL
       })
     })
     
-    # Load and process all theme metadata
+    # Load and process theme metadata for the selected year
     allThemes <- reactive({
+      req(selectedYear())
+      
       tryCatch({
         themes_data <- theme_metadata$load_thematic_classifications()
+        current_year <- selectedYear()
         
-        # Filter out Internal and Dashboard Context themes
-        themes_data <- themes_data %>%
-          filter(!MainTheme %in% c("Internal", "Dashboard Context"))
+        # Debug information
+        message(paste("Total themes loaded:", nrow(themes_data)))
+        if (nrow(themes_data) > 0) {
+          unique_surveys <- unique(themes_data$survey_id)
+          message(paste("Available surveys:", paste(unique_surveys, collapse = ", ")))
+        }
         
-        return(themes_data)
+        # Filter by selected year and exclude internal themes
+        filtered_data <- themes_data %>%
+          filter(
+            !MainTheme %in% c("Internal", "Dashboard Context"),
+            grepl(paste0("_", current_year), survey_id)
+          )
+        
+        message(paste("Filtered themes for", current_year, ":", nrow(filtered_data)))
+        if (nrow(filtered_data) > 0) {
+          unique_themes <- unique(filtered_data$MainTheme)
+          message(paste("Available themes for", current_year, ":", paste(unique_themes, collapse = ", ")))
+        }
+        
+        return(filtered_data)
       }, error = function(e) {
         showNotification(
           paste("Error al cargar metadata de temas:", e$message), 
           type = "error",
           duration = 10
         )
+        message(paste("Error in allThemes():", e$message))
+        # Return empty data frame with correct structure
         data.frame(
           variable = character(0),
           survey_id = character(0),
@@ -98,98 +151,221 @@ explorerServer <- function(id) {
       })
     })
     
-    # Create a comprehensive question catalog with theme info
+    # Create a comprehensive question catalog with theme info for selected year
     questionCatalog <- reactive({
-      req(allSurveyData(), allThemes())
+      req(allSurveyData(), allThemes(), selectedYear())
       
-      catalog <- data.frame()
-      themes_data <- allThemes()
-      survey_data <- allSurveyData()
-      
-      for (survey_id in names(survey_data)) {
-        if (is.null(survey_data[[survey_id]]$metadata)) next
+      tryCatch({
+        themes_data <- allThemes()
+        survey_data <- allSurveyData()
+        current_year <- selectedYear()
         
-        # Clean survey_id for matching with themes
-        clean_survey_id <- gsub("_V[0-9]+$", "", survey_id)
-        
-        # Get questions for this survey
-        metadata <- survey_data[[survey_id]]$metadata
-        
-        # Get theme info for this survey
-        survey_themes <- themes_data %>%
-          filter(survey_id == clean_survey_id)
-        
-        # Classify questions by scale type
-        classifications <- tryCatch({
-          classify_questions(metadata)
-        }, error = function(e) {
-          list(
-            razon = character(0),
-            intervalo = character(0),
-            ordinal = character(0),
-            categorico = character(0),
-            binaria = character(0),
-            nominal = character(0)
-          )
-        })
-        
-        # Determine scale type for each question
-        all_questions <- unique(unlist(classifications))
-        
-        for (question_id in all_questions) {
-          # Skip nominal questions and "Other" questions
-          if (question_id %in% classifications$nominal ||
-              question_id %in% metadata$variable[grepl("Other", metadata$label, fixed = TRUE)]) {
-            next
-          }
-          
-          # Find theme info
-          theme_info <- survey_themes %>%
-            filter(variable == question_id) %>%
-            slice(1)
-          
-          if (nrow(theme_info) == 0) next
-          
-          # Get question label
-          question_meta <- metadata %>%
-            filter(variable == question_id) %>%
-            slice(1)
-          
-          if (nrow(question_meta) == 0) next
-          
-          # Determine scale type
-          scale_type <- "unknown"
-          if (question_id %in% classifications$razon) scale_type <- "razon"
-          else if (question_id %in% classifications$intervalo) scale_type <- "intervalo"
-          else if (question_id %in% classifications$ordinal) scale_type <- "ordinal"
-          else if (question_id %in% classifications$categorico) scale_type <- "categorico"
-          else if (question_id %in% classifications$binaria) scale_type <- "binaria"
-          
-          # Add to catalog
-          catalog <- rbind(catalog, data.frame(
-            question_id = question_id,
-            survey_id = survey_id,
-            clean_survey_id = clean_survey_id,
-            survey_type = substr(survey_id, 1, 3),
-            survey_year = substr(survey_id, 5, 8),
-            main_theme = theme_info$MainTheme,
-            subtheme = theme_info$Subtheme,
-            question_label = question_meta$label,
-            scale_type = scale_type,
+        # Return empty data frame if no data
+        if (nrow(themes_data) == 0 || length(survey_data) == 0) {
+          return(data.frame(
+            question_id = character(0),
+            survey_id = character(0),
+            clean_survey_id = character(0),
+            survey_type = character(0),
+            survey_year = character(0),
+            main_theme = character(0),
+            subtheme = character(0),
+            question_label = character(0),
+            scale_type = character(0),
             stringsAsFactors = FALSE
           ))
         }
-      }
-      
-      return(catalog)
+        
+        catalog <- data.frame()
+        
+        for (survey_id in names(survey_data)) {
+          if (is.null(survey_data[[survey_id]]$metadata)) next
+          
+          # Clean survey_id for matching with themes
+          clean_survey_id <- gsub("_V[0-9]+$", "", survey_id)
+          
+          # Get questions for this survey
+          metadata <- survey_data[[survey_id]]$metadata
+          
+          # Get theme info for this survey
+          survey_themes <- themes_data %>%
+            filter(survey_id == clean_survey_id)
+          
+          # Classify questions by scale type
+          classifications <- tryCatch({
+            classify_questions(metadata)
+          }, error = function(e) {
+            list(
+              razon = character(0),
+              intervalo = character(0),
+              ordinal = character(0),
+              categorico = character(0),
+              binaria = character(0),
+              nominal = character(0)
+            )
+          })
+          
+          # Determine scale type for each question
+          all_questions <- unique(unlist(classifications))
+          
+          for (question_id in all_questions) {
+            # Skip nominal questions and "Other" questions
+            if (question_id %in% classifications$nominal ||
+                question_id %in% metadata$variable[grepl("Other", metadata$label, fixed = TRUE)]) {
+              next
+            }
+            
+            # Find theme info
+            theme_info <- survey_themes %>%
+              filter(variable == question_id) %>%
+              slice(1)
+            
+            if (nrow(theme_info) == 0) next
+            
+            # Get question label
+            question_meta <- metadata %>%
+              filter(variable == question_id) %>%
+              slice(1)
+            
+            if (nrow(question_meta) == 0) next
+            
+            # Determine scale type
+            scale_type <- "unknown"
+            if (question_id %in% classifications$razon) scale_type <- "razon"
+            else if (question_id %in% classifications$intervalo) scale_type <- "intervalo"
+            else if (question_id %in% classifications$ordinal) scale_type <- "ordinal"
+            else if (question_id %in% classifications$categorico) scale_type <- "categorico"
+            else if (question_id %in% classifications$binaria) scale_type <- "binaria"
+            
+            # Add to catalog
+            catalog <- rbind(catalog, data.frame(
+              question_id = question_id,
+              survey_id = survey_id,
+              clean_survey_id = clean_survey_id,
+              survey_type = substr(survey_id, 1, 3),
+              survey_year = current_year,  # Use current year consistently
+              main_theme = theme_info$MainTheme,
+              subtheme = theme_info$Subtheme,
+              question_label = question_meta$label,
+              scale_type = scale_type,
+              stringsAsFactors = FALSE
+            ))
+          }
+        }
+        
+        return(catalog)
+      }, error = function(e) {
+        warning(paste("Error creating question catalog:", e$message))
+        # Return empty but properly structured data frame
+        return(data.frame(
+          question_id = character(0),
+          survey_id = character(0),
+          clean_survey_id = character(0),
+          survey_type = character(0),
+          survey_year = character(0),
+          main_theme = character(0),
+          subtheme = character(0),
+          question_label = character(0),
+          scale_type = character(0),
+          stringsAsFactors = FALSE
+        ))
+      })
     })
     
+    # Display current year info
+    output$current_year_info <- renderText({
+      current_year <- selectedYear()
+      if (is.null(current_year)) {
+        return("Cargando...")
+      }
+      return(current_year)
+    })
+    prepare_q65_data <- function(data, question_id, metadata) {
+  # Monument mapping for Q65
+  monument_mapping <- c(
+    "1" = "La X", "2" = "El Monumento A Benito Juárez", "3" = "La Catedral",
+    "4" = "El Parque Central", "5" = "El Chamizal", "6" = "La Casa De Juan Gabriel",
+    "7" = "El Centro", "8" = "La Presidencia", "9" = "Umbral Del Milenio",
+    "10" = "El Museo De La Ex-Aduana", "11" = "El Parque Borunda",
+    "12" = "El Monumento A Zapata", "13" = "La Rodadora", "14" = "Letras JRZ",
+    "15" = "La Plaza De Toros", "16" = "Monumento A Los Indomables",
+    "17" = "Gimnasios Públicos", "18" = "La Torre Centinela", "19" = "El Gardie",
+    "20" = "El Cigarro", "21" = "Estadio Benito Juárez", "22" = "La Iglesia De San Lorenzo",
+    "23" = "Mercado Juárez", "24" = "Monumento A Tin Tan", "25" = "Monumento Al Trabajo",
+    "26" = "Otro", "27" = "Ninguno"
+  )
+  
+  # Check if standardized columns exist and handle missing ones
+  data <- check_standardized_columns(data)
+  
+  # Extract the column data
+  if (!question_id %in% names(data)) {
+    warning(paste("Question", question_id, "not found in data"))
+    return(NULL)
+  }
+  
+  # Select relevant columns
+  subset_data <- data %>%
+    select(
+      value = all_of(question_id),
+      district = DISTRICT, 
+      gender = GENDER,
+      age_group = AGE_GROUP
+    )
+  
+  # Apply the monument mapping
+  subset_data <- subset_data %>%
+    mutate(
+      original_value = value,
+      value = case_when(
+        as.character(value) %in% names(monument_mapping) ~ monument_mapping[as.character(value)],
+        TRUE ~ as.character(value)
+      ),
+      # Convert factors to characters for consistency
+      district = as.factor(district),
+      gender = as.factor(gender),
+      age_group = as.factor(age_group)
+    ) %>%
+    # Remove rows with missing values
+    filter(!is.na(value), value != "", !is.na(district))
+  
+  # Add attributes for reference
+  attr(subset_data, "question_id") <- question_id
+  attr(subset_data, "monument_mapping") <- monument_mapping
+  attr(subset_data, "is_monument_question") <- TRUE
+  
+  # Get question label from metadata
+  question_meta <- metadata %>%
+    filter(variable == question_id) %>%
+    first()
+  
+  if (!is.null(question_meta) && !is.na(question_meta$label)) {
+    attr(subset_data, "question_label") <- question_meta$label
+  }
+  
+  return(subset_data)
+}
     # Update theme dropdown (only for theme search tab)
     observe({
-      req(questionCatalog())
-      
       catalog <- questionCatalog()
+      
+      # Handle empty or NULL catalog
+      if (is.null(catalog) || nrow(catalog) == 0) {
+        updateSelectInput(session, "theme_filter", 
+                         choices = c("No hay temas disponibles" = ""),
+                         selected = "")
+        return()
+      }
+      
       unique_themes <- unique(catalog$main_theme)
+      
+      # Handle empty themes
+      if (length(unique_themes) == 0) {
+        updateSelectInput(session, "theme_filter", 
+                         choices = c("No hay temas disponibles" = ""),
+                         selected = "")
+        return()
+      }
       
       # Translate theme names to Spanish
       translated_themes <- sapply(unique_themes, function(theme) {
@@ -209,9 +385,25 @@ explorerServer <- function(id) {
     
     # Update subtheme dropdown based on selected theme
     observe({
-      req(input$theme_filter, input$theme_filter != "", questionCatalog())
+      req(input$theme_filter, input$theme_filter != "")
       
       catalog <- questionCatalog()
+      
+      # Handle empty or NULL catalog
+      if (is.null(catalog) || nrow(catalog) == 0) {
+        updateSelectInput(session, "subtheme_filter", 
+                         choices = c("No hay datos disponibles" = ""),
+                         selected = "")
+        return()
+      }
+      
+      # Check if main_theme column exists
+      if (!"main_theme" %in% names(catalog)) {
+        updateSelectInput(session, "subtheme_filter", 
+                         choices = c("Error en los datos" = ""),
+                         selected = "")
+        return()
+      }
       
       # Get subthemes for the selected theme
       subthemes <- catalog %>%
@@ -219,6 +411,14 @@ explorerServer <- function(id) {
         pull(subtheme) %>%
         unique() %>%
         sort()
+      
+      # Handle empty subthemes
+      if (length(subthemes) == 0) {
+        updateSelectInput(session, "subtheme_filter", 
+                         choices = c("No hay subtemas disponibles" = ""),
+                         selected = "")
+        return()
+      }
       
       # Translate subtheme names to Spanish
       translated_subthemes <- sapply(subthemes, function(subtheme) {
@@ -248,10 +448,31 @@ explorerServer <- function(id) {
     # Update question dropdown for theme search based on theme and subtheme
     observe({
       req(input$theme_filter, input$theme_filter != "",
-          input$subtheme_filter, input$subtheme_filter != "",
-          questionCatalog())
+          input$subtheme_filter, input$subtheme_filter != "")
       
       catalog <- questionCatalog()
+      
+      # Handle empty or NULL catalog
+      if (is.null(catalog) || nrow(catalog) == 0) {
+        updateSelectInput(
+          session,
+          "question_select_theme",
+          choices = c("No hay datos disponibles" = ""),
+          selected = ""
+        )
+        return()
+      }
+      
+      # Check if required columns exist
+      if (!"main_theme" %in% names(catalog) || !"subtheme" %in% names(catalog)) {
+        updateSelectInput(
+          session,
+          "question_select_theme",
+          choices = c("Error en los datos" = ""),
+          selected = ""
+        )
+        return()
+      }
       
       # Filter questions by theme and subtheme
       filtered_questions <- catalog %>%
@@ -302,15 +523,25 @@ explorerServer <- function(id) {
     
     # Text search functionality
     searchResults <- eventReactive(input$search_button, {
-      req(input$search_query, nchar(trimws(input$search_query)) > 0, questionCatalog())
+      req(input$search_query, nchar(trimws(input$search_query)) > 0)
       
       search_query <- trimws(input$search_query)
       if (search_query == "") return(data.frame())
       
       catalog <- questionCatalog()
       
+      # Handle empty or NULL catalog
+      if (is.null(catalog) || nrow(catalog) == 0) {
+        return(data.frame())
+      }
+      
       # Split search terms
       search_terms <- tolower(trimws(strsplit(search_query, "\\s+")[[1]]))
+      
+      # Check if required columns exist
+      if (!"question_label" %in% names(catalog) || !"question_id" %in% names(catalog)) {
+        return(data.frame())
+      }
       
       # Filter questions that match any search term
       filtered_questions <- catalog %>%
@@ -319,49 +550,57 @@ explorerServer <- function(id) {
             grepl(term, tolower(question_label), fixed = TRUE) |
             grepl(term, tolower(question_id), fixed = TRUE)
           }))
-        ) %>%
+        )
+      
+      # Handle case where no columns exist for sorting
+      if (!"survey_type" %in% names(filtered_questions)) {
+        return(filtered_questions)
+      }
+      
+      filtered_questions <- filtered_questions %>%
         arrange(survey_type, survey_year, question_id)
       
       return(filtered_questions)
     })
     
     # Update search results info
-    output$search_results_info <- renderUI({
-      if (input$search_button == 0) return(NULL)
-      
-      req(input$search_query)
-      search_query <- trimws(input$search_query)
-      
-      if (search_query == "") {
-        return(div(
-          class = "search-results-info",
-          "Ingrese términos de búsqueda y haga clic en 'Buscar'"
-        ))
-      }
-      
-      results <- searchResults()
-      
-      if (nrow(results) == 0) {
-        return(div(
-          class = "search-results-info",
-          paste("No se encontraron preguntas que contengan:", search_query)
-        ))
-      }
-      
-      # Count by survey
-      survey_counts <- results %>%
-        group_by(survey_type, survey_year) %>%
-        summarise(count = n(), .groups = 'drop') %>%
-        mutate(survey_label = paste0(survey_type, " ", survey_year, ": ", count)) %>%
-        pull(survey_label)
-      
-      return(div(
-        class = "search-results-info",
-        paste0("Se encontraron ", nrow(results), " preguntas"),
-        br(),
-        paste(survey_counts, collapse = ", ")
-      ))
-    })
+output$search_results_info <- renderUI({
+  if (input$search_button == 0) return(NULL)
+  
+  req(input$search_query, selectedYear())
+  search_query <- trimws(input$search_query)
+  current_year <- selectedYear()
+  
+  if (search_query == "") {
+    return(div(
+      class = "alert alert-secondary",
+      "Ingrese términos de búsqueda y haga clic en 'Buscar'"
+    ))
+  }
+  
+  results <- searchResults()
+  
+  if (nrow(results) == 0) {
+    return(div(
+      class = "alert alert-warning",
+      paste0("No se encontraron preguntas que contengan '", search_query, "' en el año ", current_year)
+    ))
+  }
+  
+  # Count by survey
+  survey_counts <- results %>%
+    group_by(survey_type, survey_year) %>%
+    summarise(count = n(), .groups = 'drop') %>%
+    mutate(survey_label = paste0(survey_type, " ", survey_year, ": ", count)) %>%
+    pull(survey_label)
+  
+  return(div(
+    class = "alert alert-success",
+    paste0("Se encontraron ", nrow(results), " preguntas en ", current_year),
+    br(),
+    paste(survey_counts, collapse = ", ")
+  ))
+})
     
     # Update search results dropdown
     observe({
@@ -482,80 +721,103 @@ explorerServer <- function(id) {
     
     # Display data source info
     output$data_source_info <- renderText({
-      req(selectedQuestionInfo())
-      
-      survey_id <- selectedQuestionInfo()$survey_id
-      survey_type <- ifelse(startsWith(survey_id, "PER"), 
-                           "Encuesta de Percepción Ciudadana", 
-                           "Encuesta de Participación Ciudadana y Buen Gobierno")
-      survey_year <- substr(survey_id, nchar(survey_id) - 3, nchar(survey_id))
-      
-      paste(survey_type, survey_year)
+      tryCatch({
+        req(selectedQuestionInfo())
+        
+        current_year <- selectedYear()
+        if (is.null(current_year)) {
+          return("Cargando información de la fuente...")
+        }
+        
+        survey_id <- selectedQuestionInfo()$survey_id
+        survey_type <- ifelse(startsWith(survey_id, "PER"), 
+                             "Encuesta de Percepción Ciudadana", 
+                             "Encuesta de Participación Ciudadana y Buen Gobierno")
+        
+        paste(survey_type, current_year)
+      }, error = function(e) {
+        return("Error cargando información de la fuente")
+      })
     })
     
     # Display question information
-    output$question_text <- renderUI({
-      req(selectedQuestionInfo(), currentSurveyData())
-      
-      question_id <- selectedQuestionInfo()$question_id
-      label <- get_question_label(question_id, currentSurveyData()$metadata)
-      scale_type <- selectedScaleType()
-      
-      # Get theme info for styling
-      catalog <- questionCatalog()
-      question_info <- catalog %>%
-        filter(question_id == !!question_id, survey_id == !!selectedQuestionInfo()$survey_id) %>%
-        slice(1)
-      
-      # Determine theme class for styling
-      theme_class <- "theme-bienestar"  # default
-      if (nrow(question_info) > 0) {
-        main_theme <- question_info$main_theme
-        if (main_theme == "Urban Mobility & Environment") theme_class <- "theme-movilidad"
-        else if (main_theme == "Governance & Civic Engagement") theme_class <- "theme-gobierno"
-        else if (main_theme == "Public Services") theme_class <- "theme-infraestructura"
-        else if (main_theme == "Community Participation") theme_class <- "theme-participacion"
-      }
-      
-      # Get Spanish translations
-      theme_spanish <- ifelse(nrow(question_info) > 0, 
-                             theme_metadata$translate_theme_name(question_info$main_theme), 
-                             "")
-      subtheme_spanish <- ifelse(nrow(question_info) > 0, 
-                                theme_metadata$translate_subtheme_name(question_info$subtheme), 
-                                "")
-      
+output$question_text <- renderUI({
+  tryCatch({
+    req(selectedQuestionInfo(), currentSurveyData())
+    
+    question_id <- selectedQuestionInfo()$question_id
+    label <- get_question_label(question_id, currentSurveyData()$metadata)
+    scale_type <- selectedScaleType()
+    
+    # Get theme info for styling
+    catalog <- questionCatalog()
+    
+    if (is.null(catalog) || nrow(catalog) == 0) {
+      # Fallback without theme styling
       scale_type_spanish <- switch(scale_type,
-                                  "razon" = "Razón (numérica continua)",
-                                  "intervalo" = "Intervalo (numérica con rangos)",
-                                  "ordinal" = "Ordinal (categorías ordenadas)",
-                                  "categorico" = "Categórica (categorías sin orden)",
-                                  "binaria" = "Binaria (sí/no)",
-                                  "nominal" = "Nominal (texto abierto)",
-                                  "Desconocido")
+                                "razon" = "Razón (numérica continua)",
+                                "intervalo" = "Intervalo (numérica con rangos)",
+                                "ordinal" = "Ordinal (categorías ordenadas)",
+                                "categorico" = "Categórica (categorías sin orden)",
+                                "binaria" = "Binaria (sí/no)",
+                                "nominal" = "Nominal (texto abierto)",
+                                "Desconocido")
       
-      HTML(paste0(
+      return(HTML(paste0(
         "<strong>ID:</strong> ", question_id, "<br/>",
         "<strong>Pregunta:</strong> ", label, "<br/>",
-        "<strong>Tipo de datos:</strong> ", scale_type_spanish, "<br/>",
-        "<strong>Tema:</strong> ", theme_spanish, 
-        "<span class='theme-indicator ", theme_class, "'>", theme_spanish, "</span><br/>",
-        "<strong>Subtema:</strong> ", subtheme_spanish
-      ))
-    })
+        "<strong>Tipo de datos:</strong> ", scale_type_spanish
+      )))
+    }
+    
+    question_info <- catalog %>%
+      filter(question_id == !!question_id, survey_id == !!selectedQuestionInfo()$survey_id) %>%
+      slice(1)
+    
+    # Get Spanish translations
+    theme_spanish <- ifelse(nrow(question_info) > 0, 
+                           theme_metadata$translate_theme_name(question_info$main_theme), 
+                           "")
+    subtheme_spanish <- ifelse(nrow(question_info) > 0, 
+                              theme_metadata$translate_subtheme_name(question_info$subtheme), 
+                              "")
+    
+    scale_type_spanish <- switch(scale_type,
+                                "razon" = "Razón (numérica continua)",
+                                "intervalo" = "Intervalo (numérica con rangos)",
+                                "ordinal" = "Ordinal (categorías ordenadas)",
+                                "categorico" = "Categórica (categorías sin orden)",
+                                "binaria" = "Binaria (sí/no)",
+                                "nominal" = "Nominal (texto abierto)",
+                                "Desconocido")
+    
+    HTML(paste0(
+      "<strong>ID:</strong> ", question_id, "<br/>",
+      "<strong>Pregunta:</strong> ", label, "<br/>",
+      "<strong>Tipo de datos:</strong> ", scale_type_spanish, "<br/>",
+      "<strong>Tema:</strong> ", theme_spanish, "<br/>",
+      "<strong>Subtema:</strong> ", subtheme_spanish
+    ))
+  }, error = function(e) {
+    HTML("<strong>Error:</strong> No se pudo cargar la información de la pregunta.")
+  })
+})
     
     # Generate visualization title
-    output$viz_title <- renderText({
-      req(selectedQuestionInfo())
-      
-      if (is.null(selectedQuestionInfo())) {
-        return("Seleccione una pregunta para visualizar")
-      }
-      
-      "Resultados de la Visualización"
-    })
+output$viz_title <- renderText({
+  current_year <- selectedYear()
+  if (is.null(current_year)) {
+    return("Así Estamos Juárez")
+  }
+  
+  if (is.null(selectedQuestionInfo())) {
+    return(paste("Así Estamos Juárez -", current_year))
+  }
+  
+  paste("Resultados -", current_year)
+})
     
-    # Display visualization options based on scale type (rest of the server code remains the same)
+    # Display visualization options based on scale type
     output$viz_options <- renderUI({
       req(selectedScaleType())
       
@@ -634,35 +896,39 @@ explorerServer <- function(id) {
       }
     })
     
-    # The rest of the server logic (preparedData, filteredData, outputs, etc.) 
-    # remains the same as in the original code...
-    # [Include all the remaining reactive expressions and output handlers from the original]
+    # Rest of the code remains the same from the original implementation...
+    # (preparedData, filteredData, visualization outputs, etc.)
     
     # Prepare data for the selected question
-    preparedData <- reactive({
-      req(selectedQuestionInfo(), currentSurveyData(), selectedScaleType())
-      
-      question_id <- selectedQuestionInfo()$question_id
-      scale_type <- selectedScaleType()
-      survey_data <- currentSurveyData()
-      
-      # Prepare data based on scale type
-      if (scale_type == "razon") {
-        prepare_razon_data(survey_data$responses, question_id, survey_data$metadata)
-      } else if (scale_type == "intervalo") {
-        prepare_interval_data(survey_data$responses, question_id, survey_data$metadata)
-      } else if (scale_type == "ordinal") {
-        prepare_ordinal_data(survey_data$responses, question_id, survey_data$metadata)
-      } else if (scale_type == "categorico") {
-        prepare_categorical_data(survey_data$responses, question_id, survey_data$metadata)
-      } else if (scale_type == "binaria") {
-        prepare_binary_data(survey_data$responses, question_id, survey_data$metadata)
-      } else if (scale_type == "nominal") {
-        prepare_nominal_data(survey_data$responses, question_id, survey_data$metadata)
-      } else {
-        NULL
-      }
-    })
+   preparedData <- reactive({
+  req(selectedQuestionInfo(), currentSurveyData(), selectedScaleType())
+  
+  question_id <- selectedQuestionInfo()$question_id
+  scale_type <- selectedScaleType()
+  survey_data <- currentSurveyData()
+  
+  # Special handling for Q65 (monuments question)
+  if (question_id == "Q65") {
+    return(prepare_q65_data(survey_data$responses, question_id, survey_data$metadata))
+  }
+  
+  # Standard data preparation based on scale type
+  if (scale_type == "razon") {
+    prepare_razon_data(survey_data$responses, question_id, survey_data$metadata)
+  } else if (scale_type == "intervalo") {
+    prepare_interval_data(survey_data$responses, question_id, survey_data$metadata)
+  } else if (scale_type == "ordinal") {
+    prepare_ordinal_data(survey_data$responses, question_id, survey_data$metadata)
+  } else if (scale_type == "categorico") {
+    prepare_categorical_data(survey_data$responses, question_id, survey_data$metadata)
+  } else if (scale_type == "binaria") {
+    prepare_binary_data(survey_data$responses, question_id, survey_data$metadata)
+  } else if (scale_type == "nominal") {
+    prepare_nominal_data(survey_data$responses, question_id, survey_data$metadata)
+  } else {
+    NULL
+  }
+})
     
     # Update district filter
     observe({
@@ -701,17 +967,7 @@ explorerServer <- function(id) {
       scale_type <- selectedScaleType()
       viz_type <- input$viz_type
       
-      # Create appropriate UI elements based on visualization type
-      if (scale_type %in% c("razon", "intervalo", "ordinal") && viz_type == "histogram") {
-        # Histogram options
-        sliderInput(
-          ns("histogram_bins"),
-          "Número de Bins:",
-          min = 5,
-          max = 50,
-          value = 30
-        )
-      } else if (scale_type %in% c("razon", "intervalo", "ordinal", "binaria") && viz_type == "district_map") {
+ if (scale_type %in% c("razon", "intervalo", "ordinal", "binaria") && viz_type == "district_map") {
         # Map options
         tagList(
           checkboxInput(
@@ -808,229 +1064,1164 @@ explorerServer <- function(id) {
       }
     })
     
-# Custom visualization options
-output$custom_viz_options <- renderUI({
-  req(input$viz_type, selectedScaleType())
-  
-  scale_type <- selectedScaleType()
-  viz_type <- input$viz_type
-  
-  if (scale_type == "binaria" && viz_type == "district_map") {
-    tagList(
-      checkboxInput(
-        ns("highlight_extremes"),
-        "Resaltar valores extremos",
-        value = TRUE
+    # Update binary comparison questions
+    observe({
+      req(selectedScaleType() == "binaria", input$viz_type == "multiple_comparison")
+      
+      # Get all binary questions from current survey
+      survey_data <- currentSurveyData()
+      if (is.null(survey_data)) return()
+      
+      # Classify questions for this survey
+      classifications <- tryCatch({
+        classify_questions(survey_data$metadata)
+      }, error = function(e) {
+        return(list(binaria = character(0)))
+      })
+      
+      binary_questions <- classifications$binaria
+      
+      if (length(binary_questions) == 0) {
+        updateCheckboxGroupInput(
+          session, 
+          "compare_questions",
+          choices = NULL
+        )
+        return()
+      }
+      
+      # Get labels for questions
+      question_labels <- sapply(binary_questions, function(qid) {
+        # Try to get label from metadata
+        q_meta <- survey_data$metadata %>% filter(variable == qid) %>% first()
+        if (!is.null(q_meta) && !is.na(q_meta$label)) {
+          # Truncate long labels
+          label <- q_meta$label
+          if (nchar(label) > 50) {
+            label <- paste0(substr(label, 1, 47), "...")
+          }
+          return(paste0(qid, " - ", label))
+        } else {
+          return(qid)
+        }
+      })
+      
+      # Set current question as selected by default
+      current_question_id <- selectedQuestionInfo()$question_id
+      default_selected <- if (current_question_id %in% binary_questions) {
+        question_labels[current_question_id]
+      } else {
+        character(0)
+      }
+      
+      updateCheckboxGroupInput(
+        session, 
+        "compare_questions",
+        choices = question_labels,
+        selected = default_selected
       )
-    )
-  } else if (scale_type == "binaria" && viz_type == "district_bars") {
-    radioButtons(
-      ns("bar_orientation"),
-      "Orientación:",
-      choices = c(
-        "Vertical" = "v",
-        "Horizontal" = "h"
-      ),
-      selected = "v"
-    )
-  } else {
-    div()
-  }
-})
+    })
 
-# Get theme for styling
 sectionTheme <- reactive({
-  get_section_theme("extras")
-})
-
-# Generate the appropriate visualization
-output$visualization <- renderUI({
-  req(selectedQuestionInfo(), input$viz_type, selectedScaleType())
-  
-  scale_type <- selectedScaleType()
-  viz_type <- input$viz_type
-  
-  if (viz_type == "summary") {
-    uiOutput(ns("summary_output"))
-  } else if (scale_type == "binaria") {
-    if (viz_type == "bars") {
-      plotlyOutput(ns("binary_bars"), height = "500px")
-    } else if (viz_type == "pie") {
-      plotlyOutput(ns("binary_pie"), height = "500px")
-    } else if (viz_type == "district_map") {
-      leafletOutput(ns("binary_district_map"), height = "600px")
-    } else if (viz_type == "district_bars") {
-      plotlyOutput(ns("binary_district_bars"), height = "500px")
+  # Always use extras theme for explorer, but try to get question theme if available
+  tryCatch({
+    req(selectedQuestionInfo())
+    
+    catalog <- questionCatalog()
+    
+    # Return extras theme if no catalog or question info
+    if (is.null(catalog) || nrow(catalog) == 0 || is.null(selectedQuestionInfo())) {
+      return(get_section_theme("extras"))
     }
-  }
+    
+    question_info <- catalog %>%
+      filter(question_id == selectedQuestionInfo()$question_id, 
+             survey_id == selectedQuestionInfo()$survey_id) %>%
+      slice(1)
+    
+    # Default to extras theme if no question info found
+    if (nrow(question_info) == 0) {
+      return(get_section_theme("extras"))
+    }
+    
+    # Map MainTheme to section theme names - but always fallback to extras
+    main_theme <- question_info$main_theme
+    section_name <- switch(main_theme,
+      "Social & Economic Wellbeing" = "bienestar",
+      "Urban Mobility & Environment" = "movilidad", 
+      "Governance & Civic Engagement" = "gobierno",
+      "Public Services" = "infraestructura",
+      "Community Participation" = "participacion",
+      "extras"  # default fallback - always safe
+    )
+    
+    get_section_theme(section_name)
+  }, error = function(e) {
+    # Always return a valid theme - extras is safe fallback
+    get_section_theme("extras")
+  })
 })
+    
+    # Generate the appropriate visualization
+    output$visualization <- renderUI({
+      req(selectedQuestionInfo(), input$viz_type, selectedScaleType())
+      
+      scale_type <- selectedScaleType()
+      viz_type <- input$viz_type
+      
+      if (viz_type == "summary") {
+        uiOutput(ns("summary_output"))
+      } else if (scale_type == "razon") {
+        if (viz_type == "histogram") {
+          plotlyOutput(ns("razon_histogram"), height = "500px")
+        } else if (viz_type == "district_map") {
+          leafletOutput(ns("razon_district_map"), height = "600px")
+        } else if (viz_type == "district_bars") {
+          plotlyOutput(ns("razon_district_bars"), height = "500px")
+        }
+      } else if (scale_type == "intervalo" || scale_type == "ordinal") {
+        if (viz_type == "histogram") {
+          plotlyOutput(ns("interval_histogram"), height = "500px")
+        } else if (viz_type == "pie") {
+          plotlyOutput(ns("interval_pie"), height = "500px")
+        } else if (viz_type == "district_map") {
+          leafletOutput(ns("interval_district_map"), height = "600px")
+        } else if (viz_type == "district_bars") {
+          plotlyOutput(ns("interval_district_bars"), height = "500px")
+        }
+      } else if (scale_type == "categorico") {
+        if (viz_type == "bars") {
+          plotlyOutput(ns("categorical_bars"), height = "500px")
+        } else if (viz_type == "pie") {
+          plotlyOutput(ns("categorical_pie"), height = "500px")
+        } else if (viz_type == "stacked_bars") {
+          plotlyOutput(ns("categorical_stacked_bars"), height = "500px")
+        }
+      } else if (scale_type == "binaria") {
+        if (viz_type == "bars") {
+          plotlyOutput(ns("binary_bars"), height = "500px")
+        } else if (viz_type == "pie") {
+          plotlyOutput(ns("binary_pie"), height = "500px")
+        } else if (viz_type == "district_map") {
+          leafletOutput(ns("binary_district_map"), height = "600px")
+        } else if (viz_type == "district_bars") {
+          plotlyOutput(ns("binary_district_bars"), height = "500px")
+        } else if (viz_type == "multiple_comparison") {
+          plotlyOutput(ns("binary_comparison"), height = "600px")
+        }
+      } else if (scale_type == "nominal") {
+        if (viz_type == "word_freq") {
+          plotlyOutput(ns("nominal_word_freq"), height = "500px")
+        }
+      }
+    })
 
-# Download options
+    # Download options
 output$download_options <- renderUI({
   req(selectedQuestionInfo(), input$viz_type)
   
   viz_type <- input$viz_type
   
   if (viz_type == "summary") {
-    div(
-      class = "download-btn",
-      downloadButton(ns("download_summary_csv"), "Descargar CSV", class = "btn btn-outline-primary btn-sm")
+    downloadButton(
+      ns("download_summary_csv"), 
+      "", 
+      icon = icon("download"), 
+      class = "plot-action-btn",
+      title = "Descargar CSV"
     )
   } else {
     div()
   }
 })
 
-# Download handler
-output$download_summary_csv <- downloadHandler(
-  filename = function() {
-    question_id <- selectedQuestionInfo()$question_id
-    survey_id <- selectedQuestionInfo()$survey_id
-    paste0("datos_", question_id, "_", survey_id, "_", Sys.Date(), ".csv")
-  },
-  content = function(file) {
-    if (!is.null(filteredData())) {
+    # Download handler
+    output$download_summary_csv <- downloadHandler(
+      filename = function() {
+        question_id <- selectedQuestionInfo()$question_id
+        survey_id <- selectedQuestionInfo()$survey_id
+        current_year <- selectedYear()
+        paste0("datos_", question_id, "_", survey_id, "_", current_year, "_", Sys.Date(), ".csv")
+      },
+      content = function(file) {
+        if (!is.null(filteredData())) {
+          data <- filteredData()
+          
+          # Create a simplified table for download
+          if ("binary_value" %in% names(data)) {
+            export_data <- data %>%
+              select(district, binary_value)
+            
+            # Safe column renaming
+            colnames(export_data) <- c("Distrito", selectedQuestionInfo()$question_id)
+          } else if ("value" %in% names(data)) {
+            export_data <- data %>%
+              select(district, value)
+            colnames(export_data) <- c("Distrito", selectedQuestionInfo()$question_id)
+          } else {
+            export_data <- data %>%
+              select(district)
+            colnames(export_data) <- "Distrito"
+          }
+          
+          write.csv(export_data, file, row.names = FALSE)
+        } else {
+          write.csv(data.frame(message = "No hay datos disponibles"), file, row.names = FALSE)
+        }
+      }
+    )
+
+    # COMPLETE COMPREHENSIVE SUMMARY OUTPUT - From old version
+    output$summary_output <- renderUI({
+      req(filteredData(), selectedScaleType())
+      
+      scale_type <- selectedScaleType()
       data <- filteredData()
       
-      # Create a simplified table for download - FIXED the !! issue
-      if ("binary_value" %in% names(data)) {
-        export_data <- data %>%
-          select(district, binary_value)
-        
-        # Safe column renaming
-        colnames(export_data) <- c("Distrito", selectedQuestionInfo()$question_id)
-      } else {
-        export_data <- data %>%
-          select(district)
-        colnames(export_data) <- "Distrito"
-      }
+      # Define a common style for all value boxes
+      vbox_style <- list(
+        bg = "#2d2d2d", 
+        fg = "white"
+      )
       
-      write.csv(export_data, file, row.names = FALSE)
-    } else {
-      write.csv(data.frame(message = "No hay datos disponibles"), file, row.names = FALSE)
-    }
-  }
-)
+      if (scale_type == "razon") {
+        # Razon (ratio) summary
+        
+        # Calculate key metrics
+        mean_val <- round(mean(data$value, na.rm = TRUE), 2)
+        median_val <- median(data$value, na.rm = TRUE)
+        range_val <- paste(min(data$value, na.rm = TRUE), "-", max(data$value, na.rm = TRUE))
+        valid_responses <- sum(!is.na(data$value))
+        
+        # District stats table
+        district_stats <- data %>%
+          group_by(district) %>%
+          summarise(
+        Distrito = district,
+            Respuestas = n(),
+            Media = round(mean(value, na.rm = TRUE), 2),
+            Mediana = median(value, na.rm = TRUE),
+            DE = round(sd(value, na.rm = TRUE), 2),
+            Min = min(value, na.rm = TRUE),
+            Max = max(value, na.rm = TRUE),
+            .groups = 'drop'
+          )
+        
+        # Create UI
+        tagList(
+          
+          # Value boxes
+          fluidRow(
+            column(
+              width = 3,
+              value_box(
+                title = "Media",
+                value = mean_val,
+                showcase = bsicons::bs_icon("calculator"),
+                p("Promedio aritmético"),
+                !!!vbox_style
+              )
+            ),
+            column(
+              width = 3,
+              value_box(
+                title = "Mediana",
+                value = median_val,
+                showcase = bsicons::bs_icon("bar-chart-line"),
+                p("Valor central"),
+                !!!vbox_style
+              )
+            ),
+            column(
+              width = 3,
+              value_box(
+                title = "Rango",
+                value = range_val,
+                showcase = bsicons::bs_icon("arrows-expand"),
+                p("Valores mínimo y máximo"),
+                !!!vbox_style
+              )
+            ),
+            column(
+              width = 3,
+              value_box(
+                title = "Respuestas Válidas",
+                value = paste0(valid_responses),
+                showcase = bsicons::bs_icon("people-fill"),
+                !!!vbox_style
+              )
+            )
+          ),
+          
+          # District stats table
+          h4("Estadísticas por Distrito", class = "mt-4 mb-3"),
+          DT::renderDataTable({
+            DT::datatable(
+              district_stats,
+              options = list(
+                dom = 't',
+                ordering = TRUE,
+                paging = FALSE,
+                searching = FALSE,
+                scrollX = TRUE,
+                columnDefs = list(
+                  list(className = 'dt-center', targets = "_all")
+                )
+              ),
+              rownames = FALSE,
+              class = "compact stripe hover"
+            )
+          })
+        )
+        
+      } else if (scale_type %in% c("intervalo", "ordinal")) {
+        # Interval/Ordinal summary
+        type_name <- ifelse(scale_type == "intervalo", "Intervalo", "Ordinales")
+        
+        # Get numeric values
+        numeric_values <- get_numeric_values(data)
+        
+        # Calculate key metrics
+        mean_val <- round(mean(numeric_values, na.rm = TRUE), 2)
+        median_val <- median(numeric_values, na.rm = TRUE)
+        range_val <- paste(min(numeric_values, na.rm = TRUE), "-", max(numeric_values, na.rm = TRUE))
+        valid_responses <- sum(!is.na(numeric_values))
+        
+        # Prepare frequency table
+        freq_table <- table(data$value)
+        freq_df <- data.frame(
+          Valor = names(freq_table),
+          Frecuencia = as.vector(freq_table),
+          Porcentaje = round(100 * as.vector(freq_table) / sum(freq_table), 2)
+        )
+        
+        # Add labels if available
+        if (!is.null(attr(data, "value_labels"))) {
+          value_labels <- attr(data, "value_labels")
+          freq_df$Etiqueta <- sapply(as.character(freq_df$Valor), function(val) {
+            if (val %in% names(value_labels)) {
+              value_labels[val]
+            } else {
+              NA
+            }
+          })
+          
+          # Reorder columns to put label after value
+          freq_df <- freq_df[, c("Valor", "Etiqueta", "Frecuencia", "Porcentaje")]
+        }
+        
+        if (scale_type == "ordinal") {
+          # For ordinal, add most/least popular
+          freq_df_sorted <- freq_df[order(-freq_df$Frecuencia),]
+          most_popular <- paste0(freq_df_sorted$Valor[1], 
+                                 ifelse(!is.null(attr(data, "value_labels")) && 
+                                          !is.na(freq_df_sorted$Etiqueta[1]), 
+                                        paste0(" (", freq_df_sorted$Etiqueta[1], ")"), ""))
+          least_popular <- paste0(freq_df_sorted$Valor[nrow(freq_df_sorted)], 
+                                  ifelse(!is.null(attr(data, "value_labels")) && 
+                                           !is.na(freq_df_sorted$Etiqueta[nrow(freq_df_sorted)]), 
+                                         paste0(" (", freq_df_sorted$Etiqueta[nrow(freq_df_sorted)], ")"), ""))
+          
+          # Create UI for ordinal data
+          tagList(
+            
+            # Value boxes
+            fluidRow(
+              column(
+                width = 3,
+                value_box(
+                  title = "Respuesta más popular",
+                  value = most_popular,
+                  showcase = bsicons::bs_icon("trophy"),
+                  p(paste0(freq_df_sorted$Frecuencia[1], " respuestas")),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Respuesta menos popular",
+                  value = least_popular,
+                  showcase = bsicons::bs_icon("arrow-down"),
+                  p(paste0(freq_df_sorted$Frecuencia[nrow(freq_df_sorted)], " respuestas")),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Mediana",
+                  value = median_val,
+                  showcase = bsicons::bs_icon("bar-chart-line"),
+                  p("Valor central"),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Respuestas Válidas",
+                  value = paste0(valid_responses),
+                  showcase = bsicons::bs_icon("people-fill"),
+                  !!!vbox_style
+                )
+              )
+            ),
+            
+            # Category distribution table
+            h4("Distribución de Categorías", class = "mt-4 mb-3"),
+            DT::renderDataTable({
+              DT::datatable(
+                freq_df,
+                options = list(
+                  dom = 't',
+                  ordering = TRUE,
+                  paging = FALSE,
+                  searching = FALSE,
+                  columnDefs = list(
+                    list(className = 'dt-center', targets = "_all")
+                  )
+                ),
+                rownames = FALSE,
+                class = "compact stripe hover"
+              )
+            }),
+            
+            # District stats if available
+            h4("Estadísticas por Distrito", class = "mt-4 mb-3"),
+            DT::renderDataTable({
+district_stats <- data %>%
+  mutate(numeric_value = get_numeric_values(.)) %>%  # Extract numeric values first
+  group_by(district) %>%
+  summarise(
+    Respuestas = n(),
+    Media = round(mean(numeric_value, na.rm = TRUE), 2),
+    Mediana = median(numeric_value, na.rm = TRUE),
+    DE = round(sd(numeric_value, na.rm = TRUE), 2),
+    Min = min(numeric_value, na.rm = TRUE),
+    Max = max(numeric_value, na.rm = TRUE),
+    .groups = 'drop'
+  )
+              
+              DT::datatable(
+                district_stats,
+                options = list(
+                  dom = 't',
+                  ordering = TRUE,
+                  paging = FALSE,
+                  searching = FALSE,
+                  scrollX = TRUE,
+                  columnDefs = list(
+                    list(className = 'dt-center', targets = "_all")
+                  )
+                ),
+                rownames = FALSE,
+                class = "compact stripe hover"
+              )
+            })
+          )
+        } else {
+          # Create UI for interval data (which places more emphasis on numeric stats)
+          tagList(
+            
+            # Value boxes
+            fluidRow(
+              column(
+                width = 3,
+                value_box(
+                  title = "Media",
+                  value = mean_val,
+                  showcase = bsicons::bs_icon("calculator"),
+                  p("Promedio aritmético"),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Mediana",
+                  value = median_val,
+                  showcase = bsicons::bs_icon("bar-chart-line"),
+                  p("Valor central"),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Rango",
+                  value = range_val,
+                  showcase = bsicons::bs_icon("arrows-expand"),
+                  p("Valores mínimo y máximo"),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Respuestas Válidas",
+                  value = paste0(valid_responses),
+                  showcase = bsicons::bs_icon("people-fill"),
+                  !!!vbox_style
+                )
+              )
+            ),
+            
+            # Category distribution table
+            h4("Distribución de Categorías", class = "mt-4 mb-3"),
+            DT::renderDataTable({
+              DT::datatable(
+                freq_df,
+                options = list(
+                  dom = 't',
+                  ordering = TRUE,
+                  paging = FALSE,
+                  searching = FALSE,
+                  columnDefs = list(
+                    list(className = 'dt-center', targets = "_all")
+                  )
+                ),
+                rownames = FALSE,
+                class = "compact stripe hover"
+              )
+            }),
+            
+            # District stats
+            h4("Estadísticas por Distrito", class = "mt-4 mb-3"),
+            DT::renderDataTable({
+district_stats <- data %>%
+  mutate(numeric_value = get_numeric_values(.)) %>%  # Extract numeric values first
+  group_by(district) %>%
+  summarise(
+    Respuestas = n(),
+    Media = round(mean(numeric_value, na.rm = TRUE), 2),
+    Mediana = median(numeric_value, na.rm = TRUE),
+    DE = round(sd(numeric_value, na.rm = TRUE), 2),
+    Min = min(numeric_value, na.rm = TRUE),
+    Max = max(numeric_value, na.rm = TRUE),
+    .groups = 'drop'
+  )
+              DT::datatable(
+                district_stats,
+                options = list(
+                  dom = 't',
+                  ordering = TRUE,
+                  paging = FALSE,
+                  searching = FALSE,
+                  scrollX = TRUE,
+                  columnDefs = list(
+                    list(className = 'dt-center', targets = "_all")
+                  )
+                ),
+                rownames = FALSE,
+                class = "compact stripe hover"
+              )
+            })
+          )
+        }
+        
+      } else if (scale_type == "categorico") {
+ # Categorical summary with special handling for Q65
+  
+  # Check if this is the monuments question
+  is_monument_question <- !is.null(attr(data, "is_monument_question")) && attr(data, "is_monument_question")
+  
+  clean_values <- data$value[!is.na(data$value)]
+  clean_values <- trimws(as.character(clean_values))
+  clean_values <- clean_values[clean_values != ""]
 
-# Summary output for binary data
-output$summary_output <- renderUI({
-  req(filteredData(), selectedScaleType())
+  # Create frequency table with cleaned data
+  freq_table <- table(clean_values)
+  freq_df <- data.frame(
+    Categoría = names(freq_table),
+    Frecuencia = as.vector(freq_table),
+    Porcentaje = round(100 * as.vector(freq_table) / sum(freq_table), 2),
+    stringsAsFactors = FALSE
+  )
+
+  # Sort by frequency (descending)
+  freq_df <- freq_df[order(-freq_df$Frecuencia), ]
+
+  # Calculate key metrics with safety checks
+  if (nrow(freq_df) > 0 && !is.na(freq_df$Categoría[1]) && freq_df$Categoría[1] != "") {
+    most_popular <- as.character(freq_df$Categoría[1])
+  } else {
+    most_popular <- "Sin datos"
+  }
+
+  if (nrow(freq_df) > 0 && !is.na(freq_df$Categoría[nrow(freq_df)]) && freq_df$Categoría[nrow(freq_df)] != "") {
+    least_popular <- as.character(freq_df$Categoría[nrow(freq_df)])
+  } else {
+    least_popular <- "Sin datos"
+  }
+
+  # Use length of clean_values for valid responses
+  valid_responses <- length(clean_values)
+
+  # District breakdown - most common category per district
+  district_breakdown <- data %>%
+    filter(!is.na(value)) %>%
+    mutate(clean_value = trimws(as.character(value))) %>%
+    filter(clean_value != "") %>%
+    group_by(district, clean_value) %>%
+    summarise(count = n(), .groups = 'drop') %>%
+    group_by(district) %>%
+    mutate(percentage = round(100 * count / sum(count), 1)) %>%
+    slice_max(order_by = count, n = 1) %>%
+    arrange(district) %>%
+    select(
+      Distrito = district, 
+      Respuestas = count, 
+      `Categoría más frecuente` = clean_value, 
+      Porcentaje = percentage
+    )
   
-  scale_type <- selectedScaleType()
-  data <- filteredData()
+  # Special title for monuments question
+  section_title <- if (is_monument_question) {
+    "Monumento/Lugar Más Representativo"
+  } else {
+    "Estadísticas Categóricas"
+  }
   
-  if (scale_type == "binaria") {
-    # Binary summary
-    total_responses <- nrow(data)
-    true_count <- sum(data$binary_value, na.rm = TRUE)
-    false_count <- sum(!data$binary_value, na.rm = TRUE)
-    missing_count <- total_responses - true_count - false_count
-    valid_responses <- total_responses - missing_count
+  # Create UI with special handling for monuments
+  tagList(
     
-    if (valid_responses > 0) {
-      true_percent <- round(100 * true_count / valid_responses, 2)
-      false_percent <- round(100 * false_count / valid_responses, 2)
-    } else {
-      true_percent <- 0
-      false_percent <- 0
-    }
+    # Add special header for monuments question
+    if (is_monument_question) {
+      div(
+        class = "alert alert-info mb-3",
+        icon("landmark"),
+        " Esta pregunta se refiere a los monumentos y lugares más representativos de Ciudad Juárez."
+      )
+    },
     
-    # Get labels
-    labels <- tryCatch({
-      get_binary_labels(data)
-    }, error = function(e) {
-      list(true_label = "Sí", false_label = "No")
-    })
-    
-    true_label <- labels$true_label
-    false_label <- labels$false_label
-    
-    tagList(
-      fluidRow(
-        column(
-          width = 4,
-          div(
-            class = "card",
-            div(
-              class = "card-body text-center",
-              h4(true_label, class = "card-title"),
-              h2(paste0(true_count, " (", true_percent, "%)"), class = "text-success"),
-              p("Respuestas positivas", class = "card-text")
-            )
-          )
-        ),
-        column(
-          width = 4,
-          div(
-            class = "card",
-            div(
-              class = "card-body text-center",
-              h4(false_label, class = "card-title"),
-              h2(paste0(false_count, " (", false_percent, "%)"), class = "text-danger"),
-              p("Respuestas negativas", class = "card-text")
-            )
-          )
-        ),
-        column(
-          width = 4,
-          div(
-            class = "card",
-            div(
-              class = "card-body text-center",
-              h4("Total", class = "card-title"),
-              h2(paste0(valid_responses), class = "text-info"),
-              p("Respuestas válidas", class = "card-text")
-            )
-          )
+    # Value boxes
+    fluidRow(
+      column(
+        width = 3,
+        value_box(
+          title = if (is_monument_question) "Lugar más popular" else "Categoría más frecuente",
+          value = most_popular,
+          showcase = if (is_monument_question) bsicons::bs_icon("geo-alt-fill") else bsicons::bs_icon("trophy"),
+          p(paste0(freq_df$Frecuencia[1], " respuestas")),
+          !!!vbox_style
+        )
+      ),
+      column(
+        width = 3,
+        value_box(
+          title = if (is_monument_question) "Lugar menos popular" else "Categoría menos frecuente",
+          value = least_popular,
+          showcase = bsicons::bs_icon("arrow-down"),
+          p(paste0(freq_df$Frecuencia[nrow(freq_df)], " respuestas")),
+          !!!vbox_style
+        )
+      ),
+      column(
+        width = 3,
+        value_box(
+          title = if (is_monument_question) "Total lugares" else "Total categorías",
+          value = nrow(freq_df),
+          showcase = bsicons::bs_icon("list-check"),
+          p(if (is_monument_question) "Lugares distintos" else "Categorías distintas"),
+          !!!vbox_style
+        )
+      ),
+      column(
+        width = 3,
+        value_box(
+          title = "Respuestas Válidas",
+          value = paste0(valid_responses),
+          showcase = bsicons::bs_icon("people-fill"),
+          !!!vbox_style
         )
       )
-    )
+    ),
+    
+    # Category distribution table
+    h4(if (is_monument_question) "Distribución de Lugares Mencionados" else "Distribución de Categorías", 
+       class = "mt-4 mb-3"),
+    DT::renderDataTable({
+      # For monuments, show more rows since they're meaningful
+      display_df <- if (is_monument_question) freq_df else head(freq_df, 15)
+      
+      DT::datatable(
+        display_df,
+        options = list(
+          dom = if (nrow(freq_df) > 15) 'ftp' else 't',
+          ordering = TRUE,
+          paging = if (nrow(freq_df) > 15) TRUE else FALSE,
+          searching = if (nrow(freq_df) > 15) TRUE else FALSE,
+          pageLength = 15,
+          columnDefs = list(
+            list(className = 'dt-center', targets = "_all")
+          )
+        ),
+        rownames = FALSE,
+        class = "compact stripe hover"
+      )
+    }),
+    
+    # District stats table
+    h4("Estadísticas por Distrito", class = "mt-4 mb-3"),
+    DT::renderDataTable({
+      DT::datatable(
+        district_breakdown,
+        options = list(
+          dom = 't',
+          ordering = TRUE,
+          paging = FALSE,
+          searching = FALSE,
+          scrollX = TRUE,
+          columnDefs = list(
+            list(className = 'dt-center', targets = "_all")
+          )
+        ),
+        rownames = FALSE,
+        class = "compact stripe hover"
+      )
+    })
+  )
+        
+      } else if (scale_type == "binaria") {
+        # Binary summary
+        
+        # Get binary counts
+        total_responses <- nrow(data)
+        true_count <- sum(data$binary_value, na.rm = TRUE)
+        false_count <- sum(!data$binary_value, na.rm = TRUE)
+        missing_count <- total_responses - true_count - false_count
+        valid_responses <- total_responses - missing_count
+        
+        # Get binary labels
+        labels <- get_binary_labels(data)
+        true_label <- labels$true_label
+        false_label <- labels$false_label
+        
+        # Calculate percentages
+        true_percent <- round(100 * true_count / valid_responses, 2)
+        false_percent <- round(100 * false_count / valid_responses, 2)
+        
+        # District breakdown
+        district_breakdown <- data %>%
+          group_by(district) %>%
+          summarise(
+            Total = n(),
+            `Respuestas Sí` = sum(binary_value, na.rm = TRUE),
+            `Respuestas No` = sum(!binary_value, na.rm = TRUE),
+            `% Sí` = round(100 * mean(binary_value, na.rm = TRUE), 2),
+            .groups = 'drop'
+          )
+        
+        # Create UI
+        tagList(
+          
+          # Value boxes
+          fluidRow(
+            column(
+              width = 4,
+              value_box(
+                title = true_label,
+                value = paste0(true_count, " (", true_percent, "%)"),
+                showcase = bsicons::bs_icon("check-circle-fill"),
+                p("Respuestas positivas"),
+                !!!vbox_style
+              )
+            ),
+            column(
+              width = 4,
+              value_box(
+                title = false_label,
+                value = paste0(false_count, " (", false_percent, "%)"),
+                showcase = bsicons::bs_icon("x-circle-fill"),
+                p("Respuestas negativas"),
+                !!!vbox_style
+              )
+            ),
+            column(
+              width = 4,
+              value_box(
+                title = "Respuestas Válidas",
+                value = paste0(valid_responses),
+                showcase = bsicons::bs_icon("people-fill"),
+                !!!vbox_style
+              )
+            )
+          ),
+          
+          # District stats table
+          h4("Estadísticas por Distrito", class = "mt-4 mb-3"),
+          DT::renderDataTable({
+            DT::datatable(
+              district_breakdown,
+              options = list(
+                dom = 't',
+                ordering = TRUE,
+                paging = FALSE,
+                searching = FALSE,
+                scrollX = TRUE,
+                columnDefs = list(
+                  list(className = 'dt-center', targets = "_all")
+                )
+              ),
+              rownames = FALSE,
+              class = "compact stripe hover"
+            )
+          })
+        )
+        
+      } else if (scale_type == "nominal") {
+        # Nominal summary
+        
+        # Word frequency data
+        word_freq <- attr(data, "word_freq")
+        if (!is.null(word_freq) && nrow(word_freq) > 0) {
+          # Calculate metrics
+          response_lengths <- sapply(strsplit(data$preprocessed_text, "\\s+"), length)
+          avg_words <- round(mean(response_lengths, na.rm = TRUE), 2)
+          median_words <- median(response_lengths, na.rm = TRUE)
+          min_words <- min(response_lengths, na.rm = TRUE)
+          max_words <- max(response_lengths, na.rm = TRUE)
+          
+          # Create UI
+          tagList(
+            
+            # Value boxes
+            fluidRow(
+              column(
+                width = 3,
+                value_box(
+                  title = "Palabra más frecuente",
+                  value = word_freq$word[1],
+                  showcase = bsicons::bs_icon("chat-quote-fill"),
+                  p(paste0(word_freq$freq[1], " apariciones")),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Promedio de palabras",
+                  value = avg_words,
+                  showcase = bsicons::bs_icon("calculator"),
+                  p("Palabras por respuesta"),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Respuesta más larga",
+                  value = max_words,
+                  showcase = bsicons::bs_icon("chat-right-text-fill"),
+                  p("Palabras"),
+                  !!!vbox_style
+                )
+              ),
+              column(
+                width = 3,
+                value_box(
+                  title = "Respuestas",
+                  value = length(response_lengths),
+                  showcase = bsicons::bs_icon("people-fill"),
+                  p("Total respuestas"),
+                  !!!vbox_style
+                )
+              )
+            ),
+            
+            # Word frequency table
+            h4("Palabras más frecuentes", class = "mt-4 mb-3"),
+            DT::renderDataTable({
+              # Limit to top 15 words
+              top_words <- head(word_freq, 15)
+              
+              DT::datatable(
+                top_words,
+                options = list(
+                  dom = 't',
+                  ordering = TRUE,
+                  paging = FALSE,
+                  searching = FALSE,
+                  columnDefs = list(
+                    list(className = 'dt-center', targets = "_all")
+                  )
+                ),
+                rownames = FALSE,
+                class = "compact stripe hover"
+              )
+            }),
+            
+            # Additional statistics
+            h4("Estadísticas de longitud de respuesta", class = "mt-4 mb-3"),
+            fluidRow(
+              column(
+                width = 12,
+                div(
+                  class = "table-responsive",
+                  tags$table(
+                    class = "table table-sm table-bordered",
+                    tags$thead(
+                      tags$tr(
+                        tags$th("Estadística", style = "text-align: center;"),
+                        tags$th("Valor", style = "text-align: center;")
+                      )
+                    ),
+                    tags$tbody(
+                      tags$tr(
+                        tags$td("Promedio de palabras por respuesta"),
+                        tags$td(avg_words, style = "text-align: center;")
+                      ),
+                      tags$tr(
+                        tags$td("Mediana de palabras por respuesta"),
+                        tags$td(median_words, style = "text-align: center;")
+                      ),
+                      tags$tr(
+                        tags$td("Respuesta más corta (palabras)"),
+                        tags$td(min_words, style = "text-align: center;")
+                      ),
+                      tags$tr(
+                        tags$td("Respuesta más larga (palabras)"),
+                        tags$td(max_words, style = "text-align: center;")
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        } else {
+          # No word frequency data available
+          div(
+            class = "alert alert-warning",
+            icon("exclamation-triangle"),
+            "No hay datos de frecuencia de palabras disponibles para esta pregunta."
+          )
+        }
+      } else {
+        # Default case - unknown type
+        div(
+          class = "alert alert-info",
+          icon("info-circle"),
+          "Tipo de datos no soportado o desconocido para visualización de resumen."
+        )
+      }
+    })
+
+    # RAZON VISUALIZATIONS
+    output$razon_histogram <- renderPlotly({
+      req(filteredData())
+      create_histogram(
+        filteredData(), 
+        bins = input$histogram_bins,
+        title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        custom_theme = sectionTheme()
+      )
+    })
+    
+    output$razon_district_map <- renderLeaflet({
+      req(filteredData(), geoData())
+      create_district_map(
+        filteredData(), 
+        geoData(),
+        custom_theme = sectionTheme()
+      )
+    })
+    
+    output$razon_district_bars <- renderPlotly({
+      req(filteredData())
+      district_means <- calculate_district_means(filteredData())
+      
+      plot_functions$bar(
+        district_means,
+        x = "district",
+        y = "mean_value",
+        title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        xlab = "Distrito",
+        ylab = "Valor Promedio",
+        orientation = input$bar_orientation,
+        color_by = "district",
+        custom_theme = sectionTheme()
+      )
+    })
+
+    # INTERVAL/ORDINAL VISUALIZATIONS
+    output$interval_histogram <- renderPlotly({
+      req(filteredData())
+      create_interval_histogram(
+        filteredData(), 
+        bins = input$histogram_bins, 
+        title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        custom_theme = sectionTheme()
+      )
+    })
+    
+    output$interval_pie <- renderPlotly({
+      req(filteredData())
+      create_interval_pie(
+        filteredData(),
+        title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        custom_theme = sectionTheme()
+      )
+    })
+    
+    output$interval_district_map <- renderLeaflet({
+      req(filteredData(), geoData())
+      create_interval_district_map(
+        filteredData(),
+        geoData(),
+        selected_responses = NULL,  # Show means by default
+        highlight_extremes = input$highlight_extremes,
+        use_gradient = input$use_gradient,
+        color_scale = input$color_scale,
+        custom_theme = sectionTheme()
+      )
+    })
+    
+    output$interval_district_bars <- renderPlotly({
+      req(filteredData())
+      create_interval_bars(
+        filteredData(),
+        title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        orientation = input$bar_orientation,
+        custom_theme = sectionTheme()
+      )
+    })
+
+    # CATEGORICAL VISUALIZATIONS
+output$categorical_bars <- renderPlotly({
+  req(filteredData())
+  
+  data <- filteredData()
+  is_monument_question <- !is.null(attr(data, "is_monument_question")) && attr(data, "is_monument_question")
+  
+  if (is_monument_question) {
+    # Special handling for monuments - show more categories and better formatting
+    create_category_bars(
+      data,
+      max_categories = 20,  # Show more for monuments
+      title = "Monumentos y Lugares Más Representativos",
+
+      custom_theme = sectionTheme()    )
   } else {
-    div(
-      class = "alert alert-info",
-      p("Seleccione una visualización específica para ver los datos procesados.")
+    # Standard categorical visualization
+    create_category_bars(
+      data,
+      max_categories = 15,
+      title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+      custom_theme = sectionTheme()
     )
   }
 })
-
-# Binary visualizations (simplified)
-output$binary_bars <- renderPlotly({
+    
+output$categorical_pie <- renderPlotly({
   req(filteredData())
-  create_binary_bar(
-    filteredData(),
-    title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
-    custom_theme = sectionTheme()
-  )
+  
+  data <- filteredData()
+  is_monument_question <- !is.null(attr(data, "is_monument_question")) && attr(data, "is_monument_question")
+  
+  if (is_monument_question) {
+    # For monuments, show top 10 and group others
+    create_category_pie(
+      data,
+      max_categories = 10,
+      title = "Distribución de Monumentos y Lugares",
+      custom_theme = sectionTheme(),
+      highlight_max = TRUE    )
+  } else {
+    # Standard categorical pie
+    create_category_pie(
+      data,
+      max_categories = 8,
+      title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+      custom_theme = sectionTheme(),
+      highlight_max = TRUE
+    )
+  }
 })
+    
+    output$categorical_stacked_bars <- renderPlotly({
+      req(filteredData())
+      create_category_stacked_bars(
+        filteredData(),
+                title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        max_categories = 7,
+        custom_theme = sectionTheme()
+      )
+    })
 
-output$binary_pie <- renderPlotly({
-  req(filteredData())
-  create_binary_pie(
-    filteredData(),
-    title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
-    custom_theme = sectionTheme()
-  )
-})
+    # BINARY VISUALIZATIONS (already present but updated)
+    output$binary_bars <- renderPlotly({
+      req(filteredData())
+      create_binary_bar(
+        filteredData(),
+        title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        custom_theme = sectionTheme()
+      )
+    })
 
-output$binary_district_map <- renderLeaflet({
-  req(filteredData(), geoData())
-  create_binary_district_map(
-    filteredData(), 
-    geoData(),
-    highlight_extremes = input$highlight_extremes,
-    focus_on_true = TRUE,
-    custom_theme = sectionTheme()
-  )
-})
+    output$binary_pie <- renderPlotly({
+      req(filteredData())
+      create_binary_pie(
+        filteredData(),
+        title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        custom_theme = sectionTheme()
+      )
+    })
 
-output$binary_district_bars <- renderPlotly({
-  req(filteredData())
-  create_binary_district_bars(
-    filteredData(),
-    orientation = input$bar_orientation,
-    custom_theme = sectionTheme()
-  )
-})
+    output$binary_district_map <- renderLeaflet({
+      req(filteredData(), geoData())
+      create_binary_district_map(
+        filteredData(), 
+        geoData(),
+        highlight_extremes = input$highlight_extremes,
+        focus_on_true = TRUE,
+        custom_theme = sectionTheme()
+      )
+    })
+
+    output$binary_district_bars <- renderPlotly({
+      req(filteredData())
+      create_binary_district_bars(
+        filteredData(),
+                title = get_question_label(selectedQuestionInfo()$question_id, currentSurveyData()$metadata),
+        orientation = input$bar_orientation,
+        custom_theme = sectionTheme()
+      )
+    })
+    
+    # BINARY MULTIPLE COMPARISON
+    output$binary_comparison <- renderPlotly({
+      req(input$compare_questions, length(input$compare_questions) > 0)
+      
+      # Extract question IDs from checkboxgroup input
+      question_ids <- sapply(input$compare_questions, function(q) {
+        strsplit(q, " - ")[[1]][1]
+      })
+      
+      # Prepare data for all selected questions
+      binary_data_list <- prepare_multiple_binary(currentSurveyData()$responses, question_ids, currentSurveyData()$metadata)
+      
+      # Create the comparison visualization
+      create_multiple_binary_comparison(
+        binary_data_list,
+        comparison_type = input$comparison_type,
+        top_n = input$top_n,
+        custom_theme = sectionTheme()
+      )
+    })
+
+    # NOMINAL VISUALIZATIONS
+    output$nominal_word_freq <- renderPlotly({
+      req(filteredData())
+      create_word_freq_bars(
+        filteredData(),
+        max_words = input$max_words,
+        exclude_stopwords = input$exclude_stopwords,
+        min_chars = input$min_chars,
+        custom_theme = sectionTheme()
+      )
+    })
     
   })
 }

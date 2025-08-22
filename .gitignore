@@ -1,5 +1,33 @@
+# R specific
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-Dockerfile
+
+# Large files
+*.pdf
+*.tar
+
+# Logs and temporary files
+logs/
+*.log
+*.tmp
+
+# Environment and secrets
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Claude-specific
+.claude
+CLAUDE.md
+
+# Docker files that change
+Dockerfile.local

@@ -1,0 +1,13 @@
+Loading required package: pdftools
+Using poppler version 24.02.0
+Loading required package: magick
+Warning in library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘magick’
+Installing package into ‘/usr/local/lib/R/site-library’
+(as ‘lib’ is unspecified)
+Warning in install.packages("magick") :
+  'lib = "/usr/local/lib/R/site-library"' is not writable
+Error in install.packages("magick") : unable to install packages
+Calls: runApp ... source -> withVisible -> eval -> eval -> install.packages
+Execution halted
+

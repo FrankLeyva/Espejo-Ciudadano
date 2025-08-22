@@ -1,107 +1,231 @@
-# environmentUI.R
+# environment_ui.R
 environmentUI <- function() {
   page_fluid(
     class = "section-bienestar", 
     useShinyjs(),
-    tags$head(
-      tags$style(HTML("
-        /* Override pill navigation styling for this page */
-        .bienestar-pills .nav-pills .nav-link:not(.active) {
-          background-color: rgba(240, 240, 240, 0.8);
-color: var(--bienestar-color) !important;
-            border: 1px solid rgba(30, 136, 229, 0.2);
-          font-weight: bold !important;
-        }
-        
-        .bienestar-pills .nav-pills .nav-link:hover:not(.active) {
-          background-color: rgba(30, 136, 229, 0.1);
-        }
-             .bienestar-pills .nav-pills .nav-link.active {
-          background-color: var(--bienestar-color) !important; /* Bienestar primary color */
-          color: white !important;
-          font-weight: bold !important;
-          border: none !important;
-        }
-      "))
-    ),
     init_tooltips(),
 
-   div(
+    # Back navigation
+    div(
       class = "mb-4",
       tags$a(
         href = "#",
         class = "text-decoration-none",
         onclick = "Shiny.setInputValue('nav_target', 'wellness', {priority: 'event'}); return false;",
         tags$i(class = "fas fa-arrow-left me-2"),
-        "Volver a Bienestar Social y Económico"
+        "Volver a Calidad de Vida"
       )
     ),
+    
     # Header
     layout_columns(
       fill = FALSE,
       card(
-        style = "border-top: 4px solid var(--bienestar-color);", 
         card_header(
-          h2("Medio Ambiente", class = "text-center")
+          style = paste0("background-color: var(--bienestar-color) !important; 
+            color: white !important; 
+            font-family: var(--font-display) !important;
+            font-weight: bolder !important; 
+            text-align: center !important; 
+            border-bottom: none !important;"),
+          h1("Medio Ambiente", class = "dashboard-header")
         )
       )
     ),
     
-    # Environmental satisfaction maps
-    card(
-      card_header(
-        div(
-          class = "d-flex justify-content-between align-items-center",
+    # Tab Navigation with Plot Cards (Environmental Satisfaction Maps)
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
+        id = "environment_tabs",
+        
+        # Air Quality Tab
+        nav_panel(
+          title = "Calidad del Aire",
+          value = "air_quality",
+          
           div(
-            class = "d-flex align-items-center",
-            "Satisfacción con Aspectos Ambientales",
-            # Dynamic tooltip that will be updated based on selected tab
-            create_dynamic_tooltip("env_satisfaction_tooltip")
-          ),          downloadButton(
-            "download_environment_map", 
-            "", 
-            icon = icon("download"), 
-            class = "btn-sm"
+            class = "plot-card plot-card-bienestar",
+            
+            # Plot Header
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con la Calidad del Aire por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q94.2 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, qué tan satisfecho está usted con la calidad del aire en su colonia? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_air_quality_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            # Plot Content
+            div(
+              class = "plot-content",
+              leafletOutput("air_quality_map", height = "500px")
+            )
+          )
+        ),
+        
+        # Urban Trees Tab
+        nav_panel(
+          title = "Arbolado Urbano",
+          value = "urban_trees",
+          
+          div(
+            class = "plot-card plot-card-bienestar",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con el Arbolado Urbano por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q94.3 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, qué tan satisfecho está usted con el arbolado urbano en su colonia? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_urban_trees_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("urban_trees_map", height = "500px")
+            )
+          )
+        ),
+        
+        # Street Cleanliness Tab
+        nav_panel(
+          title = "Limpieza de Calles",
+          value = "street_cleanliness",
+          
+          div(
+            class = "plot-card plot-card-bienestar",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con la Limpieza de Calles por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q94.4 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, qué tan satisfecho está usted con la limpieza de las calles en su colonia? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_street_cleanliness_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("street_cleanliness_map", height = "500px")
+            )
+          )
+        ),
+        
+        # Water Quality Tab
+        nav_panel(
+          title = "Calidad del Agua",
+          value = "water_quality",
+          
+          div(
+            class = "plot-card plot-card-bienestar",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con la Calidad del Agua por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q94.1 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, qué tan satisfecho está usted con la calidad del agua en su colonia? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_water_quality_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("water_quality_map", height = "500px")
+            )
           )
         )
-      ),
-      div(class = "bienestar-pills",
-      navset_pill(
-        id = "env_satisfaction_tabs",
-        tabPanel(
-          "Calidad del Aire",
-          leafletOutput("air_quality_map", height = "500px")
+      )
+    ),
+    
+    # Independent Environmental Problems Plot Card
+    div(
+      class = "plot-cards-grid single-column",
+      
+      div(
+        class = "plot-card plot-card-bienestar",
+        
+        div(
+          class = "plot-header",
+          div(
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
+              "Principales Problemas Ambientales por Colonia",
+              create_tooltip("<b>ID</b>: PER Q97 <br>
+                <b>Pregunta</b>: De las siguientes problemáticas medioambientales, ¿cuál cree que sea el mayor problema de la colonia? <br>
+                 <b>Escala</b>: 1=Neumáticos/llantas tiradas; 2=Calles sucias/Basura en las calles; 3=Parques sucios/descuidados; 4=Falta de recolección de residuos; 5=Basureros clandestinos/Casas/terrenos; 6=Terrenos baldíos; 7=Otro")
+            )
+          )
         ),
-        tabPanel(
-          "Arbolado Urbano",
-          leafletOutput("urban_trees_map", height = "500px")
-        ),
-        tabPanel(
-          "Limpieza de Calles",
-          leafletOutput("street_cleanliness_map", height = "500px")
-        ),
-        tabPanel(
-          "Calidad del Agua",
-          leafletOutput("water_quality_map", height = "500px")
+        
+        div(
+          class = "plot-content",
+          plotlyOutput("env_problems_plot", height = "500px")
         )
       )
     )
-    ),
-    
-    # Environmental problems bar chart
-    card(
-      card_header(
-
-        div(
-          class = "d-flex align-items-center",
-          "Principales Problemas Ambientales por Colonia",
-          create_tooltip("<b>ID</b>: PER Q97 <br>
-            <b>Pregunta</b>: 	De las siguientes problemáticas medioambientales, cual cree que sea el mayor problema de la colonia? <br>
-             <b>Escala</b>: 1=Neumaticos/ llantas tiradas; 2=Calles sucias/ Basura en las calles; 3=Parque sucios/descuidados; 4=Falta de recoleccion de residuos; 5=Basureros Clandestinos/ Casas/terrenos;6=Terrenos baldios; 7=Otro")
-       )
-            ),
-      plotlyOutput("env_problems_plot", height = "500px")
-    ),
-
   )
 }

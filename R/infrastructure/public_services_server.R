@@ -39,16 +39,8 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
     "Q29" = "Agua",
     "Q30" = "Drenaje y Alcantarillado", 
     "Q35" = "CFE",
-    "Q40" = "Recolección de Basura",
-    "Q45" = "Alumbrado Público",
-    "Q51" = "Calles y Pavimentación",
-    "Q55" = "Semaforización",
-    "Q56" = "Áreas verdes y Espacios públicos",
-    "Q58" = "Unidades deportivas",
-    "Q59" = "Bibliotecas",
-    "Q60" = "Centros Comunitarios",
-    "Q61" = "Banquetas", 
-    "Q62" = "Espacios para personas con discapacidad"
+    "Q40" = "Recolección de Basura"
+
   )
   
   # Service titles for maps and displays
@@ -56,16 +48,7 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
     "Q29" = "Satisfacción con los servicios de agua",
     "Q30" = "Satisfacción con los servicios de drenaje y alcantarillado",
     "Q35" = "Satisfacción con los servicios de CFE",
-    "Q40" = "Satisfacción con la recolección de basura",
-    "Q45" = "Satisfacción con el alumbrado público",
-    "Q51" = "Satisfacción con calles y pavimentación",
-    "Q55" = "Satisfacción con semaforización y señales viales",
-    "Q56" = "Satisfacción con áreas verdes y espacios públicos",
-    "Q58" = "Satisfacción con unidades deportivas",
-    "Q59" = "Satisfacción con bibliotecas",
-    "Q60" = "Satisfacción con centros comunitarios",
-    "Q61" = "Satisfacción con banquetas",
-    "Q62" = "Satisfacción con espacios para personas con discapacidad"
+    "Q40" = "Satisfacción con la recolección de basura"
   )
   
   # Update tooltip content based on selected service
@@ -85,36 +68,6 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
              <b>Escala</b>: 1-10",
       "Recolección de Basura" = "<b>ID</b>: PER Q40 <br>
             <b>Pregunta</b>: Que tan satisfecho esta con el SERVICIO DE RECOLECCION DE BASURA? <br>
-             <b>Escala</b>: 1-10",
-      "Alumbrado Público" = "<b>ID</b>: PER Q45 <br>
-            <b>Pregunta</b>: Que tan satisfecho se siente con la calidad del servicio de alumbrado público en la CIUDAD? <br>
-             <b>Escala</b>: 1-10",
-      "Calles y Pavimentación" = "<b>ID</b>: PER Q51 <br>
-            <b>Pregunta</b>: Que tan satisfecho se siente con la calidad de las calles y la pavimentación? <br>
-             <b>Escala</b>: 1-10",
-      "Semaforización" = "<b>ID</b>: PER Q55 <br>
-            <b>Pregunta</b>: Que tan satisfecho esta con LA SEMAFORIZACION y señales viales? <br>
-             <b>Escala</b>: 1-10",
-      "Áreas verdes y Espacios públicos" = "<b>ID</b>: PER Q56 <br>
-            <b>Pregunta</b>: Que tan satisfecho está con LA DISPONIBILIDAD DE ÁREAS VERDES Y ESPACIOS PÚBLICOS CERCA DE SU CASA? <br>
-             <b>Escala</b>: 1-10",
-      "Unidades deportivas" = "<b>ID</b>: PER Q58 <br>
-            <b>Pregunta</b>: En que estado considera que se encuentran las UNIDADES DEPORTIVAS? <br>
-             <b>Escala</b>: 1-10",
-      "Bibliotecas" = "<b>ID</b>: PER Q59 <br>
-            <b>Pregunta</b>: En qué estado considera que se encuentran las BIBLIOTECAS? <br>
-             <b>Escala</b>: 1-10",
-      "Centros Comunitarios" = "<b>ID</b>: PER Q60 <br>
-            <b>Pregunta</b>: En que estado considera que se encuentran las CENTROS COMUNITARIOS? <br>
-             <b>Escala</b>: 1-10",
-      "Espacios para personas con discapacidad" = "<b>ID</b>: PER Q62 <br>
-            <b>Pregunta</b>: En que estado considera que se encuentran los ESPACIOS PARA PERSONAS CON DISCAPACIDAD? <br>
-             <b>Escala</b>: 1-10",
-      "Banquetas" = "<b>ID</b>: PER Q61 <br>
-            <b>Pregunta</b>: En qué estado considera que se encuentran las BANQUETAS? <br>
-             <b>Escala</b>: 1-10",
-      "<b>ID</b>: PER Q29 <br>
-            <b>Pregunta</b>: Que tan satisfecho esta con el SERVICIO DEL AGUA? <br>
              <b>Escala</b>: 1-10"
     )
     
@@ -140,29 +93,13 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
       "Q30" = "service_Q30_map", 
       "Q35" = "service_Q35_map",
       "Q40" = "service_Q40_map",
-      "Q45" = "service_Q45_map",
-      "Q51" = "service_Q51_map",
-      "Q55" = "service_Q55_map",
-      "Q56" = "service_Q56_map",
-      "Q58" = "service_Q58_map",
-      "Q59" = "service_Q59_map",
-      "Q60" = "service_Q60_map",
-      "Q61" = "service_Q61_map",
-      "Q62" = "service_Q62_map",
       "service_Q29_map"  # default
     )
     
     maps()[[service_map_name]]
   })
   
-  # Render the report statistics plot (if it exists as a pre-saved plot)
-  output$report_statistics_plot <- renderUI({
-    if (!is.null(plots()$report_statistics_plot)) {
-      plots()$report_statistics_plot
-    } else {
-      div("Estadísticas de reporte no disponibles")
-    }
-  })
+ 
   
   # Output service title
   output$service_title <- renderText({
@@ -185,22 +122,6 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
   
   output$trash_pickup <- renderText({
     percentages()$trash_pickup
-  })
-  
-  output$green_areas_equipment <- renderText({
-    percentages()$green_areas_equipment
-  })
-  
-  output$green_areas_lighting <- renderText({
-    percentages()$green_areas_lighting
-  })
-  
-  output$green_areas_maintenance <- renderText({
-    percentages()$green_areas_maintenance
-  })
-  
-  output$green_areas_security <- renderText({
-    percentages()$green_areas_security
   })
   
   # Download data handler - simplified to use pre-saved data
@@ -229,16 +150,7 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
         "Q29" = "Agua",
         "Q30" = "Drenaje_y_Alcantarillado",
         "Q35" = "CFE", 
-        "Q40" = "Recoleccion_Basura",
-        "Q45" = "Alumbrado_Publico",
-        "Q51" = "Calles_y_Pavimentacion",
-        "Q55" = "Semaforizacion",
-        "Q56" = "Areas_Verdes",
-        "Q58" = "Unidades_Deportivas",
-        "Q59" = "Bibliotecas",
-        "Q60" = "Centros_Comunitarios",
-        "Q61" = "Banquetas",
-        "Q62" = "Espacios_Discapacidad"
+        "Q40" = "Recoleccion_Basura"
       )
       
       service_name <- service_filename_mapping[input$selected_service]
@@ -252,16 +164,7 @@ publicServicesServer <- function(input, output, session, current_theme = NULL) {
         "Q29" = "mapa_servicio_Agua",
         "Q30" = "mapa_servicio_Drenaje_y_Alcantarillado",
         "Q35" = "mapa_servicio_CFE",
-        "Q40" = "mapa_servicio_Recoleccion_Basura", 
-        "Q45" = "mapa_servicio_Alumbrado_Publico",
-        "Q51" = "mapa_servicio_Calles_y_Pavimentacion",
-        "Q55" = "mapa_servicio_Semaforizacion",
-        "Q56" = "mapa_servicio_Areas_Verdes",
-        "Q58" = "mapa_servicio_Unidades_Deportivas",
-        "Q59" = "mapa_servicio_Bibliotecas",
-        "Q60" = "mapa_servicio_Centros_Comunitarios",
-        "Q61" = "mapa_servicio_Banquetas",
-        "Q62" = "mapa_servicio_Espacios_Discapacidad"
+        "Q40" = "mapa_servicio_Recoleccion_Basura"
       )
       
       map_name <- service_filename_mapping[input$selected_service]

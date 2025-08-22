@@ -1,9 +1,31 @@
+# infrastructure_ui.R - Updated to match style guide and wellness_ui pattern
 infrastructureUI <- function() {
+  svg_icon <- function(filename, class = "nav-card-icon", width = "48", height = "48") {
+    svg_path <- file.path("svg", filename)
+    
+    # Check if file exists
+    full_path <- file.path("www", svg_path)
+    if (!file.exists(full_path)) {
+      warning(paste("SVG file not found:", full_path))
+      return(div(class = class, "⚠️"))  # Fallback icon
+    }
+    
+    tags$div(
+      class = class,
+      tags$img(
+        src = svg_path,
+        alt = tools::file_path_sans_ext(filename),
+        width = width,
+        height = height,
+        style = "max-width: 100%; height: auto;"
+      )
+    )
+  }
+  
   page_fluid(
-    class = "section-infrastructure",
+    class = "section-infraestructura",
     useShinyjs(),
     init_tooltips(),
-
 
     # Header
     layout_columns(
@@ -11,163 +33,173 @@ infrastructureUI <- function() {
       card(
         card_header(
           style = paste0("background-color: var(--infraestructura-color) !important; 
-          color: white !important; 
-          font-weight: bolder !important; 
-          text-align: center !important; 
-          border-bottom: none !important;"),
-          h2("Infraestructura Publica de la ciudad", class = "text-center")
+            color: white !important; 
+            font-family: var(--font-display) !important;
+            font-weight: bolder !important; 
+            text-align: center !important; 
+            border-bottom: none !important;"),
+          h1("Infraestructura", class = "dashboard-header")
         )
       )
     ),
-
     
-    layout_columns(
-      col_widths = 3,
+    # Navigation Cards Section with improved responsive grid
+    div(
+      class = "section-nav-grid mb-4",
       
-      # Education Dashboard Card
+      # Public Services Card
       div(
-        id = "nav_education_card",  # Changed ID to match what overviewNavServer expects
-        onclick = "Shiny.setInputValue('nav_target', 'education', {priority: 'event'})",
-        card(
-          class = "nav-card-infraestructura",
-          card_body(
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("book")),
-            h4(class = "nav-card-title text-center", "Educación"),
-            p(class = "text-center", "Análisis de indicadores educativos")
-          )
-        )
-      ),
-      
-      # Healthcare Dashboard Card
-      div(
-        id = "nav_healthcare_card",  # Changed ID to match what overviewNavServer expects
-        onclick = "Shiny.setInputValue('nav_target', 'healthcare', {priority: 'event'})",
-        card(
-          class = "nav-card-infraestructura",
-
-          card_body(
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("heart-pulse")),
-            h4(class = "nav-card-title text-center", "Salud"),
-            p(class = "text-center", "Estadísticas de servicios de salud")
-          )
-        )
-      ),
-      
-      # Public Services Dashboard Card
-      div(
-        id = "nav_services_card",  # Changed ID to match what overviewNavServer expects
+        class = "page-card page-card-infraestructura section-nav-card",
         onclick = "Shiny.setInputValue('nav_target', 'public_services', {priority: 'event'})",
-        card(
-          class = "nav-card-infraestructura",
-
-          card_body(
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("gear")),
-            h4(class = "nav-card-title text-center", "Servicios Públicos"),
-            p(class = "text-center", "Evaluación de servicios e infraestructura")
+        
+        # Card Header
+        div(
+          class = "page-header",
+          div(
+            class = "page-header-content",
+            h4(class = "page-card-title", "Servicios Públicos"),
+            p(class = "page-card-subtitle", "¿Qué tan satisfechos están con los servicios básicos?")
+          ),
+          div(
+            class = "page-icon",
+            svg_icon("Cap--50.svg", width = "40", height = "40")
           )
         )
       ),
       
-      # Housing Dashboard Card
+      # Equipment Card
       div(
-        id = "nav_housing_card",  # Changed ID to match what overviewNavServer expects
+        class = "page-card page-card-infraestructura section-nav-card",
+        onclick = "Shiny.setInputValue('nav_target', 'equipment', {priority: 'event'})",
+        
+        div(
+          class = "page-header",
+          div(
+            class = "page-header-content",
+            h4(class = "page-card-title", "Equipamiento Público"),
+            p(class = "page-card-subtitle", "¿Cómo evalúan la infraestructura comunitaria?")
+          ),
+          div(
+            class = "page-icon",
+            svg_icon("Cap--38.svg", width = "40", height = "40")
+          )
+        )
+      ),
+      
+      # Housing Card
+      div(
+        class = "page-card page-card-infraestructura section-nav-card",
         onclick = "Shiny.setInputValue('nav_target', 'housing', {priority: 'event'})",
-        card(
-          class = "nav-card-infraestructura",
-
-          card_body(
-            div(class = "text-center nav-card-icon", 
-                bsicons::bs_icon("house")),
-            h4(class = "nav-card-title text-center", "Vivienda"),
-            p(class = "text-center", "Análisis de condiciones de vivienda")
+        
+        div(
+          class = "page-header",
+          div(
+            class = "page-header-content",
+            h4(class = "page-card-title", "Vivienda"),
+            p(class = "page-card-subtitle", "¿Cómo perciben las condiciones de su vivienda?")
+          ),
+          div(
+            class = "page-icon",
+            svg_icon("Cap--38.svg", width = "40", height = "40")
           )
         )
       )
     ),
-
-    # First row of indicators
-    layout_columns(
-      col_widths = c(6, 6),
+    
+    # PLOT CARDS SECTION - Using responsive grid
+    
+    # Content section 1: Public Services and Housing
+    div(
+      class = "plot-cards-grid two-columns",
       
-      # Education Plot
-      card(
-        card_header(
+      # Public Services Plot Card
+      div(
+        class = "plot-card plot-card-infraestructura",
+        
+        # Plot Header
+        div(
+          class = "plot-header",
           div(
-            class = "d-flex justify-content-between align-items-center",
-            div(
-              class = "d-flex align-items-center",
-            "Educación: Hogares con estudiantes por distrito",
-            create_tooltip("<b>ID</b>: PER Q6 <br>
-              <b>Pregunta</b>: En su familia, hay por lo menos 1 o más estudiantes de cualquier nivel educativo?v <br>
-               <b>Escala</b>: 1=Sí; 2=No")
-         ),
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
+              "Servicios Públicos: Satisfacción por servicio",
+              create_tooltip("<b>ID</b>: PER Q29 - Q56 <br>
+                <b>Pregunta</b>: Satisfacción con los servicios en la gráfica <br>
+                 <b>Escala</b>: 1-10")
+            )
+          )
+        ),
+        
+        # Plot Content
+        div(
+          class = "plot-content",
+          plotlyOutput("utilities_plot", height = "500px")
+        )
+      ),
+      
+      # Housing Plot Card
+      div(
+        class = "plot-card plot-card-infraestructura",
+        
+        # Plot Header with download button
+        div(
+          class = "plot-header",
+          div(
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
+              "Vivienda: Satisfacción por distrito",
+              create_tooltip("<b>ID</b>: PER Q25 <br>
+                <b>Pregunta</b>: En una escala del 1 al 10, Que tan satisfecho esta con LA CASA EN LA QUE VIVE? <br>
+                 <b>Escala</b>: 1-10")
+            )
+          ),
+          div(
+            class = "plot-actions",
             downloadButton(
-              "download_gen_students_map", 
+              "download_housing_map", 
               "", 
               icon = icon("download"), 
-              class = "btn-sm"
+              class = "plot-action-btn",
+              title = "Descargar mapa"
             )
+          )
+        ),
+        
+        # Plot Content
+        div(
+          class = "plot-content",
+          leafletOutput("housing_map", height = "500px")
         )
-      ),
-        leafletOutput("education_plot", height = "400px")
-      ),
-      
-      # Healthcare Plot
-      card(
-        card_header(
-          div(
-            class = "d-flex align-items-center",
-          "Salud: Satisfacción con servicios de salud"),
-          create_tooltip("<b>ID</b>: PER Q19 <br>
-            <b>Pregunta</b>: En una escala del 1 al 10, Que tan satisfecho/a esta en GENERAL con los servicios de salud que recibe del servicio medico que mas USA? <br>
-             <b>Escala</b>: 1-10")
-			 ),
-        plotlyOutput("healthcare_plot", height = "400px")
       )
     ),
     
-    # Second row of indicators
-    layout_columns(
-      col_widths = c(6, 6),
+    # Content section 2: Reports chart (full width)
+    div(
+      class = "plot-cards-grid single-column",
       
-      # Utilities Plot
-      card(
-        card_header(
-          div(
-            class = "d-flex align-items-center",
-            "Servicios Públicos: Satisfacción por servicio",
-            create_tooltip("<b>ID</b>: PER Q29 - Q56 <br>
-              <b>Pregunta</b>: Satisfacción con los servicios en la gráfica <br>
-               <b>Escala</b>: 1-10")
-         )
-          ),
-        plotlyOutput("utilities_plot", height = "500px")
-      ),
-      
-      # Housing Plot
-      card(
-        card_header(        
-          div(
-          class = "d-flex justify-content-between align-items-center",
-          div(
-            class = "d-flex align-items-center",
-          "Vivienda: Satisfacción por distrito",
-          create_tooltip("<b>ID</b>: PER Q25 <br>
-            <b>Pregunta</b>: En una escala del 1 al 10, Que tan satisfecho esta con LA CASA EN LA QUE VIVE? <br>
-             <b>Escala</b>: 1-10")
-			 ),
+      div(
+        class = "plot-card plot-card-infraestructura",
         
-        downloadButton(
-          "download_housing_map", 
-          "", 
-          icon = icon("download"), 
-          class = "btn-sm"
+        div(
+          class = "plot-header",
+          div(
+            class = "plot-header-content",
+            h6(
+              class = "plot-title",
+              "Reportes de Servicios Públicos",
+              create_tooltip("<b>ID</b>: PER Q32 Q33 Q37 Q38 Q42 Q43 Q48 Q49 Q52 Q53 <br>
+                <b>Pregunta</b>: Durante este año Interpuso algún reporte? El problema fue atendido por la dependencia? <br>
+                 <b>Escala</b>: 1=Si;2=No;3=no sabe")
+            )
+          )
+        ),
+        
+        div(
+          class = "plot-content",
+          uiOutput("report_statistics_plot")
         )
-      )),
-        leafletOutput("housing_map", height = "500px")
       )
     )
   )

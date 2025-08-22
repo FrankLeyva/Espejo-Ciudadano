@@ -1,13 +1,13 @@
-
 survey_config <- list(
   PER_2023 = list(
     district_col = "Q2",
     gender_col = "Q101",  # This is correct
     age_col = "Q103",
-    # Added gender mapping that was missing
+    # FIXED: Added missing gender mapping for value "0"
     gender_mapping = c(
-      "1" = "Hombre",
-      "2" = "Mujer",
+      "0" = "No especificado",  # ✅ Added this mapping
+      "1" = "Mujer",
+      "2" = "Hombre",
       "3" = "Otro"
     )
   ),
@@ -16,8 +16,9 @@ survey_config <- list(
     gender_col = "Q101",
     age_col = "Q103",
     gender_mapping = c(
-      "1" = "Hombre",
-      "2" = "Mujer",
+      "0" = "No especificado",  # ✅ Added for consistency
+      "1" = "Mujer",
+      "2" = "Hombre",
       "3" = "Otro"
     )
   ),
@@ -26,8 +27,9 @@ survey_config <- list(
     gender_col = "Q144",
     age_col = "Q146",
     gender_mapping = c(
-      "1" = "Hombre",
-      "2" = "Mujer",
+      "0" = "No especificado",  # ✅ Added for consistency
+      "1" = "Mujer",
+      "2" = "Hombre",
       "3" = "Otro"
     ),
     age_mapping = c(
@@ -42,8 +44,9 @@ survey_config <- list(
     gender_col = "Q144",
     age_col = "Q146",
     gender_mapping = c(
-      "1" = "Hombre",
-      "2" = "Mujer",
+      "0" = "No especificado",  # ✅ Added for consistency
+      "1" = "Mujer",
+      "2" = "Hombre",
       "3" = "Otro"
     ),
     age_mapping = c(

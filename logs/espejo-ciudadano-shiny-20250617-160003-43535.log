@@ -1,0 +1,854 @@
+Fixed background preloader loaded without reactive context dependencies
+DataManager class loaded and assigned to global environment
+Loading required package: pdftools
+Using poppler version 24.02.0
+Loading required package: magick
+Linking to ImageMagick 6.9.12.98
+Enabled features: fontconfig, freetype, fftw, heic, lcms, pango, raw, webp, x11
+Disabled features: cairo, ghostscript, rsvg
+Using 16 threads
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘bslib’
+
+The following object is masked from ‘package:utils’:
+
+    page
+
+
+Attaching package: ‘DT’
+
+The following objects are masked from ‘package:shiny’:
+
+    dataTableOutput, renderDataTable
+
+Loading required package: ggplot2
+
+Attaching package: ‘plotly’
+
+The following object is masked from ‘package:ggplot2’:
+
+    last_plot
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+The following object is masked from ‘package:graphics’:
+
+    layout
+
+Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ lubridate 1.9.4     ✔ tibble    3.3.0
+✔ purrr     1.0.4     ✔ tidyr     1.3.1
+✔ readr     2.1.5     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ plotly::filter() masks dplyr::filter(), stats::filter()
+✖ dplyr::lag()     masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+Attaching package: ‘igraph’
+
+The following objects are masked from ‘package:lubridate’:
+
+    %--%, union
+
+The following objects are masked from ‘package:purrr’:
+
+    compose, simplify
+
+The following object is masked from ‘package:tidyr’:
+
+    crossing
+
+The following object is masked from ‘package:tibble’:
+
+    as_data_frame
+
+The following object is masked from ‘package:plotly’:
+
+    groups
+
+The following objects are masked from ‘package:dplyr’:
+
+    as_data_frame, groups, union
+
+The following objects are masked from ‘package:future’:
+
+    %->%, %<-%
+
+The following objects are masked from ‘package:stats’:
+
+    decompose, spectrum
+
+The following object is masked from ‘package:base’:
+
+    union
+
+
+Attaching package: ‘shinyjs’
+
+The following object is masked from ‘package:lubridate’:
+
+    show
+
+The following object is masked from ‘package:future’:
+
+    reset
+
+The following object is masked from ‘package:shiny’:
+
+    runExample
+
+The following objects are masked from ‘package:methods’:
+
+    removeClass, show
+
+
+Attaching package: ‘colourpicker’
+
+The following objects are masked from ‘package:shinyjs’:
+
+    colourInput, colourPicker, runExample, updateColourInput
+
+The following object is masked from ‘package:shiny’:
+
+    runExample
+
+Configured background processing with 4.000000 cores
+DataManager class loaded and assigned to global environment
+Fixed background preloader loaded without reactive context dependencies
+Loaded module: R/binary_module.R
+Loaded module: R/categorical_module.R
+Loaded module: R/interval_module.R
+Loaded module: R/ordinal_module.R
+Loaded module: R/nominal_module.R
+Loaded module: R/razon_module.R
+Loaded module: R/special_module.R
+Warning: Navigation containers expect a collection of `bslib::nav_panel()`/`shiny::tabPanel()`s and/or `bslib::nav_menu()`/`shiny::navbarMenu()`s. Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents.
+
+Listening on http://127.0.0.1:43535
+DataManager initialized with 500 MB cache limit
+BackgroundPreloader initialized (non-reactive): 106 total tasks (50 data, 28 UI, 28 server)
+Starting non-interfering background preloading...
+Priority: Loading explorer UI and server modules...
+Silent loaded UI module: explorerUI
+Silent loaded server module: explorerServer
+Loaded basic module: categorical
+Loaded basic module: special
+Background preloading initiated successfully
+Silent loaded UI module: wellnessUI
+Explorer modules already preloaded - instant activation!
+Explorer initialized with enhanced preload support
+Transition started: explorer at 2025-06-17 16:00:16.243968
+Tab: explorer | Cache: 0.0 MB (0.0% hit, 0 objects)
+Slow transition detected: 3.65 seconds to explorer
+Loading survey data for year: 2024
+Attempting to load: PER_2024
+Loading survey data from: data/processed/PER_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 1, 2, 2
+Sample raw age values: 3, 1, 3, 4, 1
+Sample mapped gender values: Mujer, Hombre, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 740, Mujer = 742, Otro = 1
+Successfully loaded PER_2024 with 1483 responses
+Metadata has 195 questions
+Attempting to load: PAR_2024
+Loading survey data from: data/processed/PAR_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 2, 2, 2
+Sample raw age values: 2, 2, 2, 4, 4
+Sample mapped gender values: Mujer, Hombre, Mujer, Mujer, Mujer
+Standardized gender distribution: Hombre = 725, Mujer = 769, Otro = 2
+Successfully loaded PAR_2024 with 1496 responses
+Metadata has 338 questions
+Total surveys loaded: 2
+Raw file data/processed/PER_2023_metadata_classified_V3.csv has columns: X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PER_2023 metadata from PER_2023_metadata_classified_V3.csv with 192 valid questions
+Raw file data/processed/PAR_2023_metadata_classified_V2.csv has columns: X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PAR_2023 metadata from PAR_2023_metadata_classified_V2.csv with 332 valid questions
+Raw file data/processed/PER_2024_metadata_classified_V4.csv has columns: X.5, X.4, X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme
+Successfully loaded PER_2024 metadata from PER_2024_metadata_classified_V4.csv with 195 valid questions
+Raw file data/processed/PAR_2024_metadata_classified_V4.csv has columns: X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme, notes
+Successfully loaded PAR_2024 metadata from PAR_2024_metadata_classified_V4.csv with 338 valid questions
+Total metadata loaded: 1057 questions from 4 surveys
+PAR_2023 : 332 questions, 4 themes
+PAR_2024 : 338 questions, 4 themes
+PER_2023 : 192 questions, 6 themes
+PER_2024 : 195 questions, 6 themes
+Total themes loaded: 1057
+Available surveys: PER_2023, PAR_2023, PER_2024, PAR_2024
+Filtered themes for 2024 : 489
+Available themes for 2024 : Social & Economic Wellbeing, Public Services, Urban Mobility & Environment, Governance & Civic Engagement, Community Participation
+Silent loaded UI module: governmentUI
+Explorer section accessed
+Silent loaded UI module: infrastructureUI
+Silent loaded UI module: urbanUI
+Silent loaded UI module: participationUI
+Background: Silently loading explorer data for 2024...
+Loading survey data from: data/processed/PER_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 1, 2, 2
+Sample raw age values: 3, 1, 3, 4, 1
+Sample mapped gender values: Mujer, Hombre, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 740, Mujer = 742, Otro = 1
+Loading survey data from: data/processed/PAR_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 2, 2, 2
+Sample raw age values: 2, 2, 2, 4, 4
+Sample mapped gender values: Mujer, Hombre, Mujer, Mujer, Mujer
+Standardized gender distribution: Hombre = 725, Mujer = 769, Otro = 2
+Background: Completed explorer data for 2024
+Transition completed: explorer at 2025-06-17 16:00:18.556137
+Slow transition detected: 3.55 seconds to wellness
+Transition started: wellness at 2025-06-17 16:00:19.800579
+Tab: wellness | Cache: 7.8 MB (0.0% hit, 2 objects)
+UI module for wellness already preloaded
+Loading server module for wellness
+Loaded module: R/wellness/wellness_server.R
+Smart preloading for wellness: wellness, economic, cultural, identity, environment
+Loading plots for wellness 2024 from RDS
+Loading plots for economic 2024 from RDS
+Loading maps for economic 2024 from RDS
+Loading plots for cultural 2024 from RDS
+Loading maps for cultural 2024 from RDS
+Warning in doTryCatch(return(expr), name, parentenv, handler) :
+  Map file not found: data/plots/map_cultural_2024.rds
+Loading plots for identity 2024 from RDS
+Loading maps for identity 2024 from RDS
+Loading plots for environment 2024 from RDS
+Loading maps for environment 2024 from RDS
+Server initialized: wellness_wellness
+Loading maps for wellness 2024 from RDS
+Loading maps for infrastructure 2024 from RDS
+Loading plots for infrastructure 2024 from RDS
+Slow transition detected: 3.55 seconds to overview
+Silent loaded UI module: economyUI
+Transition completed: wellness at 2025-06-17 16:00:21.417481
+Silent loaded UI module: culturalUI
+Silent loaded UI module: identityUI
+Slow transition detected: 5.94 seconds to wellness
+Transition started: wellness at 2025-06-17 16:00:22.186495
+Tab: wellness | Cache: 21.9 MB (5.6% hit, 19 objects)
+UI module for wellness already preloaded
+Server module for wellness already preloaded
+Silent loaded UI module: environmentUI
+Silent loaded UI module: educationUI
+Transition completed: wellness at 2025-06-17 16:00:23.212914
+Silent loaded UI module: healthcareUI
+Silent loaded UI module: housingUI
+Silent loaded UI module: inequalityUI
+Silent loaded UI module: accountabilityUI
+Silent loaded UI module: representationUI
+Silent loaded UI module: expectationsUI
+Silent loaded UI module: trustUI
+Silent loaded UI module: public_servicesUI
+Silent loaded UI module: equipmentUI
+Slow transition detected: 5.79 seconds to economic
+Transition started: economic at 2025-06-17 16:00:27.979379
+Tab: economic | Cache: 21.9 MB (22.7% hit, 19 objects)
+Silent loaded UI module: mobilityUI
+UI module for economic already preloaded
+Loading server module for economic
+Loaded module: R/wellness/economy_server.R
+Server initialized: wellness_economy
+Silent loaded UI module: transportationUI
+Transition completed: economic at 2025-06-17 16:00:29.008347
+Silent loaded UI module: civicUI
+Transition started: wellness at 2025-06-17 16:00:29.114157
+Tab: wellness | Cache: 21.9 MB (29.2% hit, 19 objects)
+UI module for wellness already preloaded
+Server module for wellness already preloaded
+Silent loaded UI module: communityUI
+Transition completed: wellness at 2025-06-17 16:00:30.127632
+Slow transition detected: 3.01 seconds to urban
+Transition started: urban at 2025-06-17 16:00:30.986678
+Tab: urban | Cache: 21.9 MB (39.3% hit, 19 objects)
+Silent loaded server module: governmentServer
+UI module for urban already preloaded
+Loading server module for urban
+Loaded module: R/urban/urban_server.R
+Smart preloading for urban: urban, mobility, transportation
+Loading plots for urban 2024 from RDS
+Loading maps for urban 2024 from RDS
+Warning in doTryCatch(return(expr), name, parentenv, handler) :
+  Map file not found: data/plots/map_urban_2024.rds
+Loading plots for mobility 2024 from RDS
+Loading plots for transportation 2024 from RDS
+Loading maps for transportation 2024 from RDS
+Server initialized: urban_urban
+Silent loaded server module: infrastructureServer
+Transition completed: urban at 2025-06-17 16:00:32.121847
+Background: Silently loading explorer data for 2023...
+Loading survey data from: data/processed/PER_2023_responses_V3.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 1, 1, 2, 1
+Sample raw age values: 4, 2, 4, 1, 1
+Sample mapped gender values: Hombre, Hombre, Hombre, Mujer, Hombre
+Standardized gender distribution: Hombre = 800, Mujer = 722, No especificado = 2
+Loading survey data from: data/processed/PAR_2023_responses_V2.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 2, 1, 2, 2
+Sample raw age values: 2, 1, 3, 3, 4
+Sample mapped gender values: Hombre, Mujer, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 731, Mujer = 770, Otro = 5
+Background: Completed explorer data for 2023
+Silent loaded server module: participationServer
+Silent loaded UI module: reportsUI
+Silent loaded UI module: methodologyUI
+Slow transition detected: 5.58 seconds to mobility
+Transition started: mobility at 2025-06-17 16:00:36.569267
+Tab: mobility | Cache: 31.5 MB (34.2% hit, 29 objects)
+Silent loaded UI module: aboutUI
+UI module for mobility already preloaded
+Loading server module for mobility
+Loaded module: R/urban/mobility_server.R
+Server initialized: urban_mobility
+Silent loaded UI module: dashboard_mapUI
+Transition completed: mobility at 2025-06-17 16:00:37.588801
+Transition started: urban at 2025-06-17 16:00:38.003765
+Tab: urban | Cache: 31.5 MB (35.9% hit, 29 objects)
+UI module for urban already preloaded
+Server module for urban already preloaded
+Transition completed: urban at 2025-06-17 16:00:39.011005
+Slow transition detected: 2.67 seconds to transportation
+Transition started: transportation at 2025-06-17 16:00:39.234489
+Tab: transportation | Cache: 31.5 MB (39.0% hit, 29 objects)
+Silent loaded server module: culturalServer
+UI module for transportation already preloaded
+Loading server module for transportation
+Loaded module: R/urban/transportation_server.R
+Server initialized: urban_transportation
+Silent loaded server module: identityServer
+Silent loaded server module: environmentServer
+Transition completed: transportation at 2025-06-17 16:00:40.266377
+Silent loaded server module: educationServer
+Silent loaded server module: healthcareServer
+Slow transition detected: 2.67 seconds to urban
+Transition started: urban at 2025-06-17 16:00:41.438041
+Tab: urban | Cache: 31.5 MB (41.9% hit, 29 objects)
+UI module for urban already preloaded
+Server module for urban already preloaded
+Silent loaded server module: housingServer
+Slow transition detected: 2.67 seconds to overview
+Silent loaded server module: inequalityServer
+Transition completed: urban at 2025-06-17 16:00:42.445171
+Silent loaded server module: accountabilityServer
+Silent loaded server module: representationServer
+Slow transition detected: 4.11 seconds to government
+Transition started: government at 2025-06-17 16:00:43.34795
+Tab: government | Cache: 31.5 MB (44.4% hit, 29 objects)
+UI module for government already preloaded
+Server module for government already preloaded
+Smart preloading for government: government, inequality, accountability, representation, trust
+Loading plots for government 2024 from RDS
+Loading maps for government 2024 from RDS
+Warning in doTryCatch(return(expr), name, parentenv, handler) :
+  Map file not found: data/plots/map_government_2024.rds
+Loading plots for inequality 2024 from RDS
+Loading maps for inequality 2024 from RDS
+Loading plots for accountability 2024 from RDS
+Loading plots for representation 2024 from RDS
+Loading maps for representation 2024 from RDS
+Loading plots for trust 2024 from RDS
+Server initialized: government_government
+Silent loaded server module: expectationsServer
+Silent loaded server module: trustServer
+Silent loaded server module: public_servicesServer
+Transition started: accountability at 2025-06-17 16:00:45.147177
+Tab: accountability | Cache: 34.7 MB (35.6% hit, 42 objects)
+Background: Silently loaded wellness 2024 (3 items)
+Silent loaded server module: equipmentServer
+UI module for accountability already preloaded
+Server module for accountability already preloaded
+Server initialized: government_accountability
+Transition completed: government at 2025-06-17 16:00:45.760524
+Transition completed: accountability at 2025-06-17 16:00:46.482572
+Silent loaded server module: civicServer
+Silent loaded server module: communityServer
+Explorer modules already preloaded - instant activation!
+Explorer initialized with enhanced preload support
+Transition started: explorer at 2025-06-17 16:00:47.770031
+Tab: explorer | Cache: 34.7 MB (36.7% hit, 42 objects)
+Loading survey data for year: 2024
+Attempting to load: PER_2024
+Loading survey data from: data/processed/PER_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 1, 2, 2
+Sample raw age values: 3, 1, 3, 4, 1
+Sample mapped gender values: Mujer, Hombre, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 740, Mujer = 742, Otro = 1
+Successfully loaded PER_2024 with 1483 responses
+Metadata has 195 questions
+Attempting to load: PAR_2024
+Loading survey data from: data/processed/PAR_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 2, 2, 2
+Sample raw age values: 2, 2, 2, 4, 4
+Sample mapped gender values: Mujer, Hombre, Mujer, Mujer, Mujer
+Standardized gender distribution: Hombre = 725, Mujer = 769, Otro = 2
+Successfully loaded PAR_2024 with 1496 responses
+Metadata has 338 questions
+Total surveys loaded: 2
+Raw file data/processed/PER_2023_metadata_classified_V3.csv has columns: X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PER_2023 metadata from PER_2023_metadata_classified_V3.csv with 192 valid questions
+Raw file data/processed/PAR_2023_metadata_classified_V2.csv has columns: X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PAR_2023 metadata from PAR_2023_metadata_classified_V2.csv with 332 valid questions
+Raw file data/processed/PER_2024_metadata_classified_V4.csv has columns: X.5, X.4, X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme
+Successfully loaded PER_2024 metadata from PER_2024_metadata_classified_V4.csv with 195 valid questions
+Raw file data/processed/PAR_2024_metadata_classified_V4.csv has columns: X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme, notes
+Successfully loaded PAR_2024 metadata from PAR_2024_metadata_classified_V4.csv with 338 valid questions
+Total metadata loaded: 1057 questions from 4 surveys
+PAR_2023 : 332 questions, 4 themes
+PAR_2024 : 338 questions, 4 themes
+PER_2023 : 192 questions, 6 themes
+PER_2024 : 195 questions, 6 themes
+Total themes loaded: 1057
+Available surveys: PER_2023, PAR_2023, PER_2024, PAR_2024
+Filtered themes for 2024 : 489
+Available themes for 2024 : Social & Economic Wellbeing, Public Services, Urban Mobility & Environment, Governance & Civic Engagement, Community Participation
+Explorer section accessed
+Background: Silently loaded government 2024 (1 items)
+Transition completed: explorer at 2025-06-17 16:00:49.762185
+Silent loaded server module: reportsServer
+Background: Silently loaded infrastructure 2024 (3 items)
+Silent loaded server module: methodologyServer
+Silent loaded server module: aboutServer
+Slow transition detected: 6.66 seconds to participation
+Transition started: participation at 2025-06-17 16:00:51.808449
+Tab: participation | Cache: 34.7 MB (36.7% hit, 43 objects)
+UI module for participation already preloaded
+Server module for participation already preloaded
+Smart preloading for participation: participation, civic, community
+Loading plots for participation 2024 from RDS
+Loading maps for participation 2024 from RDS
+Loading plots for civic 2024 from RDS
+Loading maps for civic 2024 from RDS
+Loading plots for community 2024 from RDS
+Server initialized: participation_participation
+Silent loaded server module: dashboard_mapServer
+Transition completed: participation at 2025-06-17 16:00:53.122582
+Slow transition detected: 6.66 seconds to overview
+Background: Silently loaded urban 2024 (2 items)
+Slow transition detected: 6.66 seconds to wellness
+Transition started: wellness at 2025-06-17 16:00:54.6422
+Tab: wellness | Cache: 35.6 MB (35.2% hit, 51 objects)
+UI module for wellness already preloaded
+Server module for wellness already preloaded
+Slow transition detected: 3.79 seconds to education
+Transition started: education at 2025-06-17 16:00:55.595529
+Tab: education | Cache: 35.6 MB (38.7% hit, 51 objects)
+Transition completed: wellness at 2025-06-17 16:00:55.742203
+UI module for education already preloaded
+Server module for education already preloaded
+Smart preloading for education: infrastructure, education, healthcare
+Loading plots for education 2024 from RDS
+Warning in doTryCatch(return(expr), name, parentenv, handler) :
+  Plot file not found: data/plots/education_2024.rds
+Loading plots for healthcare 2024 from RDS
+Warning in doTryCatch(return(expr), name, parentenv, handler) :
+  Plot file not found: data/plots/healthcare_2024.rds
+Server initialized: wellness_education
+Transition completed: education at 2025-06-17 16:00:56.665111
+Slow transition detected: 3.79 seconds to overview
+Background: Silently loaded participation 2024 (3 items)
+Slow transition detected: 5.20 seconds to reports
+Transition started: reports at 2025-06-17 16:01:00.799606
+Tab: reports | Cache: 35.6 MB (39.8% hit, 55 objects)
+UI module for reports already preloaded
+Server module for reports already preloaded
+Smart preloading for reports: reports
+Loading plots for reports 2024 from RDS
+Warning in doTryCatch(return(expr), name, parentenv, handler) :
+  Plot file not found: data/plots/reports_2024.rds
+Warning in value[[3L]](cond) :
+  Failed to load server module extras_reports: session must be a ShinySession or session_proxy object.
+Transition completed: reports at 2025-06-17 16:01:01.854952
+Slow transition detected: 5.20 seconds to explorer
+Explorer modules already preloaded - instant activation!
+Explorer initialized with enhanced preload support
+Transition started: explorer at 2025-06-17 16:01:11.365589
+Tab: explorer | Cache: 35.6 MB (38.8% hit, 57 objects)
+Loading survey data for year: 2024
+Attempting to load: PER_2024
+Loading survey data from: data/processed/PER_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 1, 2, 2
+Sample raw age values: 3, 1, 3, 4, 1
+Sample mapped gender values: Mujer, Hombre, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 740, Mujer = 742, Otro = 1
+Successfully loaded PER_2024 with 1483 responses
+Metadata has 195 questions
+Attempting to load: PAR_2024
+Loading survey data from: data/processed/PAR_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 2, 2, 2
+Sample raw age values: 2, 2, 2, 4, 4
+Sample mapped gender values: Mujer, Hombre, Mujer, Mujer, Mujer
+Standardized gender distribution: Hombre = 725, Mujer = 769, Otro = 2
+Successfully loaded PAR_2024 with 1496 responses
+Metadata has 338 questions
+Total surveys loaded: 2
+Raw file data/processed/PER_2023_metadata_classified_V3.csv has columns: X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PER_2023 metadata from PER_2023_metadata_classified_V3.csv with 192 valid questions
+Raw file data/processed/PAR_2023_metadata_classified_V2.csv has columns: X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PAR_2023 metadata from PAR_2023_metadata_classified_V2.csv with 332 valid questions
+Raw file data/processed/PER_2024_metadata_classified_V4.csv has columns: X.5, X.4, X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme
+Successfully loaded PER_2024 metadata from PER_2024_metadata_classified_V4.csv with 195 valid questions
+Raw file data/processed/PAR_2024_metadata_classified_V4.csv has columns: X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme, notes
+Successfully loaded PAR_2024 metadata from PAR_2024_metadata_classified_V4.csv with 338 valid questions
+Total metadata loaded: 1057 questions from 4 surveys
+PAR_2023 : 332 questions, 4 themes
+PAR_2024 : 338 questions, 4 themes
+PER_2023 : 192 questions, 6 themes
+PER_2024 : 195 questions, 6 themes
+Total themes loaded: 1057
+Available surveys: PER_2023, PAR_2023, PER_2024, PAR_2024
+Filtered themes for 2024 : 489
+Available themes for 2024 : Social & Economic Wellbeing, Public Services, Urban Mobility & Environment, Governance & Civic Engagement, Community Participation
+Explorer section accessed
+Transition completed: explorer at 2025-06-17 16:01:13.398942
+Loading survey data for year: 2023
+Attempting to load: PER_2023
+Loading survey data from: data/processed/PER_2023_responses_V3.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 1, 1, 2, 1
+Sample raw age values: 4, 2, 4, 1, 1
+Sample mapped gender values: Hombre, Hombre, Hombre, Mujer, Hombre
+Standardized gender distribution: Hombre = 800, Mujer = 722, No especificado = 2
+Successfully loaded PER_2023 with 1524 responses
+Metadata has 192 questions
+Attempting to load: PAR_2023
+Loading survey data from: data/processed/PAR_2023_responses_V2.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 2, 1, 2, 2
+Sample raw age values: 2, 1, 3, 3, 4
+Sample mapped gender values: Hombre, Mujer, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 731, Mujer = 770, Otro = 5
+Successfully loaded PAR_2023 with 1506 responses
+Metadata has 332 questions
+Total surveys loaded: 2
+Raw file data/processed/PER_2023_metadata_classified_V3.csv has columns: X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PER_2023 metadata from PER_2023_metadata_classified_V3.csv with 192 valid questions
+Raw file data/processed/PAR_2023_metadata_classified_V2.csv has columns: X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PAR_2023 metadata from PAR_2023_metadata_classified_V2.csv with 332 valid questions
+Raw file data/processed/PER_2024_metadata_classified_V4.csv has columns: X.5, X.4, X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme
+Successfully loaded PER_2024 metadata from PER_2024_metadata_classified_V4.csv with 195 valid questions
+Raw file data/processed/PAR_2024_metadata_classified_V4.csv has columns: X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme, notes
+Successfully loaded PAR_2024 metadata from PAR_2024_metadata_classified_V4.csv with 338 valid questions
+Total metadata loaded: 1057 questions from 4 surveys
+PAR_2023 : 332 questions, 4 themes
+PAR_2024 : 338 questions, 4 themes
+PER_2023 : 192 questions, 6 themes
+PER_2024 : 195 questions, 6 themes
+Total themes loaded: 1057
+Available surveys: PER_2023, PAR_2023, PER_2024, PAR_2024
+Filtered themes for 2023 : 473
+Available themes for 2023 : Social & Economic Wellbeing, Public Services, Urban Mobility & Environment, Governance & Civic Engagement, Community Participation
+Loading survey data for year: 2023
+Attempting to load: PER_2023
+Loading survey data from: data/processed/PER_2023_responses_V3.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 1, 1, 2, 1
+Sample raw age values: 4, 2, 4, 1, 1
+Sample mapped gender values: Hombre, Hombre, Hombre, Mujer, Hombre
+Standardized gender distribution: Hombre = 800, Mujer = 722, No especificado = 2
+Successfully loaded PER_2023 with 1524 responses
+Metadata has 192 questions
+Attempting to load: PAR_2023
+Loading survey data from: data/processed/PAR_2023_responses_V2.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 2, 1, 2, 2
+Sample raw age values: 2, 1, 3, 3, 4
+Sample mapped gender values: Hombre, Mujer, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 731, Mujer = 770, Otro = 5
+Successfully loaded PAR_2023 with 1506 responses
+Metadata has 332 questions
+Total surveys loaded: 2
+Raw file data/processed/PER_2023_metadata_classified_V3.csv has columns: X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PER_2023 metadata from PER_2023_metadata_classified_V3.csv with 192 valid questions
+Raw file data/processed/PAR_2023_metadata_classified_V2.csv has columns: X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PAR_2023 metadata from PAR_2023_metadata_classified_V2.csv with 332 valid questions
+Raw file data/processed/PER_2024_metadata_classified_V4.csv has columns: X.5, X.4, X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme
+Successfully loaded PER_2024 metadata from PER_2024_metadata_classified_V4.csv with 195 valid questions
+Raw file data/processed/PAR_2024_metadata_classified_V4.csv has columns: X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme, notes
+Successfully loaded PAR_2024 metadata from PAR_2024_metadata_classified_V4.csv with 338 valid questions
+Total metadata loaded: 1057 questions from 4 surveys
+PAR_2023 : 332 questions, 4 themes
+PAR_2024 : 338 questions, 4 themes
+PER_2023 : 192 questions, 6 themes
+PER_2024 : 195 questions, 6 themes
+Total themes loaded: 1057
+Available surveys: PER_2023, PAR_2023, PER_2024, PAR_2024
+Filtered themes for 2023 : 473
+Available themes for 2023 : Social & Economic Wellbeing, Public Services, Urban Mobility & Environment, Governance & Civic Engagement, Community Participation
+Skipping navbar transition - year change in progress
+Loading survey data for year: 2023
+Attempting to load: PER_2023
+Loading survey data from: data/processed/PER_2023_responses_V3.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 1, 1, 2, 1
+Sample raw age values: 4, 2, 4, 1, 1
+Sample mapped gender values: Hombre, Hombre, Hombre, Mujer, Hombre
+Standardized gender distribution: Hombre = 800, Mujer = 722, No especificado = 2
+Successfully loaded PER_2023 with 1524 responses
+Metadata has 192 questions
+Attempting to load: PAR_2023
+Loading survey data from: data/processed/PAR_2023_responses_V2.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 2, 1, 2, 2
+Sample raw age values: 2, 1, 3, 3, 4
+Sample mapped gender values: Hombre, Mujer, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 731, Mujer = 770, Otro = 5
+Successfully loaded PAR_2023 with 1506 responses
+Metadata has 332 questions
+Total surveys loaded: 2
+Raw file data/processed/PER_2023_metadata_classified_V3.csv has columns: X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PER_2023 metadata from PER_2023_metadata_classified_V3.csv with 192 valid questions
+Raw file data/processed/PAR_2023_metadata_classified_V2.csv has columns: X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, notes, MainTheme, Subtheme
+Successfully loaded PAR_2023 metadata from PAR_2023_metadata_classified_V2.csv with 332 valid questions
+Raw file data/processed/PER_2024_metadata_classified_V4.csv has columns: X.5, X.4, X.3, X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme
+Successfully loaded PER_2024 metadata from PER_2024_metadata_classified_V4.csv with 195 valid questions
+Raw file data/processed/PAR_2024_metadata_classified_V4.csv has columns: X.2, X.1, X, variable, label, type, has_value_labels, value_labels, X0, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31, X32, X33, X34, scale_type, MainTheme, Subtheme, notes
+Successfully loaded PAR_2024 metadata from PAR_2024_metadata_classified_V4.csv with 338 valid questions
+Total metadata loaded: 1057 questions from 4 surveys
+PAR_2023 : 332 questions, 4 themes
+PAR_2024 : 338 questions, 4 themes
+PER_2023 : 192 questions, 6 themes
+PER_2024 : 195 questions, 6 themes
+Total themes loaded: 1057
+Available surveys: PER_2023, PAR_2023, PER_2024, PAR_2024
+Filtered themes for 2023 : 473
+Available themes for 2023 : Social & Economic Wellbeing, Public Services, Urban Mobility & Environment, Governance & Civic Engagement, Community Participation
+Background: Silently loaded economic 2024 (3 items)
+Slow transition detected: 5.20 seconds to overview
+Background: Silently loaded cultural 2024 (2 items)
+Slow transition detected: 5.20 seconds to government
+Transition started: government at 2025-06-17 16:01:21.093323
+Tab: government | Cache: 35.6 MB (38.8% hit, 57 objects)
+Loading plots for government 2023 from RDS
+UI module for government already preloaded
+Server module for government already preloaded
+Transition completed: government at 2025-06-17 16:01:22.216469
+Background: Silently loaded identity 2024 (3 items)
+Background: Silently loaded environment 2024 (3 items)
+Background: Silently loaded wellness 2023 (3 items)
+Background: Silently loaded government 2023 (1 items)
+Background: Silently loaded infrastructure 2023 (3 items)
+Background: Silently loaded inequality 2024 (3 items)
+Background: Silently loaded urban 2023 (2 items)
+Background: Silently loaded accountability 2024 (2 items)
+Background: Silently loaded participation 2023 (3 items)
+Background: Silently loaded representation 2024 (3 items)
+Background: Silently loaded expectations 2024 (3 items)
+Skipping trust 2024 (uses data from other sections)
+Skipping equipment 2024 (uses data from other sections)
+Background: Silently loaded mobility 2024 (1 items)
+Background: Silently loaded economic 2023 (3 items)
+Background: Silently loaded transportation 2024 (2 items)
+Background: Silently loaded cultural 2023 (2 items)
+Background: Silently loaded civic 2024 (2 items)
+Background: Silently loaded identity 2023 (3 items)
+Background: Silently loaded community 2024 (1 items)
+Background: Silently loaded environment 2023 (3 items)
+Background: Silently loaded inequality 2023 (3 items)
+Background: Silently loaded accountability 2023 (2 items)
+Background: Silently loaded representation 2023 (3 items)
+Background: Silently loaded expectations 2023 (3 items)
+Skipping trust 2023 (uses data from other sections)
+Skipping equipment 2023 (uses data from other sections)
+Background: Silently loaded mobility 2023 (1 items)
+Background: Silently loaded transportation 2023 (2 items)
+Background: Silently loaded civic 2023 (2 items)
+Background: Silently loaded community 2023 (1 items)
+DataManager initialized with 500 MB cache limit
+BackgroundPreloader initialized (non-reactive): 106 total tasks (50 data, 28 UI, 28 server)
+Starting non-interfering background preloading...
+Priority: Loading explorer UI and server modules...
+Loaded basic module: categorical
+Loaded basic module: special
+Background preloading initiated successfully
+Background: Silently loading explorer data for 2024...
+Loading survey data from: data/processed/PER_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 1, 2, 2
+Sample raw age values: 3, 1, 3, 4, 1
+Sample mapped gender values: Mujer, Hombre, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 740, Mujer = 742, Otro = 1
+Loading survey data from: data/processed/PAR_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 2, 2, 2
+Sample raw age values: 2, 2, 2, 4, 4
+Sample mapped gender values: Mujer, Hombre, Mujer, Mujer, Mujer
+Standardized gender distribution: Hombre = 725, Mujer = 769, Otro = 2
+Background: Completed explorer data for 2024
+Silent loaded UI module: public_servicesUI
+Background: Silently loading explorer data for 2023...
+Loading survey data from: data/processed/PER_2023_responses_V3.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 1, 1, 2, 1
+Sample raw age values: 4, 2, 4, 1, 1
+Sample mapped gender values: Hombre, Hombre, Hombre, Mujer, Hombre
+Standardized gender distribution: Hombre = 800, Mujer = 722, No especificado = 2
+Loading survey data from: data/processed/PAR_2023_responses_V2.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 2, 1, 2, 2
+Sample raw age values: 2, 1, 3, 3, 4
+Sample mapped gender values: Hombre, Mujer, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 731, Mujer = 770, Otro = 5
+Background: Completed explorer data for 2023
+Silent loaded UI module: dashboard_mapUI
+Silent loaded server module: public_servicesServer
+Background: Silently loaded wellness 2024 (3 items)
+Background: Silently loaded government 2024 (1 items)
+Background: Silently loaded infrastructure 2024 (3 items)
+Silent loaded server module: dashboard_mapServer
+Background: Silently loaded urban 2024 (2 items)
+Background: Silently loaded participation 2024 (3 items)
+Background: Silently loaded economic 2024 (3 items)
+Background: Silently loaded cultural 2024 (2 items)
+Background: Silently loaded identity 2024 (3 items)
+Background: Silently loaded environment 2024 (3 items)
+Background: Silently loaded wellness 2023 (3 items)
+Background: Silently loaded government 2023 (1 items)
+Background: Silently loaded infrastructure 2023 (3 items)
+Background: Silently loaded inequality 2024 (3 items)
+Background: Silently loaded urban 2023 (2 items)
+Background: Silently loaded accountability 2024 (2 items)
+Background: Silently loaded participation 2023 (3 items)
+Background: Silently loaded representation 2024 (3 items)
+Background: Silently loaded expectations 2024 (3 items)
+Skipping trust 2024 (uses data from other sections)
+Skipping equipment 2024 (uses data from other sections)
+Background: Silently loaded mobility 2024 (1 items)
+Background: Silently loaded economic 2023 (3 items)
+Background: Silently loaded transportation 2024 (2 items)
+Background: Silently loaded cultural 2023 (2 items)
+Background: Silently loaded civic 2024 (2 items)
+Background: Silently loaded identity 2023 (3 items)
+Background: Silently loaded community 2024 (1 items)
+Background: Silently loaded environment 2023 (3 items)
+Background: Silently loaded inequality 2023 (3 items)
+Background: Silently loaded accountability 2023 (2 items)
+Background: Silently loaded representation 2023 (3 items)
+Background: Silently loaded expectations 2023 (3 items)
+Skipping trust 2023 (uses data from other sections)
+Skipping equipment 2023 (uses data from other sections)
+Background: Silently loaded mobility 2023 (1 items)
+Background: Silently loaded transportation 2023 (2 items)
+Background: Silently loaded civic 2023 (2 items)
+Background: Silently loaded community 2023 (1 items)
+DataManager initialized with 500 MB cache limit
+BackgroundPreloader initialized (non-reactive): 106 total tasks (50 data, 28 UI, 28 server)
+Starting non-interfering background preloading...
+Priority: Loading explorer UI and server modules...
+Loaded basic module: categorical
+Loaded basic module: special
+Background preloading initiated successfully
+Background: Silently loading explorer data for 2024...
+Loading survey data from: data/processed/PER_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 1, 2, 2
+Sample raw age values: 3, 1, 3, 4, 1
+Sample mapped gender values: Mujer, Hombre, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 740, Mujer = 742, Otro = 1
+Loading survey data from: data/processed/PAR_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 2, 2, 2
+Sample raw age values: 2, 2, 2, 4, 4
+Sample mapped gender values: Mujer, Hombre, Mujer, Mujer, Mujer
+Standardized gender distribution: Hombre = 725, Mujer = 769, Otro = 2
+Background: Completed explorer data for 2024
+Silent loaded UI module: public_servicesUI
+Background: Silently loading explorer data for 2023...
+Loading survey data from: data/processed/PER_2023_responses_V3.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 1, 1, 2, 1
+Sample raw age values: 4, 2, 4, 1, 1
+Sample mapped gender values: Hombre, Hombre, Hombre, Mujer, Hombre
+Standardized gender distribution: Hombre = 800, Mujer = 722, No especificado = 2
+Loading survey data from: data/processed/PAR_2023_responses_V2.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 2, 1, 2, 2
+Sample raw age values: 2, 1, 3, 3, 4
+Sample mapped gender values: Hombre, Mujer, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 731, Mujer = 770, Otro = 5
+Background: Completed explorer data for 2023
+Silent loaded UI module: dashboard_mapUI
+Silent loaded server module: public_servicesServer
+Background: Silently loaded wellness 2024 (3 items)
+Background: Silently loaded government 2024 (1 items)
+Background: Silently loaded infrastructure 2024 (3 items)
+Silent loaded server module: dashboard_mapServer
+Background: Silently loaded urban 2024 (2 items)
+Background: Silently loaded participation 2024 (3 items)
+Background: Silently loaded economic 2024 (3 items)
+Background: Silently loaded cultural 2024 (2 items)
+Background: Silently loaded identity 2024 (3 items)
+Background: Silently loaded environment 2024 (3 items)
+Background: Silently loaded wellness 2023 (3 items)
+Background: Silently loaded government 2023 (1 items)
+Background: Silently loaded infrastructure 2023 (3 items)
+Background: Silently loaded inequality 2024 (3 items)
+Background: Silently loaded urban 2023 (2 items)
+Background: Silently loaded accountability 2024 (2 items)
+Background: Silently loaded participation 2023 (3 items)
+Background: Silently loaded representation 2024 (3 items)
+Background: Silently loaded expectations 2024 (3 items)
+Skipping trust 2024 (uses data from other sections)
+Skipping equipment 2024 (uses data from other sections)
+Background: Silently loaded mobility 2024 (1 items)
+Background: Silently loaded economic 2023 (3 items)
+Background: Silently loaded transportation 2024 (2 items)
+Background: Silently loaded cultural 2023 (2 items)
+Background: Silently loaded civic 2024 (2 items)
+Background: Silently loaded identity 2023 (3 items)
+Background: Silently loaded community 2024 (1 items)
+Background: Silently loaded environment 2023 (3 items)
+Background: Silently loaded inequality 2023 (3 items)
+Background: Silently loaded accountability 2023 (2 items)
+Background: Silently loaded representation 2023 (3 items)
+Background: Silently loaded expectations 2023 (3 items)
+Skipping trust 2023 (uses data from other sections)
+Skipping equipment 2023 (uses data from other sections)
+Background: Silently loaded mobility 2023 (1 items)
+Background: Silently loaded transportation 2023 (2 items)
+Background: Silently loaded civic 2023 (2 items)
+Background: Silently loaded community 2023 (1 items)
+

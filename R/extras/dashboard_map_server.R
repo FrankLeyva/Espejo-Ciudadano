@@ -1,16 +1,11 @@
-
-
-# Server function
 dashboardMapServer <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Create dashboard structure
     dashboard_structure <- reactive({
-      # This structure represents the entire dashboard hierarchy
       structure <- list(
         bienestar = list(
-          title = "Bienestar Social y Económico",
+          title = "Calidad de Vida",
           color = "#1E88E5",
           sections = list(
             list(
@@ -19,7 +14,9 @@ dashboardMapServer <- function(id) {
               visualizations = list(
                 "Percepción de situación económica personal",
                 "Frecuencia con que piensa en irse de la ciudad", 
-                "Actividades realizadas en los últimos 3 meses"
+                "Actividades realizadas en los últimos 3 meses",
+                "Educación: Hogares con estudiantes por distrito",
+                "Salud: Satisfacción con servicios de salud"
               )
             ),
             list(
@@ -62,6 +59,31 @@ dashboardMapServer <- function(id) {
                 "Calidad del Agua",
                 "Principales Problemas Ambientales por Colonia"
               )
+            ), list(
+              title = "Educación",
+              value = "education",
+              visualizations = list(
+                "Hogares con Estudiantes",
+                "Satisfacción con Niveles Educativos",
+                "Educación Básica",
+                "Educación Media Superior",
+                "Educación Superior",
+                "Comparativa"
+              )
+            ),
+            list(
+              title = "Servicios de Salud",
+              value = "healthcare",
+              visualizations = list(
+                "Satisfacción con los Servicios de Salud",
+                "Servicios en General",
+                "Instalaciones",
+                "Tiempo de Atención",
+                "Medicamentos",
+                "Calidad de Servicio",
+                "Distancia",
+                "Proveedores de Servicios de Salud"
+              )
             )
           )
         ),
@@ -103,7 +125,7 @@ dashboardMapServer <- function(id) {
           )
         ),
         gobierno = list(
-          title = "Gobierno",
+          title = "Instituciones",
           color = "#E57C00",
           sections = list(
             list(
@@ -172,50 +194,33 @@ dashboardMapServer <- function(id) {
               title = "Vista General",
               value = "infrastructure",
               visualizations = list(
-                "Educación: Hogares con estudiantes por distrito",
-                "Salud: Satisfacción con servicios de salud",
                 "Servicios Públicos: Satisfacción por servicio",
-                "Vivienda: Satisfacción por distrito"
+                "Vivienda: Satisfacción por distrito",
+                "Reportes de Servicios Públicos"
+                
               )
             ),
             list(
               title = "Servicios Públicos",
               value = "public_services",
               visualizations = list(
-                "Servicio a evaluar",
-                "Evaluación de áreas verdes y espacios públicos",
                 "Suministro de Agua",
                 "Servicio Eléctrico",
-                "Recolección de Basura",
-                "Reportes de Servicios Públicos"
+                "Recolección de Basura"
+                
               )
             ),
             list(
-              title = "Educación",
-              value = "education",
+              title = "Equipamiento Público",
+              value = "equipment",
               visualizations = list(
-                "Hogares con Estudiantes",
-                "Satisfacción con Niveles Educativos",
-                "Educación Básica",
-                "Educación Media Superior",
-                "Educación Superior",
-                "Comparativa"
+                "Evaluación de áreas verdes y espacios públicos",
+                "Semaforización",
+                "Calles y Pavimentación"
+                
               )
             ),
-            list(
-              title = "Servicios de Salud",
-              value = "healthcare",
-              visualizations = list(
-                "Satisfacción con los Servicios de Salud",
-                "Servicios en General",
-                "Instalaciones",
-                "Tiempo de Atención",
-                "Medicamentos",
-                "Calidad de Servicio",
-                "Distancia",
-                "Proveedores de Servicios de Salud"
-              )
-            ),
+            
             list(
               title = "Vivienda",
               value = "housing",
@@ -316,33 +321,25 @@ dashboardMapServer <- function(id) {
       # Create a card for each subsection
       subsection_cards <- lapply(section$sections, function(subsection) {
         card(
-          style = paste0("border-left: 4px solid ", section$color, "; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"),
+          style = "margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid #e0e0e0; border-radius: 10px;",
           card_header(
-            style = paste0("background-color: rgba(", 
-                         paste(col2rgb(section$color), collapse = ","),
-                         ", 0.1); border-bottom: 1px solid rgba(", 
-                         paste(col2rgb(section$color), collapse = ","),
-                         ", 0.2);"),
-            div(
-              style = "display: flex; justify-content: space-between; align-items: center;",
-              h4(subsection$title, class = "m-0"),
-              actionButton(
-                inputId = ns(paste0("goto_", subsection$value)),
-                label = div(
-                  style = "display: flex; align-items: center;",
-                  "Ir a sección ", 
-                  tags$span(HTML("&nbsp;&#8594;"), style = "margin-left: 4px;")
-                ),
-                class = "btn btn-sm btn-link",
-                style = "padding: 2px 8px; color: #0275d8; text-decoration: none; font-size: 0.85rem; border: none;",
-                onclick = sprintf("window.scrollTo(0, 0); Shiny.setInputValue('nav_target', '%s', {priority: 'event'});", 
-                                subsection$value)
-              )
+            style = paste0("background-color: ", section$color, "; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0;"),
+            h4(subsection$title, class = "m-0", style = "color: #fff; font-weight: 700; font-family: var(--font-display);"),
+            actionButton(
+              inputId = ns(paste0("goto_", subsection$value)),
+              label = div(
+                style = "display: flex; align-items: center; gap: 0.3rem;",
+                "Ir a sección",
+                tags$span(HTML("&#8594;"))
+              ),
+              class = "btn btn-primary btn-sm",
+              style = "background: inherit; background-color: #fff0; color: #fff; font-weight: 600; font-size: 0.95rem; padding: 2px 16px; margin-left: 10px; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.08); background-color: inherit;",
+              onclick = sprintf("window.scrollTo(0, 0); Shiny.setInputValue('nav_target', '%s', {priority: 'event'});", subsection$value)
             )
           ),
           card_body(
             style = "padding: 15px;",
-            h5("Visualizaciones:", style = "font-size: 1rem; margin-bottom: 10px; color: #555;"),
+            h5("Visualizaciones:", style = "font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: #333;"),
             tags$ul(
               style = "margin-bottom: 0; padding-left: 20px;",
               lapply(subsection$visualizations, function(viz) {

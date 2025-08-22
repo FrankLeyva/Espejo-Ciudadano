@@ -80,11 +80,10 @@ economyServer <- function(input, output, session, current_theme = NULL) {
     },
     content = function(file) {
       map_path <- data_manager$get_map_path("mapa_economia", selectedYear())
-      
       if (file.exists(map_path)) {
         file.copy(map_path, file)
       } else {
-        warning(paste("Economy map file not found:", map_path))
+        warning(paste("Map file not found:", map_path))
         file.create(file)
       }
     }

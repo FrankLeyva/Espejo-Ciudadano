@@ -263,6 +263,91 @@
       "NeedsCompilation": "no",
       "Repository": "CRAN"
     },
+    "RMySQL": {
+      "Package": "RMySQL",
+      "Version": "0.11.1",
+      "Source": "Repository",
+      "Title": "Database Interface and 'MySQL' Driver for R",
+      "Description": "Legacy 'DBI' interface to 'MySQL' / 'MariaDB' based on old code ported from S-PLUS. A modern 'MySQL' client written in 'C++' is available from the 'RMariaDB' package.",
+      "Authors@R": "c(person(\"Jeroen\", \"Ooms\", email = \"jeroenooms@gmail.com\",  role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0002-4035-0289\")), person(\"David\", \"James\", role = \"aut\"), person(\"Saikat\", \"DebRoy\", role = \"aut\"), person(\"Hadley\", \"Wickham\", email = \"hadley@rstudio.com\", role = \"aut\"), person(\"Jeffrey\", \"Horner\", role = \"aut\"), person(\"RStudio\", role = \"cph\"))",
+      "Depends": [
+        "R (>= 2.8.0)",
+        "DBI (>= 0.4)"
+      ],
+      "Imports": [
+        "methods"
+      ],
+      "License": "GPL-2",
+      "URL": "https://r-dbi.r-universe.dev/RMySQL https://downloads.mariadb.org/connector-c/",
+      "BugReports": "https://github.com/r-dbi/rmysql/issues",
+      "SystemRequirements": "libmariadb-client-dev | libmariadb-client-lgpl-dev | libmysqlclient-dev (deb), mariadb-devel (rpm), mariadb | mysql-connector-c (brew), mysql56_dev (csw)",
+      "NeedsCompilation": "yes",
+      "Collate": "'mysql.R' 'driver.R' 'connection.R' 'data-type.R' 'default.R' 'escaping.R' 'result.R' 'extension.R' 'is-valid.R' 'table.R' 'transaction.R'",
+      "Suggests": [
+        "testthat",
+        "curl"
+      ],
+      "RoxygenNote": "7.3.2.9000",
+      "Author": "Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>), David James [aut], Saikat DebRoy [aut], Hadley Wickham [aut], Jeffrey Horner [aut], RStudio [cph]",
+      "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
+      "Repository": "CRAN"
+    },
+    "RSQLite": {
+      "Package": "RSQLite",
+      "Version": "2.4.1",
+      "Source": "Repository",
+      "Title": "SQLite Interface for R",
+      "Date": "2025-06-08",
+      "Authors@R": "c( person(\"Kirill\", \"Müller\", , \"kirill@cynkra.com\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0002-1416-3412\")), person(\"Hadley\", \"Wickham\", role = \"aut\"), person(c(\"David\", \"A.\"), \"James\", role = \"aut\"), person(\"Seth\", \"Falcon\", role = \"aut\"), person(\"D. Richard\", \"Hipp\", role = \"ctb\", comment = \"for the included SQLite sources\"), person(\"Dan\", \"Kennedy\", role = \"ctb\", comment = \"for the included SQLite sources\"), person(\"Joe\", \"Mistachkin\", role = \"ctb\", comment = \"for the included SQLite sources\"), person(, \"SQLite Authors\", role = \"ctb\", comment = \"for the included SQLite sources\"), person(\"Liam\", \"Healy\", role = \"ctb\", comment = \"for the included SQLite sources\"), person(\"R Consortium\", role = \"fnd\"), person(, \"RStudio\", role = \"cph\") )",
+      "Description": "Embeds the SQLite database engine in R and provides an interface compliant with the DBI package. The source for the SQLite engine and for various extensions in a recent version is included. System libraries will never be consulted because this package relies on static linking for the plugins it includes; this also ensures a consistent experience across all installations.",
+      "License": "LGPL (>= 2.1)",
+      "URL": "https://rsqlite.r-dbi.org, https://github.com/r-dbi/RSQLite",
+      "BugReports": "https://github.com/r-dbi/RSQLite/issues",
+      "Depends": [
+        "R (>= 3.1.0)"
+      ],
+      "Imports": [
+        "bit64",
+        "blob (>= 1.2.0)",
+        "DBI (>= 1.2.0)",
+        "memoise",
+        "methods",
+        "pkgconfig",
+        "rlang"
+      ],
+      "Suggests": [
+        "callr",
+        "cli",
+        "DBItest (>= 1.8.0)",
+        "decor",
+        "gert",
+        "gh",
+        "hms",
+        "knitr",
+        "magrittr",
+        "rmarkdown",
+        "rvest",
+        "testthat (>= 3.0.0)",
+        "withr",
+        "xml2"
+      ],
+      "LinkingTo": [
+        "plogr (>= 0.2.0)",
+        "cpp11 (>= 0.4.0)"
+      ],
+      "VignetteBuilder": "knitr",
+      "Config/Needs/website": "r-dbi/dbitemplate",
+      "Config/autostyle/scope": "line_breaks",
+      "Config/autostyle/strict": "false",
+      "Config/testthat/edition": "3",
+      "Encoding": "UTF-8",
+      "RoxygenNote": "7.3.2.9000",
+      "Collate": "'SQLiteConnection.R' 'SQLKeywords_SQLiteConnection.R' 'SQLiteDriver.R' 'SQLite.R' 'SQLiteResult.R' 'coerce.R' 'compatRowNames.R' 'copy.R' 'cpp11.R' 'datasetsDb.R' 'dbAppendTable_SQLiteConnection.R' 'dbBeginTransaction.R' 'dbBegin_SQLiteConnection.R' 'dbBind_SQLiteResult.R' 'dbClearResult_SQLiteResult.R' 'dbColumnInfo_SQLiteResult.R' 'dbCommit_SQLiteConnection.R' 'dbConnect_SQLiteConnection.R' 'dbConnect_SQLiteDriver.R' 'dbDataType_SQLiteConnection.R' 'dbDataType_SQLiteDriver.R' 'dbDisconnect_SQLiteConnection.R' 'dbExistsTable_SQLiteConnection_Id.R' 'dbExistsTable_SQLiteConnection_character.R' 'dbFetch_SQLiteResult.R' 'dbGetException_SQLiteConnection.R' 'dbGetInfo_SQLiteConnection.R' 'dbGetInfo_SQLiteDriver.R' 'dbGetPreparedQuery.R' 'dbGetPreparedQuery_SQLiteConnection_character_data.frame.R' 'dbGetRowCount_SQLiteResult.R' 'dbGetRowsAffected_SQLiteResult.R' 'dbGetStatement_SQLiteResult.R' 'dbHasCompleted_SQLiteResult.R' 'dbIsValid_SQLiteConnection.R' 'dbIsValid_SQLiteDriver.R' 'dbIsValid_SQLiteResult.R' 'dbListResults_SQLiteConnection.R' 'dbListTables_SQLiteConnection.R' 'dbQuoteIdentifier_SQLiteConnection_SQL.R' 'dbQuoteIdentifier_SQLiteConnection_character.R' 'dbReadTable_SQLiteConnection_character.R' 'dbRemoveTable_SQLiteConnection_character.R' 'dbRollback_SQLiteConnection.R' 'dbSendPreparedQuery.R' 'dbSendPreparedQuery_SQLiteConnection_character_data.frame.R' 'dbSendQuery_SQLiteConnection_character.R' 'dbUnloadDriver_SQLiteDriver.R' 'dbUnquoteIdentifier_SQLiteConnection_SQL.R' 'dbWriteTable_SQLiteConnection_character_character.R' 'dbWriteTable_SQLiteConnection_character_data.frame.R' 'db_bind.R' 'deprecated.R' 'export.R' 'fetch_SQLiteResult.R' 'import-standalone-check_suggested.R' 'import-standalone-purrr.R' 'initExtension.R' 'initRegExp.R' 'isSQLKeyword_SQLiteConnection_character.R' 'make.db.names_SQLiteConnection_character.R' 'pkgconfig.R' 'show_SQLiteConnection.R' 'sqlData_SQLiteConnection.R' 'table.R' 'transactions.R' 'utils.R' 'version.R' 'zzz.R'",
+      "NeedsCompilation": "yes",
+      "Author": "Kirill Müller [aut, cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>), Hadley Wickham [aut], David A. James [aut], Seth Falcon [aut], D. Richard Hipp [ctb] (for the included SQLite sources), Dan Kennedy [ctb] (for the included SQLite sources), Joe Mistachkin [ctb] (for the included SQLite sources), SQLite Authors [ctb] (for the included SQLite sources), Liam Healy [ctb] (for the included SQLite sources), R Consortium [fnd], RStudio [cph]",
+      "Maintainer": "Kirill Müller <kirill@cynkra.com>",
+      "Repository": "CRAN"
+    },
     "Rcpp": {
       "Package": "Rcpp",
       "Version": "1.0.14",
@@ -957,6 +1042,23 @@
       "NeedsCompilation": "no",
       "Author": "Matthew Lincoln [aut, cre] (<https://orcid.org/0000-0002-4387-3384>), Louis Maddox [ctb], Steve Simpson [ctb], Jennifer Bryan [ctb]",
       "Maintainer": "Matthew Lincoln <matthew.d.lincoln@gmail.com>",
+      "Repository": "CRAN"
+    },
+    "codetools": {
+      "Package": "codetools",
+      "Version": "0.2-20",
+      "Source": "Repository",
+      "Priority": "recommended",
+      "Author": "Luke Tierney <luke-tierney@uiowa.edu>",
+      "Description": "Code analysis tools for R.",
+      "Title": "Code Analysis Tools for R",
+      "Depends": [
+        "R (>= 2.1)"
+      ],
+      "Maintainer": "Luke Tierney <luke-tierney@uiowa.edu>",
+      "URL": "https://gitlab.com/luke-tierney/codetools",
+      "License": "GPL",
+      "NeedsCompilation": "no",
       "Repository": "CRAN"
     },
     "colourpicker": {
@@ -1690,6 +1792,44 @@
       "Maintainer": "Gábor Csárdi <csardi.gabor@gmail.com>",
       "Repository": "CRAN"
     },
+    "future": {
+      "Package": "future",
+      "Version": "1.58.0",
+      "Source": "Repository",
+      "Title": "Unified Parallel and Distributed Processing in R for Everyone",
+      "Depends": [
+        "R (>= 3.2.0)"
+      ],
+      "Imports": [
+        "digest",
+        "globals (>= 0.18.0)",
+        "listenv (>= 0.8.0)",
+        "parallel",
+        "parallelly (>= 1.44.0)",
+        "utils"
+      ],
+      "Suggests": [
+        "methods",
+        "RhpcBLASctl",
+        "R.rsp",
+        "markdown"
+      ],
+      "VignetteBuilder": "R.rsp",
+      "Authors@R": "c(person(\"Henrik\", \"Bengtsson\", role = c(\"aut\", \"cre\", \"cph\"), email = \"henrikb@braju.com\", comment = c(ORCID = \"0000-0002-7579-5165\")))",
+      "Description": "The purpose of this package is to provide a lightweight and unified Future API for sequential and parallel processing of R expression via futures.  The simplest way to evaluate an expression in parallel is to use `x %<-% { expression }` with `plan(multisession)`. This package implements sequential, multicore, multisession, and cluster futures.  With these, R expressions can be evaluated on the local machine, in parallel a set of local machines, or distributed on a mix of local and remote machines. Extensions to this package implement additional backends for processing futures via compute cluster schedulers, etc. Because of its unified API, there is no need to modify any code in order switch from sequential on the local machine to, say, distributed processing on a remote compute cluster. Another strength of this package is that global variables and functions are automatically identified and exported as needed, making it straightforward to tweak existing code to make use of futures.",
+      "License": "LGPL (>= 2.1)",
+      "LazyLoad": "TRUE",
+      "ByteCompile": "TRUE",
+      "URL": "https://future.futureverse.org, https://github.com/futureverse/future",
+      "BugReports": "https://github.com/futureverse/future/issues",
+      "Language": "en-US",
+      "Encoding": "UTF-8",
+      "RoxygenNote": "7.3.2",
+      "NeedsCompilation": "no",
+      "Author": "Henrik Bengtsson [aut, cre, cph] (ORCID: <https://orcid.org/0000-0002-7579-5165>)",
+      "Maintainer": "Henrik Bengtsson <henrikb@braju.com>",
+      "Repository": "CRAN"
+    },
     "gargle": {
       "Package": "gargle",
       "Version": "1.5.2",
@@ -1879,6 +2019,32 @@
       "NeedsCompilation": "no",
       "Author": "Claus O. Wilke [aut, cre] (<https://orcid.org/0000-0002-7470-9261>)",
       "Maintainer": "Claus O. Wilke <wilke@austin.utexas.edu>",
+      "Repository": "CRAN"
+    },
+    "globals": {
+      "Package": "globals",
+      "Version": "0.18.0",
+      "Source": "Repository",
+      "Depends": [
+        "R (>= 3.1.2)"
+      ],
+      "Imports": [
+        "codetools"
+      ],
+      "Title": "Identify Global Objects in R Expressions",
+      "Authors@R": "c( person(\"Henrik\", \"Bengtsson\", role=c(\"aut\", \"cre\", \"cph\"), email=\"henrikb@braju.com\"), person(\"Davis\",\"Vaughan\", role=\"ctb\", email=\"davis@posit.co\"))",
+      "Description": "Identifies global (\"unknown\" or \"free\") objects in R expressions by code inspection using various strategies (ordered, liberal, conservative, or deep-first search). The objective of this package is to make it as simple as possible to identify global objects for the purpose of exporting them in parallel, distributed compute environments.",
+      "License": "LGPL (>= 2.1)",
+      "LazyLoad": "TRUE",
+      "ByteCompile": "TRUE",
+      "Language": "en-US",
+      "Encoding": "UTF-8",
+      "URL": "https://globals.futureverse.org, https://github.com/futureverse/globals",
+      "BugReports": "https://github.com/futureverse/globals/issues",
+      "RoxygenNote": "7.3.2",
+      "NeedsCompilation": "no",
+      "Author": "Henrik Bengtsson [aut, cre, cph], Davis Vaughan [ctb]",
+      "Maintainer": "Henrik Bengtsson <henrikb@braju.com>",
       "Repository": "CRAN"
     },
     "glue": {
@@ -2820,6 +2986,32 @@
       "Maintainer": "Lionel Henry <lionel@posit.co>",
       "Repository": "CRAN"
     },
+    "listenv": {
+      "Package": "listenv",
+      "Version": "0.9.1",
+      "Source": "Repository",
+      "Depends": [
+        "R (>= 3.1.2)"
+      ],
+      "Suggests": [
+        "R.utils",
+        "R.rsp",
+        "markdown"
+      ],
+      "VignetteBuilder": "R.rsp",
+      "Title": "Environments Behaving (Almost) as Lists",
+      "Authors@R": "c(person(\"Henrik\", \"Bengtsson\", role=c(\"aut\", \"cre\", \"cph\"), email = \"henrikb@braju.com\"))",
+      "Description": "List environments are environments that have list-like properties.  For instance, the elements of a list environment are ordered and can be accessed and iterated over using index subsetting, e.g. 'x <- listenv(a = 1, b = 2); for (i in seq_along(x)) x[[i]] <- x[[i]] ^ 2; y <- as.list(x)'.",
+      "License": "LGPL (>= 2.1)",
+      "LazyLoad": "TRUE",
+      "URL": "https://listenv.futureverse.org, https://github.com/HenrikBengtsson/listenv",
+      "BugReports": "https://github.com/HenrikBengtsson/listenv/issues",
+      "RoxygenNote": "7.3.1",
+      "NeedsCompilation": "no",
+      "Author": "Henrik Bengtsson [aut, cre, cph]",
+      "Maintainer": "Henrik Bengtsson <henrikb@braju.com>",
+      "Repository": "CRAN"
+    },
     "lubridate": {
       "Package": "lubridate",
       "Version": "1.9.4",
@@ -2864,6 +3056,54 @@
       "Collate": "'Dates.r' 'POSIXt.r' 'util.r' 'parse.r' 'timespans.r' 'intervals.r' 'difftimes.r' 'durations.r' 'periods.r' 'accessors-date.R' 'accessors-day.r' 'accessors-dst.r' 'accessors-hour.r' 'accessors-minute.r' 'accessors-month.r' 'accessors-quarter.r' 'accessors-second.r' 'accessors-tz.r' 'accessors-week.r' 'accessors-year.r' 'am-pm.r' 'time-zones.r' 'numeric.r' 'coercion.r' 'constants.r' 'cyclic_encoding.r' 'data.r' 'decimal-dates.r' 'deprecated.r' 'format_ISO8601.r' 'guess.r' 'hidden.r' 'instants.r' 'leap-years.r' 'ops-addition.r' 'ops-compare.r' 'ops-division.r' 'ops-integer-division.r' 'ops-m+.r' 'ops-modulo.r' 'ops-multiplication.r' 'ops-subtraction.r' 'package.r' 'pretty.r' 'round.r' 'stamp.r' 'tzdir.R' 'update.r' 'vctrs.R' 'zzz.R'",
       "NeedsCompilation": "yes",
       "Author": "Vitalie Spinu [aut, cre], Garrett Grolemund [aut], Hadley Wickham [aut], Davis Vaughan [ctb], Ian Lyttle [ctb], Imanuel Costigan [ctb], Jason Law [ctb], Doug Mitarotonda [ctb], Joseph Larmarange [ctb], Jonathan Boiser [ctb], Chel Hee Lee [ctb]",
+      "Repository": "CRAN"
+    },
+    "magick": {
+      "Package": "magick",
+      "Version": "2.8.7",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Advanced Graphics and Image-Processing in R",
+      "Authors@R": "person(\"Jeroen\", \"Ooms\", role = c(\"aut\", \"cre\"), email = \"jeroenooms@gmail.com\", comment = c(ORCID = \"0000-0002-4035-0289\"))",
+      "Description": "Bindings to 'ImageMagick': the most comprehensive open-source image processing library available. Supports many common formats (png, jpeg, tiff, pdf, etc) and manipulations (rotate, scale, crop, trim, flip, blur, etc). All operations are vectorized via the Magick++ STL meaning they operate either on a single frame or a series of frames for working with layers, collages, or animation. In RStudio images are automatically previewed when printed to the console, resulting in an interactive editing environment. The latest  version of the package includes a native graphics device for creating  in-memory graphics or drawing onto images using pixel coordinates.",
+      "License": "MIT + file LICENSE",
+      "URL": "https://docs.ropensci.org/magick/ https://ropensci.r-universe.dev/magick",
+      "BugReports": "https://github.com/ropensci/magick/issues",
+      "SystemRequirements": "ImageMagick++: ImageMagick-c++-devel (rpm) or libmagick++-dev (deb)",
+      "VignetteBuilder": "knitr",
+      "Depends": [
+        "R (>= 4.1.0)"
+      ],
+      "Imports": [
+        "Rcpp (>= 0.12.12)",
+        "magrittr",
+        "curl"
+      ],
+      "LinkingTo": [
+        "Rcpp"
+      ],
+      "Suggests": [
+        "av (>= 0.3)",
+        "spelling",
+        "jsonlite",
+        "methods",
+        "knitr",
+        "rmarkdown",
+        "rsvg",
+        "webp",
+        "pdftools",
+        "ggplot2",
+        "gapminder",
+        "IRdisplay",
+        "tesseract (>= 2.0)",
+        "gifski"
+      ],
+      "Encoding": "UTF-8",
+      "RoxygenNote": "7.3.2",
+      "Language": "en-US",
+      "NeedsCompilation": "yes",
+      "Author": "Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>)",
+      "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
       "Repository": "CRAN"
     },
     "magrittr": {
@@ -3197,6 +3437,68 @@
       "Maintainer": "Yihui Xie <xie@yihui.name>",
       "Repository": "CRAN"
     },
+    "parallelly": {
+      "Package": "parallelly",
+      "Version": "1.45.0",
+      "Source": "Repository",
+      "Title": "Enhancing the 'parallel' Package",
+      "Imports": [
+        "parallel",
+        "tools",
+        "utils"
+      ],
+      "Suggests": [
+        "commonmark",
+        "base64enc"
+      ],
+      "VignetteBuilder": "parallelly",
+      "Authors@R": "c( person(\"Henrik\", \"Bengtsson\", role = c(\"aut\", \"cre\", \"cph\"), email = \"henrikb@braju.com\", comment = c(ORCID = \"0000-0002-7579-5165\")), person(\"Mike\", \"Cheng\", role = c(\"ctb\"), email = \"mikefc@coolbutuseless.com\") )",
+      "Description": "Utility functions that enhance the 'parallel' package and support the built-in parallel backends of the 'future' package.  For example, availableCores() gives the number of CPU cores available to your R process as given by the operating system, 'cgroups' and Linux containers, R options, and environment variables, including those set by job schedulers on high-performance compute clusters. If none is set, it will fall back to parallel::detectCores(). Another example is makeClusterPSOCK(), which is backward compatible with parallel::makePSOCKcluster() while doing a better job in setting up remote cluster workers without the need for configuring the firewall to do port-forwarding to your local computer.",
+      "License": "LGPL (>= 2.1)",
+      "LazyLoad": "TRUE",
+      "ByteCompile": "TRUE",
+      "URL": "https://parallelly.futureverse.org, https://github.com/futureverse/parallelly",
+      "BugReports": "https://github.com/futureverse/parallelly/issues",
+      "Language": "en-US",
+      "Encoding": "UTF-8",
+      "RoxygenNote": "7.3.2",
+      "NeedsCompilation": "yes",
+      "Author": "Henrik Bengtsson [aut, cre, cph] (ORCID: <https://orcid.org/0000-0002-7579-5165>), Mike Cheng [ctb]",
+      "Maintainer": "Henrik Bengtsson <henrikb@braju.com>",
+      "Repository": "CRAN"
+    },
+    "pdftools": {
+      "Package": "pdftools",
+      "Version": "3.5.0",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Text Extraction, Rendering and Converting of PDF Documents",
+      "Authors@R": "person(\"Jeroen\", \"Ooms\", role = c(\"aut\", \"cre\"), email = \"jeroenooms@gmail.com\", comment = c(ORCID = \"0000-0002-4035-0289\"))",
+      "Description": "Utilities based on 'libpoppler' <https://poppler.freedesktop.org> for extracting text, fonts, attachments and metadata from a PDF file. Also supports high quality rendering of PDF documents into PNG, JPEG, TIFF format, or into raw bitmap vectors for further  processing in R.",
+      "License": "MIT + file LICENSE",
+      "URL": "https://ropensci.r-universe.dev/pdftools, https://docs.ropensci.org/pdftools/",
+      "BugReports": "https://github.com/ropensci/pdftools/issues",
+      "SystemRequirements": "Poppler C++ API: libpoppler-cpp-dev (deb) or poppler-cpp-devel (rpm), and poppler-data (rpm/deb) package.",
+      "Encoding": "UTF-8",
+      "Imports": [
+        "Rcpp (>= 0.12.12)",
+        "qpdf"
+      ],
+      "LinkingTo": [
+        "Rcpp"
+      ],
+      "Suggests": [
+        "png",
+        "webp",
+        "tesseract",
+        "testthat"
+      ],
+      "RoxygenNote": "7.2.3",
+      "NeedsCompilation": "yes",
+      "Author": "Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>)",
+      "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
+      "Repository": "CRAN"
+    },
     "pillar": {
       "Package": "pillar",
       "Version": "1.10.2",
@@ -3276,6 +3578,28 @@
       "BugReports": "https://github.com/r-lib/pkgconfig/issues",
       "Encoding": "UTF-8",
       "NeedsCompilation": "no",
+      "Repository": "CRAN"
+    },
+    "plogr": {
+      "Package": "plogr",
+      "Version": "0.2.0",
+      "Source": "Repository",
+      "Title": "The 'plog' C++ Logging Library",
+      "Date": "2018-03-24",
+      "Authors@R": "c( person(\"Kirill\", \"Müller\", role = c(\"aut\", \"cre\"), email = \"krlmlr+r@mailbox.org\"), person(\"Sergey\", \"Podobry\", role = \"cph\", comment = \"Author of the bundled plog library\"))",
+      "Description": "A simple header-only logging library for C++. Add 'LinkingTo: plogr' to 'DESCRIPTION', and '#include <plogr.h>' in your C++ modules to use it.",
+      "Suggests": [
+        "Rcpp"
+      ],
+      "License": "MIT + file LICENSE",
+      "Encoding": "UTF-8",
+      "LazyData": "true",
+      "URL": "https://github.com/krlmlr/plogr#readme",
+      "BugReports": "https://github.com/krlmlr/plogr/issues",
+      "RoxygenNote": "6.0.1.9000",
+      "NeedsCompilation": "no",
+      "Author": "Kirill Müller [aut, cre], Sergey Podobry [cph] (Author of the bundled plog library)",
+      "Maintainer": "Kirill Müller <krlmlr+r@mailbox.org>",
       "Repository": "CRAN"
     },
     "plotly": {
@@ -3408,6 +3732,48 @@
       "NeedsCompilation": "yes",
       "Repository": "CRAN"
     },
+    "pool": {
+      "Package": "pool",
+      "Version": "1.0.4",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Object Pooling",
+      "Authors@R": "c( person(\"Joe\", \"Cheng\", , \"joe@posit.co\", role = \"aut\"), person(\"Barbara\", \"Borges\", role = \"aut\"), person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = c(\"aut\", \"cre\")), person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\")) )",
+      "Description": "Enables the creation of object pools, which make it less computationally expensive to fetch a new object. Currently the only supported pooled objects are 'DBI' connections.",
+      "License": "MIT + file LICENSE",
+      "URL": "https://github.com/rstudio/pool, https://rstudio.github.io/pool/",
+      "BugReports": "https://github.com/rstudio/pool/issues",
+      "Depends": [
+        "methods",
+        "R (>= 3.6.0)"
+      ],
+      "Imports": [
+        "DBI (>= 1.2.1)",
+        "later (>= 1.0.0)",
+        "R6",
+        "rlang (>= 1.0.0)"
+      ],
+      "Suggests": [
+        "covr",
+        "dbplyr (>= 2.4.0)",
+        "dplyr",
+        "knitr",
+        "rmarkdown",
+        "RSQLite",
+        "shiny",
+        "testthat (>= 3.0.0)",
+        "tibble"
+      ],
+      "VignetteBuilder": "knitr",
+      "Config/Needs/website": "tidyverse/tidytemplate",
+      "Config/testthat/edition": "3",
+      "Encoding": "UTF-8",
+      "RoxygenNote": "7.3.2",
+      "NeedsCompilation": "no",
+      "Author": "Joe Cheng [aut], Barbara Borges [aut], Hadley Wickham [aut, cre], Posit Software, PBC [cph, fnd]",
+      "Maintainer": "Hadley Wickham <hadley@posit.co>",
+      "Repository": "CRAN"
+    },
     "prettyunits": {
       "Package": "prettyunits",
       "Version": "1.2.0",
@@ -3508,11 +3874,11 @@
     },
     "promises": {
       "Package": "promises",
-      "Version": "1.3.2",
+      "Version": "1.3.3",
       "Source": "Repository",
       "Type": "Package",
       "Title": "Abstractions for Promise-Based Asynchronous Programming",
-      "Authors@R": "c( person(\"Joe\", \"Cheng\", , \"joe@posit.co\", role = c(\"aut\", \"cre\")), person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\")) )",
+      "Authors@R": "c( person(\"Joe\", \"Cheng\", , \"joe@posit.co\", role = c(\"aut\", \"cre\")), person(\"Posit Software, PBC\", role = c(\"cph\", \"fnd\"), comment = c(ROR = \"03wc8by49\")) )",
       "Description": "Provides fundamental abstractions for doing asynchronous programming in R using promises. Asynchronous programming is useful for allowing a single R process to orchestrate multiple tasks in the background while also attending to something else. Semantics are similar to 'JavaScript' promises, but with a syntax that is idiomatic R.",
       "License": "MIT + file LICENSE",
       "URL": "https://rstudio.github.io/promises/, https://github.com/rstudio/promises",
@@ -3532,7 +3898,7 @@
         "purrr",
         "rmarkdown",
         "spelling",
-        "testthat",
+        "testthat (>= 3.0.0)",
         "vembedr"
       ],
       "LinkingTo": [
@@ -3540,12 +3906,14 @@
         "Rcpp"
       ],
       "VignetteBuilder": "knitr",
-      "Config/Needs/website": "rsconnect",
+      "Config/Needs/website": "rsconnect, tidyverse/tidytemplate",
+      "Config/testthat/edition": "3",
+      "Config/usethis/last-upkeep": "2025-05-27",
       "Encoding": "UTF-8",
       "Language": "en-US",
       "RoxygenNote": "7.3.2",
       "NeedsCompilation": "yes",
-      "Author": "Joe Cheng [aut, cre], Posit Software, PBC [cph, fnd]",
+      "Author": "Joe Cheng [aut, cre], Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)",
       "Maintainer": "Joe Cheng <joe@posit.co>",
       "Repository": "CRAN"
     },
@@ -3658,6 +4026,36 @@
       "NeedsCompilation": "yes",
       "Author": "Hadley Wickham [aut, cre] (<https://orcid.org/0000-0003-4757-117X>), Lionel Henry [aut], Posit Software, PBC [cph, fnd] (03wc8by49)",
       "Maintainer": "Hadley Wickham <hadley@posit.co>",
+      "Repository": "CRAN"
+    },
+    "qpdf": {
+      "Package": "qpdf",
+      "Version": "1.3.5",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Split, Combine and Compress PDF Files",
+      "Authors@R": "c(person(\"Jeroen\", \"Ooms\", role = c(\"aut\", \"cre\"),  email = \"jeroenooms@gmail.com\", comment = c(ORCID = \"0000-0002-4035-0289\")), person(\"Ben\", \"Raymond\", role = \"ctb\"), person(\"Jay Berkenbilt\", role = \"cph\", comment = \"Author of libqpdf\"))",
+      "Description": "Content-preserving transformations transformations of PDF files such  as split, combine, and compress. This package interfaces directly to the 'qpdf'  C++ library <https://qpdf.sourceforge.io/> and does not require any command  line utilities. Note that 'qpdf' does not read actual content from PDF files:  to extract text and data you need the 'pdftools' package.",
+      "License": "Apache License 2.0",
+      "URL": "https://docs.ropensci.org/qpdf/ https://ropensci.r-universe.dev/qpdf",
+      "BugReports": "https://github.com/ropensci/qpdf/issues",
+      "Encoding": "UTF-8",
+      "Imports": [
+        "Rcpp",
+        "askpass",
+        "curl"
+      ],
+      "LinkingTo": [
+        "Rcpp"
+      ],
+      "RoxygenNote": "7.2.1",
+      "Suggests": [
+        "testthat"
+      ],
+      "SystemRequirements": "libjpeg",
+      "NeedsCompilation": "yes",
+      "Author": "Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>), Ben Raymond [ctb], Jay Berkenbilt [cph] (Author of libqpdf)",
+      "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
       "Repository": "CRAN"
     },
     "ragg": {

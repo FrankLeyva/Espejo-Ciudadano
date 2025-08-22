@@ -96,21 +96,12 @@ identityServer <- function(input, output, session, current_theme = NULL) {
   })
   
   # Download handler using pre-saved PNG files
-  output$download_connection_map <- downloadHandler(
+  output$download_identity_map <- downloadHandler(
     filename = function() {
-      map_type <- ifelse(input$neighborhood_tabs == "Vínculo con la colonia o fraccionamiento", 
-                        "colonia", "vecinos")
-      paste("mapa_vinculo_", map_type, "_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
+      paste0(map_name, "_", selectedYear(), "_", Sys.Date(), ".png")
     },
     content = function(file) {
-      map_name <- if(input$neighborhood_tabs == "Vínculo con la colonia o fraccionamiento"){
-        "mapa_vinculo_colonia"
-      } else {
-        "mapa_vinculo_vecinos"
-      }
-      
       map_path <- data_manager$get_map_path(map_name, selectedYear())
-      
       if (file.exists(map_path)) {
         file.copy(map_path, file)
       } else {

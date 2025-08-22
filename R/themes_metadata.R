@@ -1,20 +1,128 @@
 # themes_metadata.R
 library(dplyr)
 
-# Function to load and process thematic classification files
+# Function to load and process thematic classification files for all years
 load_thematic_classifications <- function() {
-  # Load the thematic classification files
-  per_themes <- read.csv("data/processed/PER_2024_metadata_classified_V3.csv", 
-                         encoding = "utf-8", stringsAsFactors = FALSE)
-  par_themes <- read.csv("data/processed/PAR_2024_metadata_classified_V3.csv", 
-                         encoding = "utf-8", stringsAsFactors = FALSE)
+  # Initialize empty data frame with the structure we need
+  all_themes <- data.frame(
+    variable = character(0),
+    label = character(0),
+    value_labels = character(0),
+    scale_type = character(0),
+    MainTheme = character(0),
+    Subtheme = character(0),
+    survey_id = character(0),
+    stringsAsFactors = FALSE
+  )
   
-  # Add survey identifier
-  per_themes$survey_id <- "PER_2024"
-  par_themes$survey_id <- "PAR_2024"
+  # Define the files to try for each year and survey (in order of preference)
+  file_config <- list(
+    "2023" = list(
+      "PER" = c(
+        "data/processed/PER_2023_metadata_classified_V3.csv"
+      ),
+      "PAR" = c(
+        "data/processed/PAR_2023_metadata_classified_V2.csv"
+      )
+    ),
+    "2024" = list(
+      "PER" = c(
+        "data/processed/PER_2024_metadata_classified_V4.csv"
+      ),
+      "PAR" = c(
+        "data/processed/PAR_2024_metadata_classified_V4.csv"
+      )
+    )
+  )
   
-  # Combine both datasets
-  all_themes <- rbind(per_themes, par_themes)
+  # Define the columns we need
+  required_columns <- c("variable", "label", "value_labels", "scale_type", "MainTheme", "Subtheme")
+  
+  # Load data for each year and survey
+  for (year in names(file_config)) {
+    for (survey_type in names(file_config[[year]])) {
+      survey_id <- paste0(survey_type, "_", year)
+      files_to_try <- file_config[[year]][[survey_type]]
+      
+      # Try each file until we find one that exists
+      loaded <- FALSE
+      for (file_path in files_to_try) {
+        if (file.exists(file_path)) {
+          tryCatch({
+            # Load the file
+            themes_data <- read.csv(file_path, 
+                                   encoding = "utf-8", 
+                                   stringsAsFactors = FALSE)
+            
+            message(paste("Raw file", file_path, "has columns:", paste(names(themes_data), collapse = ", ")))
+            
+            # Check which required columns exist
+            available_columns <- intersect(required_columns, names(themes_data))
+            missing_columns <- setdiff(required_columns, names(themes_data))
+            
+            if (length(missing_columns) > 0) {
+              message(paste("Missing columns in", file_path, ":", paste(missing_columns, collapse = ", ")))
+            }
+            
+            # Only select the columns we need (and that exist)
+            if (length(available_columns) >= 4) {  # Need at least variable, MainTheme, Subtheme, and one other
+              # Create a standardized data frame with all required columns
+              standardized_data <- data.frame(
+                variable = if ("variable" %in% names(themes_data)) themes_data$variable else NA_character_,
+                label = if ("label" %in% names(themes_data)) themes_data$label else NA_character_,
+                value_labels = if ("value_labels" %in% names(themes_data)) themes_data$value_labels else NA_character_,
+                scale_type = if ("scale_type" %in% names(themes_data)) themes_data$scale_type else NA_character_,
+                MainTheme = if ("MainTheme" %in% names(themes_data)) themes_data$MainTheme else NA_character_,
+                Subtheme = if ("Subtheme" %in% names(themes_data)) themes_data$Subtheme else NA_character_,
+                survey_id = survey_id,
+                stringsAsFactors = FALSE
+              )
+              
+              # Remove rows with missing essential data
+              standardized_data <- standardized_data[
+                !is.na(standardized_data$variable) & 
+                !is.na(standardized_data$MainTheme) & 
+                !is.na(standardized_data$Subtheme), 
+              ]
+              
+              # Combine with existing data
+              all_themes <- rbind(all_themes, standardized_data)
+              
+              message(paste("Successfully loaded", survey_id, "metadata from", basename(file_path), "with", nrow(standardized_data), "valid questions"))
+              loaded <- TRUE
+              break  # Stop trying other versions once we successfully load one
+            } else {
+              message(paste("File", file_path, "doesn't have enough required columns"))
+            }
+            
+          }, error = function(e) {
+            message(paste("Error loading", file_path, ":", e$message))
+          })
+        }
+      }
+      
+      if (!loaded) {
+        warning(paste("No usable metadata file found for", survey_id, ". Tried:", paste(files_to_try, collapse = ", ")))
+      }
+    }
+  }
+  
+  message(paste("Total metadata loaded:", nrow(all_themes), "questions from", length(unique(all_themes$survey_id)), "surveys"))
+  
+  # Show summary by survey
+  if (nrow(all_themes) > 0) {
+    survey_summary <- all_themes %>%
+      group_by(survey_id) %>%
+      summarise(
+        questions = n(),
+        themes = n_distinct(MainTheme),
+        .groups = 'drop'
+      )
+    
+    for (i in 1:nrow(survey_summary)) {
+      message(paste(survey_summary$survey_id[i], ":", survey_summary$questions[i], "questions,", survey_summary$themes[i], "themes"))
+    }
+  }
   
   return(all_themes)
 }
@@ -42,6 +150,12 @@ theme_properties <- list(
       "Economic Conditions" = list(
         description = "Condiciones económicas y empleo"
       ),
+            "Education" = list(
+        description = "Servicios educativos"
+      ),
+      "Healthcare" = list(
+        description = "Servicios de salud"
+      ),
       "Cultural Participation" = list(
         description = "Participación en actividades culturales"
       ),
@@ -57,12 +171,7 @@ theme_properties <- list(
     icon = "water",
     hidden = FALSE,
     subthemes = list(
-      "Education" = list(
-        description = "Servicios educativos"
-      ),
-      "Healthcare" = list(
-        description = "Servicios de salud"
-      ),
+
       "Housing" = list(
         description = "Vivienda"
       ),
@@ -229,12 +338,12 @@ get_subtheme_property <- function(theme_name, subtheme_name) {
 
 theme_name_translations <- list(
   "Internal" = "Interno",
-  "Social & Economic Wellbeing" = "Bienestar Social y Económico",
-  "Public Services" = "Servicios Públicos",
-  "Urban Mobility & Environment" = "Movilidad Urbana y Medio Ambiente",
-  "Governance & Civic Engagement" = "Gobernanza y Participación Ciudadana",
+  "Social & Economic Wellbeing" = "Calidad de Vida",
+  "Public Services" = "Infraestructura y Equipamiento",
+  "Urban Mobility & Environment" = "Movilidad Urbana",
+  "Governance & Civic Engagement" = "Instituciones",
   "Dashboard Context" = "Contexto del Dashboard",
-  "Community Participation" = "Participación Comunitaria"
+  "Community Participation" = "Participación Ciudadana"
 )
 
 # Mapeo de nombres de subtemas de inglés a español
@@ -246,7 +355,7 @@ subtheme_name_translations <- list(
   "Education" = "Educación",
   "Healthcare" = "Salud",
   "Housing" = "Vivienda",
-  "Utilities & Infrastructure" = "Servicios e Infraestructura",
+  "Utilities & Infrastructure" = "Servicios Públicos e Infraestructura",
   "Transportation" = "Transporte",
   "Environmental Quality" = "Calidad Ambiental",
   "Government Operations" = "Operaciones Gubernamentales",

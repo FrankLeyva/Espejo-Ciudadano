@@ -832,7 +832,7 @@ create_binary_district_map <- function(data, geo_data, highlight_extremes = TRUE
   
   return(map)
 }
-create_binary_district_bars <- function(data, orientation = "v", custom_theme = NULL) {
+create_binary_district_bars <- function(data, orientation = "v", custom_theme = NULL, title="") {
   # Check if we have data
   if (nrow(data) == 0) {
     return(plotly_empty() %>% 
@@ -878,7 +878,7 @@ create_binary_district_bars <- function(data, orientation = "v", custom_theme = 
       marker = list(color = bar_color)
     ) %>%
       apply_plotly_theme(
-        title = paste0("Porcentaje de ", true_label, " por Distrito"),
+        title = title,
         xlab = paste0("% de ", true_label),
         ylab = "Distrito",
         custom_theme = custom_theme
@@ -898,7 +898,7 @@ create_binary_district_bars <- function(data, orientation = "v", custom_theme = 
       marker = list(color = bar_color)
     ) %>%
       apply_plotly_theme(
-        title = paste0("Porcentaje de ", true_label, " por Distrito"),
+        title = title,
         xlab = "Distrito",
         ylab = paste0("% de ", true_label),
         custom_theme = custom_theme

@@ -1350,7 +1350,7 @@ create_interval_gender_dumbbell <- function(data, custom_theme = NULL) {
     layout(showlegend = TRUE)
 }
 
-create_interval_bars <- function(data, orientation = "v", custom_theme = NULL) {
+create_interval_bars <- function(data, orientation = "v", custom_theme = NULL, title="") {
   # Check if we have valid data
   if (nrow(data) == 0) {
     return(plot_ly() %>% 
@@ -1421,7 +1421,7 @@ create_interval_bars <- function(data, orientation = "v", custom_theme = NULL) {
       marker = list(color = district_colors)
     ) %>%
       apply_plotly_theme(
-        title = "Promedio por Distrito",
+        title = title,
         xlab = "Valor Promedio",
         ylab = "Distrito",
         custom_theme = custom_theme  # Pass the custom theme
@@ -1437,7 +1437,7 @@ create_interval_bars <- function(data, orientation = "v", custom_theme = NULL) {
       marker = list(color = district_colors)
     ) %>%
       apply_plotly_theme(
-        title = "Promedio por Distrito",
+        title = title,
         xlab = "Distrito",
         ylab = "Valor Promedio",
         custom_theme = custom_theme  # Pass the custom theme
@@ -1445,7 +1445,7 @@ create_interval_bars <- function(data, orientation = "v", custom_theme = NULL) {
   }
 }
 create_interval_pie <- function(data, max_categories = 12, custom_theme = NULL, 
-  highlight_max = TRUE, palette = NULL) {
+  highlight_max = TRUE, palette = NULL,title="") {
 # Check if we have valid data
 if (nrow(data) == 0) {
 return(plotly_empty() %>% 
@@ -1530,7 +1530,7 @@ text = ~paste0(plot_data$Category, ": ", plot_data$Count, " (", plot_data$Percen
 ) %>%
 layout(
 title = list(
-text = "Distribución de Respuestas",
+text = title,
 font = list(
 family = active_theme$typography$font_family,
 size = active_theme$typography$sizes$title,

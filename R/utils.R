@@ -30,7 +30,15 @@ create_dashboard_footer <- function() {
     div(
       class = "container-fluid",
       p("Dashboard creado por Plan Estratégico de Juárez", class = "mb-1"),
-      p("Datos actualizados: Marzo 2025", class = "mb-0 small")
+      p(
+        "Datos actualizados: Marzo 2025", 
+        class = "mb-0 small",
+        span(
+          style = "margin-left: 10px; cursor: default; user-select: none;",
+          `data-analytics-secret` = "footer-trigger",
+          "•"
+        )
+      )
     )
   )
 }

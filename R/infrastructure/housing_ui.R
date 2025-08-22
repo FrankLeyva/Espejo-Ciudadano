@@ -1,32 +1,11 @@
-# UI para Dashboard de Vivienda
+# housing_ui.R - Updated to match style guide and environment_ui pattern
 housingUI <- function() {
   page_fluid(
-    class = "section-infraestructura",
-
+    class = "section-infraestructura", 
     useShinyjs(),
     init_tooltips(),
 
-    tags$head(
-      tags$style(HTML("
-        /* Override pill navigation styling for this page */
-        .infraestructura-pills .nav-pills .nav-link:not(.active) {
-          background-color: rgba(240, 240, 240, 0.8);
-color: var(--infraestructura-color) !important;
-            border: 1px solid rgba(142, 36, 170, 0.2);
-          font-weight: bold !important;
-        }
-        
-        .infraestructura-pills .nav-pills .nav-link:hover:not(.active) {
-          background-color: rgba(142, 36, 170, 0.1);
-        }
-             .infraestructura-pills .nav-pills .nav-link.active {
-          background-color: var(--infraestructura-color) !important; 
-          color: white !important;
-          font-weight: bold !important;
-          border: none !important;
-        }
-      "))
-    ),
+    # Back navigation
     div(
       class = "mb-4",
       tags$a(
@@ -37,84 +16,178 @@ color: var(--infraestructura-color) !important;
         "Volver a Infraestructura"
       )
     ),
-    # Encabezado
+    
+    # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
-          style="border-top: 4px solid var(--infraestructura-color)",
-
-          h2("Vivienda", class = "text-center")
+          style = paste0("background-color: var(--infraestructura-color) !important; 
+            color: white !important; 
+            font-family: var(--font-display) !important;
+            font-weight: bolder !important; 
+            text-align: center !important; 
+            border-bottom: none !important;"),
+          h1("Vivienda", class = "dashboard-header")
         )
       )
     ),
-
-    card(
     
-      card_header(
-        div(
-          class = "d-flex justify-content-between align-items-center",
+    # Tab Navigation with Plot Cards (Housing Satisfaction Maps)
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
+        id = "housing_tabs",
+        
+        # Materials Quality Tab
+        nav_panel(
+          title = "Calidad de Materiales",
+          value = "materials_quality",
+          
           div(
-            class = "d-flex align-items-center",
-"Satisfacción con Aspectos de la Vivienda",
-create_dynamic_tooltip("housing_tooltip")
-          ),
-downloadButton(
-  "download_house_satis_map", 
-  "", 
-  icon = icon("download"), 
-  class = "btn-sm"
-))),
-div(class = "gobierno-pills",
-navset_pill(
-  id = "housing_tabs",
-      # Pestaña: Calidad de materiales
-      nav_panel(
-        title = "Calidad de Materiales",
-        icon = bsicons::bs_icon("bricks"),
+            class = "plot-card plot-card-infraestructura",
+            
+            # Plot Header
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con la Calidad de Materiales por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q26.1 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, qué tan satisfecho está usted con la calidad de los materiales de su vivienda? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_materials_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            # Plot Content
+            div(
+              class = "plot-content",
+              leafletOutput("materials_map", height = "500px")
+            )
+          )
+        ),
         
-
+        # Size and Spaces Tab
+        nav_panel(
+          title = "Tamaño y Espacios",
+          value = "size_spaces",
+          
+          div(
+            class = "plot-card plot-card-infraestructura",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con el Tamaño y Espacios por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q26.2 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, qué tan satisfecho está usted con el tamaño y espacios de su vivienda? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_spaces_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("spaces_map", height = "500px")
+            )
+          )
+        ),
         
-        card(
-          leafletOutput("materials_map", height = "500px")
-        )
-      ),
-      
-      # Pestaña: Tamaño y espacios
-      nav_panel(
-        title = "Tamaño y Espacios",
-        icon = bsicons::bs_icon("layout-text-window"),
+        # Location and Accessibility Tab
+        nav_panel(
+          title = "Ubicación y Accesibilidad",
+          value = "location_accessibility",
+          
+          div(
+            class = "plot-card plot-card-infraestructura",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Satisfacción con la Ubicación y Accesibilidad por Distrito",
+                  create_tooltip("<b>ID</b>: PER Q26.3 <br>
+                    <b>Pregunta</b>: En una escala del 1 al 10, qué tan satisfecho está usted con la ubicación y accesibilidad de su vivienda? <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              ),
+              div(
+                class = "plot-actions",
+                downloadButton(
+                  "download_location_map", 
+                  "", 
+                  icon = icon("download"), 
+                  class = "plot-action-btn",
+                  title = "Descargar mapa"
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              leafletOutput("location_map", height = "500px")
+            )
+          )
+        ),
         
-        
-        card(
-
-          leafletOutput("spaces_map", height = "500px")
-        )
-      ),
-      
-      # Pestaña: Accesibilidad de la ubicación
-      nav_panel(
-        title = "Ubicación y Accesibilidad",
-        icon = bsicons::bs_icon("geo-alt"),
-      
-        card(
-
-          leafletOutput("location_map", height = "500px")
-        )
-      ),
-      
-      # Pestaña: Comparativa
-      nav_panel(
-        title = "Comparativa",
-        icon = bsicons::bs_icon("graph-up"),
-        
-        card(
-
-          plotlyOutput("housing_comparison_plot", height = "500px")
+        # Comparative Analysis Tab
+        nav_panel(
+          title = "Análisis Comparativo",
+          value = "comparative_analysis",
+          
+          div(
+            class = "plot-card plot-card-infraestructura",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Comparación de Satisfacción con Aspectos de la Vivienda",
+                  create_tooltip("<b>ID</b>: PER Q26.1, Q26.2, Q26.3 <br>
+                    <b>Pregunta</b>: Comparación entre satisfacción con materiales, espacios y ubicación de la vivienda <br>
+                     <b>Escala</b>: 1-10 (1=Muy insatisfecho, 10=Muy satisfecho)")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("housing_comparison_plot", height = "500px")
+            )
+          )
         )
       )
-    )
-  )
     )
   )
 }

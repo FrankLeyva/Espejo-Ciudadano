@@ -212,7 +212,7 @@ create_category_bars <- function(data, max_categories = 15, title = "Distribuci√
         x = ~Frequency,
         type = "bar",
         orientation = 'h',
-        text = ~paste0(Category, ": ", Frequency, " (", Percentage, "%)"),
+        text = ~paste0(Percentage, "%"),
         hoverinfo = "text",
         marker = list(
           color = bar_color
@@ -230,7 +230,7 @@ create_category_bars <- function(data, max_categories = 15, title = "Distribuci√
         x = ~Category,
         y = ~Frequency,
         type = "bar",
-        text = ~paste0(Category, ": ", Frequency, " (", Percentage, "%)"),
+        text = ~paste0(Percentage, "%"),
         hoverinfo = "text",
         marker = list(
           color = bar_color
@@ -259,7 +259,8 @@ create_category_pie <- function(data,
   hide_ns_nc = TRUE,
   inverse = FALSE,
   truncate_labels = TRUE,
-  max_label_length = 20) {
+  max_label_length = 20,
+title="") {
   
   # Input validation
   if (is.null(data) || nrow(data) == 0 || !("value" %in% names(data))) {
@@ -432,7 +433,7 @@ create_category_pie <- function(data,
   ) %>%
     layout(
       title = list(
-        text = "Distribuci√≥n de Categor√≠as",
+        text = title,
         font = list(
           family = active_theme$typography$font_family,
           size = active_theme$typography$sizes$title,
@@ -517,7 +518,7 @@ create_category_district_heatmap <- function(data, max_categories = 10, custom_t
 }
 
 # Create stacked bar chart by district with theme support
-create_category_stacked_bars <- function(data, max_categories = 7, custom_theme = NULL) {
+create_category_stacked_bars <- function(data, max_categories = 7, custom_theme = NULL,title="") {
   tryCatch({
     # Input validation
     if (is.null(data) || nrow(data) == 0 || 
@@ -576,7 +577,7 @@ create_category_stacked_bars <- function(data, max_categories = 7, custom_theme 
       hoverinfo = "text"
     ) %>%
       apply_plotly_theme(
-        title = "Distribuci√≥n por Distrito",
+        title = title,
         xlab = "Distrito",
         ylab = "Porcentaje",
         custom_theme = custom_theme

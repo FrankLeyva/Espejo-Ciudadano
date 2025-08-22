@@ -1,0 +1,216 @@
+Loading required package: pdftools
+Using poppler version 24.02.0
+Loading required package: magick
+Linking to ImageMagick 6.9.12.98
+Enabled features: fontconfig, freetype, fftw, heic, lcms, pango, raw, webp, x11
+Disabled features: cairo, ghostscript, rsvg
+Using 16 threads
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘bslib’
+
+The following object is masked from ‘package:utils’:
+
+    page
+
+
+Attaching package: ‘DT’
+
+The following objects are masked from ‘package:shiny’:
+
+    dataTableOutput, renderDataTable
+
+Loading required package: ggplot2
+
+Attaching package: ‘plotly’
+
+The following object is masked from ‘package:ggplot2’:
+
+    last_plot
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+The following object is masked from ‘package:graphics’:
+
+    layout
+
+Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ lubridate 1.9.4     ✔ tibble    3.3.0
+✔ purrr     1.0.4     ✔ tidyr     1.3.1
+✔ readr     2.1.5     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ plotly::filter() masks dplyr::filter(), stats::filter()
+✖ dplyr::lag()     masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+Attaching package: ‘igraph’
+
+The following objects are masked from ‘package:lubridate’:
+
+    %--%, union
+
+The following objects are masked from ‘package:purrr’:
+
+    compose, simplify
+
+The following object is masked from ‘package:tidyr’:
+
+    crossing
+
+The following object is masked from ‘package:tibble’:
+
+    as_data_frame
+
+The following object is masked from ‘package:plotly’:
+
+    groups
+
+The following objects are masked from ‘package:dplyr’:
+
+    as_data_frame, groups, union
+
+The following objects are masked from ‘package:future’:
+
+    %->%, %<-%
+
+The following objects are masked from ‘package:stats’:
+
+    decompose, spectrum
+
+The following object is masked from ‘package:base’:
+
+    union
+
+
+Attaching package: ‘shinyjs’
+
+The following object is masked from ‘package:lubridate’:
+
+    show
+
+The following object is masked from ‘package:future’:
+
+    reset
+
+The following object is masked from ‘package:shiny’:
+
+    runExample
+
+The following objects are masked from ‘package:methods’:
+
+    removeClass, show
+
+
+Attaching package: ‘colourpicker’
+
+The following objects are masked from ‘package:shinyjs’:
+
+    colourInput, colourPicker, runExample, updateColourInput
+
+The following object is masked from ‘package:shiny’:
+
+    runExample
+
+Configured background processing with 4.000000 cores
+Loaded module: R/binary_module.R
+Loaded module: R/categorical_module.R
+Loaded module: R/interval_module.R
+Loaded module: R/ordinal_module.R
+Loaded module: R/nominal_module.R
+Loaded module: R/razon_module.R
+Loaded module: R/special_module.R
+Warning: Navigation containers expect a collection of `bslib::nav_panel()`/`shiny::tabPanel()`s and/or `bslib::nav_menu()`/`shiny::navbarMenu()`s. Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents.
+
+Listening on http://127.0.0.1:40989
+DataManager initialized with 500 MB cache limit
+BackgroundPreloader initialized: 48.000000 total tasks
+Starting background preloading...
+Background: Loading explorer data for 2024...
+Loading survey data from: data/processed/PER_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 1, 2, 2
+Sample raw age values: 3, 1, 3, 4, 1
+Sample mapped gender values: Mujer, Hombre, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 740, Mujer = 742, Otro = 1
+Loading survey data from: data/processed/PAR_2024_responses_V4.csv
+Q101 column found in dataset
+Sample raw district values: 4, 4, 4, 4, 4
+Sample raw gender values: 2, 1, 2, 2, 2
+Sample raw age values: 2, 2, 2, 4, 4
+Sample mapped gender values: Mujer, Hombre, Mujer, Mujer, Mujer
+Standardized gender distribution: Hombre = 725, Mujer = 769, Otro = 2
+Background: Completed explorer data for 2024
+Background preloading initiated
+Background: Loaded wellness 2024 (3.000000 items)
+Background: Loaded government 2024 (1.000000 items)
+Background: Loaded infrastructure 2024 (3.000000 items)
+Background: Loading explorer data for 2023...
+Loading survey data from: data/processed/PER_2023_responses_V3.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 1, 1, 2, 1
+Sample raw age values: 4, 2, 4, 1, 1
+Sample mapped gender values: Hombre, Hombre, Hombre, Mujer, Hombre
+Standardized gender distribution: Hombre = 800, Mujer = 722, No especificado = 2
+Loading survey data from: data/processed/PAR_2023_responses_V2.csv
+Q101 column found in dataset
+Sample raw district values: 3, 3, 3, 3, 3
+Sample raw gender values: 1, 2, 1, 2, 2
+Sample raw age values: 2, 1, 3, 3, 4
+Sample mapped gender values: Hombre, Mujer, Hombre, Mujer, Mujer
+Standardized gender distribution: Hombre = 731, Mujer = 770, Otro = 5
+Background: Completed explorer data for 2023
+Background: Loaded urban 2024 (2.000000 items)
+Background: Loaded participation 2024 (3.000000 items)
+Background: Loaded economic 2024 (3.000000 items)
+Background: Loaded cultural 2024 (2.000000 items)
+Background: Loaded identity 2024 (3.000000 items)
+Background: Loaded environment 2024 (3.000000 items)
+Background: Loaded wellness 2023 (3.000000 items)
+Background: Loaded government 2023 (1.000000 items)
+Background: Loaded inequality 2024 (3.000000 items)
+Background: Loaded infrastructure 2023 (3.000000 items)
+Background: Loaded accountability 2024 (2.000000 items)
+Background: Loaded urban 2023 (2.000000 items)
+Background: Loaded representation 2024 (3.000000 items)
+Background: Loaded participation 2023 (3.000000 items)
+Background: Loaded expectations 2024 (3.000000 items)
+Skipping trust 2024 (uses data from other sections)
+Skipping equipment 2024 (uses data from other sections)
+Background: Loaded mobility 2024 (1.000000 items)
+Background: Loaded economic 2023 (3.000000 items)
+Background: Loaded transportation 2024 (2.000000 items)
+Background: Loaded cultural 2023 (2.000000 items)
+Background: Loaded civic 2024 (2.000000 items)
+Background: Loaded identity 2023 (3.000000 items)
+Background: Loaded community 2024 (1.000000 items)
+Background: Loaded environment 2023 (3.000000 items)
+Background: Loaded inequality 2023 (3.000000 items)
+Background: Loaded accountability 2023 (2.000000 items)
+Background: Loaded representation 2023 (3.000000 items)
+Background: Loaded expectations 2023 (3.000000 items)
+Skipping trust 2023 (uses data from other sections)
+Skipping equipment 2023 (uses data from other sections)
+Background: Loaded mobility 2023 (1.000000 items)
+Background: Loaded transportation 2023 (2.000000 items)
+Background: Loaded civic 2023 (2.000000 items)
+Background: Loaded community 2023 (1.000000 items)
+Background preloading completed! Duration: 1.5 minutes
+Final cache: 57.0 MB, 0.000000% hit rate, 84.000000 objects
+Stopping background preloading...
+Background preloader stopped on session end

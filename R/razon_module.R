@@ -184,56 +184,333 @@ create_histogram <- function(data, bins = 30, title = NULL, custom_theme = activ
     )
 }
 
-create_district_map <- function(data, geo_data, custom_theme = active_theme()) {
-  # Check inputs
-  if(is.null(data) || nrow(data) == 0 || is.null(geo_data)) {
-    return(leaflet() %>% 
-             addTiles() %>%
-             addControl("No hay datos suficientes para visualizar", position = "topright"))
+create_district_map <- function(data, geo_data, highlight_extremes = TRUE, 
+  use_gradient = FALSE, color_scale = "Blues", custom_theme = NULL, disable_mobile_pan = TRUE) {
+  
+  # Check if we have data
+  if (is.null(data) || nrow(data) == 0 || is.null(geo_data)) {
+    return(plotly_empty() %>% 
+           layout(title = "No hay datos suficientes para visualizar"))
   }
 
-  district_stats <- data %>%
-    group_by(district) %>%
-    summarise(
-      mean_value = mean(value, na.rm = TRUE),
-      n = n(),
-      .groups = 'drop'
-    )
-  
-  # Create color palette for districts - use custom theme if provided
+  # Get district palette from custom theme if provided
   district_palette <- if (!is.null(custom_theme)) {
     custom_theme$palettes$district
   } else {
     theme_config$palettes$district
   }
   
-  pal <- colorNumeric(
-    palette = district_palette,
-    domain = district_stats$mean_value
-  )
+  # Get diverging palette from custom theme if provided for highlighting
+  diverging_palette <- if (!is.null(custom_theme) && !is.null(custom_theme$palettes$diverging)) {
+    custom_theme$palettes$diverging
+  } else {
+    theme_config$palettes$diverging
+  }
   
-  # Create map
-  leaflet(geo_data) %>%
-    addTiles() %>% 
+  # Extract the high and low colors from the diverging palette
+  highest_color <- diverging_palette[length(diverging_palette)]  # Get last color (highest)
+  lowest_color <- diverging_palette[1]  # Get first color (lowest)
+  
+  # Calculate district statistics
+  district_stats <- data %>%
+    group_by(district) %>%
+    summarise(
+      mean_value = mean(value, na.rm = TRUE),
+      median_value = median(value, na.rm = TRUE),
+      sd_value = sd(value, na.rm = TRUE),
+      n = n(),
+      .groups = 'drop'
+    )
+
+  # Convert district to numeric for proper matching
+  district_stats$district_num <- as.numeric(as.character(district_stats$district))
+  
+  # Make sure district_num column exists and is valid
+  if (!("district_num" %in% names(district_stats)) || all(is.na(district_stats$district_num))) {
+    district_stats$district_num <- as.numeric(as.character(district_stats$district))
+    if (all(is.na(district_stats$district_num))) {
+      warning("Could not convert district to numeric. Using row numbers as district identifier.")
+      district_stats$district_num <- 1:nrow(district_stats)
+    }
+  }
+
+  # Find district with highest and lowest values
+  highest_district <- district_stats %>% 
+    filter(!is.na(mean_value)) %>%
+    arrange(desc(mean_value)) %>% 
+    slice(1)
+    
+  lowest_district <- district_stats %>% 
+    filter(!is.na(mean_value)) %>%
+    arrange(mean_value) %>% 
+    slice(1)
+  
+  # Calculate centroids for label placement
+  geo_data$centroid <- sf::st_centroid(geo_data$geometry)
+  centroids <- sf::st_coordinates(geo_data$centroid)
+  geo_data$lng <- centroids[,1]
+  geo_data$lat <- centroids[,2]
+  
+  # Calculate optimal label positions (same sophisticated system as interval)
+  calculate_label_positions <- function(geo_data) {
+    n <- nrow(geo_data)
+    positions <- data.frame(
+      district = geo_data$No_Distrit,
+      lng = geo_data$lng,
+      lat = geo_data$lat,
+      offset_x = rep(0, n),
+      offset_y = rep(0, n)
+    )
+    
+    # Create a matrix of distances between districts
+    distances <- matrix(0, nrow = n, ncol = n)
+    for (i in 1:(n-1)) {
+      for (j in (i+1):n) {
+        dist <- sqrt((positions$lng[i] - positions$lng[j])^2 + 
+                     (positions$lat[i] - positions$lat[j])^2)
+        distances[i,j] <- distances[j,i] <- dist
+      }
+    }
+    
+    # Define threshold for nearby districts
+    distance_threshold <- mean(distances[distances > 0]) * 0.6
+    
+    # Identify clusters of nearby districts
+    nearby <- distances < distance_threshold & distances > 0
+    
+    # Apply specific offsets for problematic pairs
+    for (i in 1:n) {
+      nearby_districts <- which(nearby[i,])
+      
+      if (length(nearby_districts) > 0) {
+        num_neighbors <- length(nearby_districts)
+        
+        # Specific handling for district 9 (move it south)
+        if (positions$district[i] == 9) {
+          positions$offset_y[i] <- -0.020  # Move south
+          positions$offset_x[i] <- -0.005  # Slight west adjustment
+        }
+        # Keep district 7 in place but move slightly west
+        else if (positions$district[i] == 7) {
+          positions$offset_x[i] <- -0.008  # Move west
+        }
+        # Move district 8 slightly east
+        else if (positions$district[i] == 8) {
+          positions$offset_x[i] <- 0.010   # Move east
+        }
+        # Default adjustments based on number of neighbors
+        else if (num_neighbors >= 2) {
+          angle <- (i %% 8) * (2 * pi / 8)
+          positions$offset_x[i] <- 0.010 * cos(angle)
+          positions$offset_y[i] <- 0.010 * sin(angle)
+        }
+        else if (num_neighbors == 1) {
+          neighbor_idx <- nearby_districts[1]
+          dx <- positions$lng[i] - positions$lng[neighbor_idx]
+          dy <- positions$lat[i] - positions$lat[neighbor_idx]
+          
+          dist <- sqrt(dx^2 + dy^2)
+          if (dist > 0) {
+            positions$offset_x[i] <- 0.006 * (dx / dist)
+            positions$offset_y[i] <- 0.006 * (dy / dist)
+          }
+        }
+      }
+    }
+    
+    return(positions)
+  }
+  
+  # Calculate optimal positions
+  label_positions <- calculate_label_positions(geo_data)
+  geo_data$offset_x <- label_positions$offset_x[match(geo_data$No_Distrit, label_positions$district)]
+  geo_data$offset_y <- label_positions$offset_y[match(geo_data$No_Distrit, label_positions$district)]
+
+  # PRE-CALCULATE all values needed for the map
+  geo_data$fill_color <- "#CCCCCC"  # Default gray
+  geo_data$hover_label <- ""
+  geo_data$label_text <- ""
+  geo_data$label_bg <- "#FFFFFF"
+  geo_data$label_color <- "#000000"
+  geo_data$is_extreme <- FALSE
+  geo_data$extreme_type <- ""
+
+  # Calculate fill colors based on gradient or categorical
+  if (use_gradient) {
+    # Create color palette based on mean values
+    value_range <- range(district_stats$mean_value, na.rm = TRUE)
+    pal <- colorNumeric(palette = color_scale, domain = value_range)
+    
+    # Apply to each district
+    for (i in 1:nrow(geo_data)) {
+      dist_num <- geo_data$No_Distrit[i]
+      match_idx <- which(district_stats$district_num == dist_num)
+      
+      if (length(match_idx) > 0) {
+        mean_val <- district_stats$mean_value[match_idx]
+        if (!is.na(mean_val)) {
+          geo_data$fill_color[i] <- pal(mean_val)
+        }
+      }
+    }
+    
+    # Store the palette for legend
+    palette_function <- pal
+    palette_values <- value_range
+    legend_title <- "Valor Promedio"
+  } else {
+    # Use categorical district colors
+    for (i in 1:nrow(geo_data)) {
+      dist_num <- geo_data$No_Distrit[i]
+      district_index <- as.numeric(dist_num) - 1
+      
+      if (!is.na(district_index) && district_index >= 1 && district_index <= length(district_palette)) {
+        geo_data$fill_color[i] <- district_palette[district_index]
+      }
+    }
+    
+    palette_function <- NULL
+  }
+
+  # Calculate hover labels and check for highest/lowest districts
+  for (i in 1:nrow(geo_data)) {
+    dist_num <- geo_data$No_Distrit[i]
+    match_idx <- which(district_stats$district_num == dist_num)
+    
+    if (length(match_idx) > 0) {
+      geo_data$hover_label[i] <- sprintf(
+        "Distrito: %s<br>Promedio: %.2f<br>Mediana: %.2f<br>DE: %.2f<br>N: %d",
+        dist_num,
+        district_stats$mean_value[match_idx],
+        district_stats$median_value[match_idx],
+        district_stats$sd_value[match_idx],
+        district_stats$n[match_idx]
+      )
+      
+      # Check if this is highest or lowest district
+      if (highlight_extremes) {
+        if (!is.null(highest_district) && !is.na(highest_district$district_num) && 
+            dist_num == highest_district$district_num) {
+          geo_data$is_extreme[i] <- TRUE
+          geo_data$extreme_type[i] <- "highest"
+          geo_data$label_bg[i] <- highest_color
+          geo_data$label_color[i] <- "#FFFFFF"
+        } else if (!is.null(lowest_district) && !is.na(lowest_district$district_num) && 
+                  dist_num == lowest_district$district_num) {
+          geo_data$is_extreme[i] <- TRUE
+          geo_data$extreme_type[i] <- "lowest"
+          geo_data$label_bg[i] <- lowest_color
+          geo_data$label_color[i] <- "#FFFFFF"
+        }
+      }
+    } else {
+      geo_data$hover_label[i] <- sprintf("Distrito: %s<br>Sin datos", dist_num)
+    }
+  }
+
+  # Create the base map
+  map <- leaflet(geo_data) %>%
+    addProviderTiles(providers$Stadia.StamenTonerLite) %>% 
     addPolygons(
+      fillColor = ~fill_color,
       fillOpacity = 0.7,
       weight = 1,
-      color = ~pal(district_stats$mean_value[match(No_Distrit, district_stats$district)]),
+      color = "#666666",
       dashArray = "3",
       highlight = highlightOptions(
         weight = 2,
-        color = "#666666",
+        color = "#000000",
         dashArray = "",
-        fillOpacity = 0.7,
+        fillOpacity = 0.9,
         bringToFront = TRUE
       ),
-      label = ~sprintf(
-        "Distrito: %s<br>Promedio: %.2f<br>N: %d",
-        district_stats$district[match(No_Distrit, district_stats$district)],
-        district_stats$mean_value[match(No_Distrit, district_stats$district)],
-        district_stats$n[match(No_Distrit, district_stats$district)]
-      ) %>% lapply(HTML)
+      label = ~lapply(hover_label, HTML)
     )
+    
+  if (disable_mobile_pan) {
+    map <- map %>% setView(lng = -106.4245, lat = 31.6904, zoom = 11) %>%
+      htmlwidgets::onRender("
+        function(el, x) {
+          var myMap = this;
+          
+          function isMobileDevice() {
+            return (typeof window.orientation !== 'undefined') || 
+                   (navigator.userAgent.indexOf('IEMobile') !== -1) ||
+                   (window.innerWidth <= 768);
+          }
+          
+          if (isMobileDevice()) {
+            myMap.dragging.disable();
+            console.log('Map panning disabled on mobile device');
+          }
+        }
+      ")
+  }
+  
+  # Add legend if using gradient
+  if (use_gradient && !is.null(palette_function)) {
+    map <- map %>% addLegend(
+      position = "bottomright",
+      pal = palette_function,
+      values = palette_values,
+      title = legend_title,
+      opacity = 0.7
+    )
+  }
+
+  # Add popup labels showing average for each district
+  for (i in 1:nrow(geo_data)) {
+    dist_num <- geo_data$No_Distrit[i]
+    match_idx <- which(district_stats$district_num == dist_num)
+    
+    if (length(match_idx) > 0) {
+      mean_value <- district_stats$mean_value[match_idx]
+      
+      if (!is.na(mean_value)) {
+        # Create label HTML with consistent styling but enhanced for extremes
+        if (geo_data$is_extreme[i]) {
+          extreme_text <- ifelse(geo_data$extreme_type[i] == "highest", 
+                               "Distrito más alto", 
+                               "Distrito más bajo")
+          
+          label_html <- sprintf(
+            '<div style="background-color: %s; color: %s; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">%s<br>Distrito %s: %.1f</div>',
+            geo_data$label_bg[i], geo_data$label_color[i], extreme_text, dist_num, mean_value
+          )
+        } else {
+          label_html <- sprintf(
+            '<div style="background-color: white; color: black; padding: 3px 8px; border-radius: 3px; font-weight: bold; text-align: center;">Distrito %s:<br>%.1f</div>',
+            dist_num, mean_value
+          )
+        }
+        
+        # Add label with calculated offset position
+        map <- map %>% addLabelOnlyMarkers(
+          lng = geo_data$lng[i] + geo_data$offset_x[i],
+          lat = geo_data$lat[i] + geo_data$offset_y[i],
+          label = lapply(list(label_html), HTML),
+          labelOptions = labelOptions(
+            noHide = TRUE,
+            direction = "center",
+            textOnly = TRUE
+          )
+        )
+      }
+    }
+  }
+  
+  # Add overall average label
+  overall_mean <- round(mean(district_stats$mean_value, na.rm = TRUE), 1)
+  
+  map <- map %>% addControl(
+    html = sprintf(
+      '<div style="background-color: #333333; color: white; padding: 5px; border-radius: 3px;"><strong>Promedio general: %.1f</strong></div>',
+      overall_mean
+    ),
+    position = "topright"
+  )
+  
+  return(map)
 }
 
 create_ridge_plot <- function(data, title = NULL, custom_theme = active_theme()) {

@@ -1,39 +1,30 @@
+# R/data_manager.R - FIXED VERSION
 
-#' @export
 DataManager <- R6::R6Class("DataManager",
   public = list(
-    #' @field session_cache A list to store session-specific cached data
     session_cache = list(),
     
-    #' @description
-    #' Create a new DataManager object and initialize global cache if needed
-    #' @return A new DataManager object
-    initialize = function() {
-      # Initialize the global cache if it doesn't exist yet
+    initialize = function(max_cache_mb = 200) {
+      # Initialize global cache environment
       if (!exists("GLOBAL_CACHE", envir = .GlobalEnv)) {
         assign("GLOBAL_CACHE", new.env(), envir = .GlobalEnv)
-        # Add a simple stats tracker
         assign("CACHE_STATS", list(
           hits = 0,
           misses = 0,
-          created = Sys.time()
+          created = Sys.time(),
+          max_size_mb = max_cache_mb
         ), envir = .GlobalEnv$GLOBAL_CACHE)
       }
       
-      message("DataManager initialized with shared cache")
+      message(sprintf("DataManager initialized with %d MB cache limit", max_cache_mb))
     },
     
-    #' @description
-    #' Load plot data from RDS files based on section and year using shared cache
-    #' @param section Section name (e.g., "wellness", "economic", "cultural", "identity", "environment")
-    #' @param year Survey year (numeric)
-    #' @return A list of plots
+    # Enhanced get_plots with cache management
     get_plots = function(section, year) {
       key <- paste0("plots_", section, "_", year)
       
-      # Try to get from global cache first
+      # Try cache first
       if (exists(key, envir = .GlobalEnv$GLOBAL_CACHE)) {
-        # Cache hit
         .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits + 1
         return(get(key, envir = .GlobalEnv$GLOBAL_CACHE))
       }
@@ -41,7 +32,7 @@ DataManager <- R6::R6Class("DataManager",
       # Cache miss
       .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses + 1
       
-      # If not in cache, load it
+      # Load data
       message(paste("Loading plots for", section, year, "from RDS"))
       path <- paste0("data/plots/", section, "_", year, ".rds")
       
@@ -57,27 +48,22 @@ DataManager <- R6::R6Class("DataManager",
         return(list())
       })
       
-      # Store in global cache
+      # Store in cache and manage size
       assign(key, result, envir = .GlobalEnv$GLOBAL_CACHE)
+      private$manage_cache_size()
       
       return(result)
     },
     
-    #' @description
-    #' Load map data from RDS files based on section and year using shared cache
-    #' @param section Section name (e.g., "wellness", "economic", "cultural", "identity", "environment")
-    #' @param year Survey year (numeric)
-    #' @return A list of maps
+    # Enhanced get_maps with cache management  
     get_maps = function(section, year) {
       key <- paste0("maps_", section, "_", year)
       
-      # Try to get from global cache first
       if (exists(key, envir = .GlobalEnv$GLOBAL_CACHE)) {
         .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits + 1
         return(get(key, envir = .GlobalEnv$GLOBAL_CACHE))
       }
       
-      # Cache miss
       .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses + 1
       
       message(paste("Loading maps for", section, year, "from RDS"))
@@ -95,37 +81,29 @@ DataManager <- R6::R6Class("DataManager",
         return(list())
       })
       
-      # Store in global cache
       assign(key, result, envir = .GlobalEnv$GLOBAL_CACHE)
+      private$manage_cache_size()
       
       return(result)
     },
     
-    #' @description
-    #' Get static percentages for a section and year with shared caching
-    #' @param section Section name (e.g., "cultural", "wellness", "economic")
-    #' @param year Survey year (numeric)
-    #' @return A list of percentages
+    # Enhanced get_percentages with cache management
     get_percentages = function(section, year) {
       key <- paste0("pct_", section, "_", year)
       
-      # Try to get from global cache
       if (exists(key, envir = .GlobalEnv$GLOBAL_CACHE)) {
         .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$hits + 1
         return(get(key, envir = .GlobalEnv$GLOBAL_CACHE))
       }
       
-      # Cache miss
       .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS$misses + 1
       
-      # Load from RDS file if available, otherwise use hardcoded values
       rds_path <- paste0("data/percentages/", section, "_", year, ".rds")
       
       result <- tryCatch({
         if (file.exists(rds_path)) {
           readRDS(rds_path)
         } else {
-          # Fallback to hardcoded percentages
           private$get_hardcoded_percentages(section, year)
         }
       }, error = function(e) {
@@ -133,70 +111,75 @@ DataManager <- R6::R6Class("DataManager",
         private$get_hardcoded_percentages(section, year)
       })
       
-      # Store in global cache
       assign(key, result, envir = .GlobalEnv$GLOBAL_CACHE)
+      private$manage_cache_size()
       
       return(result)
     },
     
-    #' @description
-    #' Get the path to a map PNG file
-    #' @param map_name Name of the map file (without extension)
-    #' @param year Survey year
-    #' @return File path to the PNG
-    get_map_path = function(map_name, year) {
-      paste0("data/maps/", map_name, "_", year, ".png")
-    },
-    
-    #' @description
-    #' Preload common data to improve responsiveness with shared caching
-    #' @param years Vector of years to preload
-    #' @param sections Vector of sections to preload
-    preload_data = function(years = c(2023, 2024), 
-                           sections = c("wellness", "economic", "cultural", "identity", "environment")) {
-      start_time <- Sys.time()
+    # Smart preloading - only load related sections
+    smart_preload = function(current_section, year) {
+      # Define section groups that users typically navigate between
+      section_groups <- list(
+        "wellness" = c("wellness", "economic", "cultural", "identity", "environment"),
+        "economic" = c("wellness", "economic", "cultural", "identity"),
+        "cultural" = c("wellness", "economic", "cultural", "identity"),
+        "identity" = c("wellness", "economic", "cultural", "identity", "environment"),
+        "environment" = c("wellness", "environment", "identity"),
+        
+        "government" = c("government", "inequality", "accountability", "representation", "trust"),
+        "inequality" = c("government", "inequality", "accountability"),
+        "accountability" = c("government", "inequality", "accountability", "representation"),
+        "representation" = c("government", "representation", "trust"),
+        "trust" = c("government", "representation", "trust"),
+        
+        "infrastructure" = c("infrastructure", "public_services", "education", "healthcare", "housing"),
+        "public_services" = c("infrastructure", "public_services", "housing"),
+        "education" = c("infrastructure", "education", "healthcare"),
+        "healthcare" = c("infrastructure", "education", "healthcare"),
+        "housing" = c("infrastructure", "public_services", "housing"),
+        
+        "participation" = c("participation", "civic", "community"),
+        "civic" = c("participation", "civic", "community"),
+        "community" = c("participation", "civic", "community"),
+        
+        "urban" = c("urban", "mobility", "transportation"),
+        "mobility" = c("urban", "mobility", "transportation"),
+        "transportation" = c("urban", "mobility", "transportation")
+      )
       
-      message("Starting data preloading...")
-      
-      total_items <- 0
-      loaded_items <- 0
-      
-      for (year in years) {
-        for (section in sections) {
-          total_items <- total_items + 1
-          
-          # Trigger loading by calling the methods
-          plots <- self$get_plots(section, year)
-          if (length(plots) > 0) loaded_items <- loaded_items + 1
-          
-          # Load maps for sections that have them
-          if (section %in% c("wellness", "economic", "identity", "environment")) {
-            maps <- self$get_maps(section, year)
-            if (length(maps) > 0) loaded_items <- loaded_items + 1
-            total_items <- total_items + 1
-          }
-          
-          # Load percentages for sections that have them
-          if (section %in% c("cultural", "wellness", "economic")) {
-            percentages <- self$get_percentages(section, year)
-            if (length(percentages) > 0) loaded_items <- loaded_items + 1
-            total_items <- total_items + 1
-          }
-        }
+      # Get sections to preload
+      sections_to_load <- section_groups[[current_section]]
+      if(is.null(sections_to_load)) {
+        sections_to_load <- c(current_section)
       }
       
-      end_time <- Sys.time()
-      duration <- difftime(end_time, start_time, units = "secs")
-      message(sprintf("Data preloading completed in %.2f seconds", as.numeric(duration)))
-      message(sprintf("Loaded %d/%d items successfully", loaded_items, total_items))
+      message(sprintf("Smart preloading for %s: %s", current_section, paste(sections_to_load, collapse = ", ")))
       
-      # Return the object for method chaining
+      # Load data for related sections
+      for(section in sections_to_load) {
+        tryCatch({
+          # Always load plots and percentages
+          self$get_plots(section, year)
+          self$get_percentages(section, year)
+          
+          # Only load maps for sections that have them (based on your mapping table)
+          map_sections <- c("identity", "environment", "economic", "cultural", "infrastructure", 
+                          "expectations", "government", "inequality", "representation", 
+                          "civic", "participation", "transportation", "urban")
+          
+          if(section %in% map_sections) {
+            self$get_maps(section, year)
+          }
+        }, error = function(e) {
+          warning(sprintf("Failed to preload %s: %s", section, e$message))
+        })
+      }
+      
       return(invisible(self))
     },
     
-    #' @description
-    #' Get cache statistics
-    #' @return List with cache stats
+    # Enhanced cache statistics
     get_cache_stats = function() {
       if (exists("GLOBAL_CACHE", envir = .GlobalEnv) && 
           exists("CACHE_STATS", envir = .GlobalEnv$GLOBAL_CACHE)) {
@@ -204,53 +187,83 @@ DataManager <- R6::R6Class("DataManager",
         total <- stats$hits + stats$misses
         hit_rate <- if(total > 0) stats$hits/total*100 else 0
         
+        # Calculate current cache size
+        cache_size_mb <- private$get_cache_size_mb()
+        
         return(list(
           hits = stats$hits,
           misses = stats$misses,
           hit_rate = round(hit_rate, 2),
           total_requests = total,
-          cache_size = length(ls(.GlobalEnv$GLOBAL_CACHE)) - 1, # -1 for CACHE_STATS
+          cache_size_mb = cache_size_mb,
+          max_cache_mb = stats$max_size_mb,
+          cache_objects = length(ls(.GlobalEnv$GLOBAL_CACHE)) - 1,
           created = stats$created
         ))
       }
-      return(list())
+      return(list(cache_size_mb = 0, hit_rate = 0, cache_objects = 0))
     },
     
-    #' @description
-    #' Clear the cache (both session and global)
-    #' @param global Boolean, whether to clear global cache
-    clear_cache = function(global = FALSE) {
-      self$session_cache <- list()
-      
-      if (global && exists("GLOBAL_CACHE", envir = .GlobalEnv)) {
-        # Save stats before clearing
-        stats <- .GlobalEnv$GLOBAL_CACHE$CACHE_STATS
-        
-        # Clear everything but stats
-        rm(list = setdiff(ls(.GlobalEnv$GLOBAL_CACHE), "CACHE_STATS"), envir = .GlobalEnv$GLOBAL_CACHE)
-        
-        # Reset stats
-        .GlobalEnv$GLOBAL_CACHE$CACHE_STATS <- list(
-          hits = 0,
-          misses = 0,
-          created = Sys.time()
-        )
-        
-        message("Global cache cleared")
-      } else {
-        message("Session cache cleared")
-      }
-      
-      return(invisible(self))
+    # Add method for map path resolution (needed by cultural_server.R)
+    get_map_path = function(map_name, year) {
+      # Return the path to the PNG map file
+      map_path <- paste0("data/maps/", map_name, "_", year, ".png")
+      return(map_path)
     }
   ),
   
   private = list(
-    #' @description
-    #' Get hardcoded percentages as fallback
-    #' @param section Section name
-    #' @param year Survey year
-    #' @return List of percentages
+    # Calculate current cache size in MB
+    get_cache_size_mb = function() {
+      if (!exists("GLOBAL_CACHE", envir = .GlobalEnv)) {
+        return(0)
+      }
+      
+      cache_env <- .GlobalEnv$GLOBAL_CACHE
+      cache_objects <- ls(cache_env, all.names = TRUE)
+      cache_objects <- cache_objects[cache_objects != "CACHE_STATS"]
+      
+      if(length(cache_objects) > 0) {
+        total_size_bytes <- sum(sapply(cache_objects, function(obj) {
+          as.numeric(object.size(get(obj, envir = cache_env)))
+        }))
+        return(round(total_size_bytes / 1024^2, 2))
+      }
+      return(0)
+    },
+    
+    # Manage cache size using LRU strategy
+    manage_cache_size = function() {
+      if (!exists("GLOBAL_CACHE", envir = .GlobalEnv)) return()
+      
+      cache_env <- .GlobalEnv$GLOBAL_CACHE
+      if (!exists("CACHE_STATS", envir = cache_env)) return()
+      
+      stats <- cache_env$CACHE_STATS
+      max_size <- stats$max_size_mb
+      
+      current_size <- private$get_cache_size_mb()
+      
+      # Only manage cache if it exceeds the limit
+      if(current_size > max_size) {
+        cache_objects <- ls(cache_env, all.names = TRUE)
+        cache_objects <- cache_objects[cache_objects != "CACHE_STATS"]
+        
+        if(length(cache_objects) > 0) {
+          # Remove oldest 30% of objects (simple LRU approximation)
+          num_to_remove <- ceiling(length(cache_objects) * 0.3)
+          objects_to_remove <- cache_objects[1:num_to_remove]
+          
+          rm(list = objects_to_remove, envir = cache_env)
+          
+          new_size <- private$get_cache_size_mb()
+          message(sprintf("Cache management: Reduced from %.1f MB to %.1f MB (removed %d objects)", 
+                         current_size, new_size, num_to_remove))
+        }
+      }
+    },
+    
+    # Get hardcoded percentages as fallback
     get_hardcoded_percentages = function(section, year) {
       if (section == "cultural") {
         if (year == 2024) {
@@ -296,3 +309,8 @@ DataManager <- R6::R6Class("DataManager",
     }
   )
 )
+
+# CRITICAL: Explicitly assign to global environment
+assign("DataManager", DataManager, envir = .GlobalEnv)
+
+message("DataManager class loaded and assigned to global environment")

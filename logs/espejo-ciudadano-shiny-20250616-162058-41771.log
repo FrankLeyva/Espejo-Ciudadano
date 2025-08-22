@@ -1,0 +1,58 @@
+su: ignoring --preserve-environment, it's mutually exclusive with --login
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘bslib’
+
+The following object is masked from ‘package:utils’:
+
+    page
+
+Loading required package: ggplot2
+
+Attaching package: ‘plotly’
+
+The following object is masked from ‘package:ggplot2’:
+
+    last_plot
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+The following object is masked from ‘package:graphics’:
+
+    layout
+
+
+Attaching package: ‘shinyjs’
+
+The following object is masked from ‘package:shiny’:
+
+    runExample
+
+The following objects are masked from ‘package:methods’:
+
+    removeClass, show
+
+Warning: Navigation containers expect a collection of `bslib::nav_panel()`/`shiny::tabPanel()`s and/or `bslib::nav_menu()`/`shiny::navbarMenu()`s. Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents.
+
+Listening on http://127.0.0.1:41771
+DataManager initialized with shared cache
+Created DataManager instance with shared cache support
+Cache stats - Hits: 0, Misses: 0, Hit rate: 0.0%
+Loaded module: R/wellness/wellness_server.R
+Loaded module: R/wellness/wellness_ui.R
+Loading plots for wellness 2024 from RDS
+Loading maps for wellness 2024 from RDS
+Terminated
+

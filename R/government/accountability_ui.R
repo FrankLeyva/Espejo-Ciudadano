@@ -1,33 +1,11 @@
-# UI for Accountability Dashboard
+# accountability_ui.R - Updated to match new styling system
 accountabilityUI <- function() {
   page_fluid(
     class = "section-gobierno",
-
     useShinyjs(),
     init_tooltips(),
 
-    tags$head(
-      tags$style(HTML("
-        /* Override pill navigation styling for this page */
-        .gobierno-pills .nav-pills .nav-link:not(.active) {
-          background-color: rgba(240, 240, 240, 0.8);
-color: var(--gobierno-color) !important;
-            border: 1px solid rgba(229, 126, 30, 0.2);
-          font-weight: bold !important;
-        }
-        
-        .gobierno-pills .nav-pills .nav-link:hover:not(.active) {
-          background-color: rgba(160, 115, 67, 0.1);
-        }
-             .gobierno-pills .nav-pills .nav-link.active {
-          background-color: var(--gobierno-color) !important; 
-          color: white !important;
-          font-weight: bold !important;
-          border: none !important;
-        }
-      "))
-    ),
-
+    # Back navigation
     div(
       class = "mb-4",
       tags$a(
@@ -35,94 +13,216 @@ color: var(--gobierno-color) !important;
         class = "text-decoration-none",
         onclick = "Shiny.setInputValue('nav_target', 'government', {priority: 'event'}); return false;",
         tags$i(class = "fas fa-arrow-left me-2"),
-        "Volver a Gobierno"
+        "Volver a Instituciones"
       )
     ),
+    
     # Header
     layout_columns(
       fill = FALSE,
       card(
         card_header(
-          style="border-top: 4px solid var(--gobierno-color)",
-
-          h2("Rendición de Cuentas", class = "text-center")
+          style = paste0("background-color: var(--gobierno-color) !important; 
+            color: white !important; 
+            font-family: var(--font-display) !important;
+            font-weight: bolder !important; 
+            text-align: center !important; 
+            border-bottom: none !important;"),
+          h1("Rendición de Cuentas", class = "dashboard-header")
         )
       )
     ),
     
-    # Callout for Q122 - "El que la hace la paga"
-    layout_columns(
-      col_widths = 12,
-      card(
-        div(
-          class = "justice-callout",
-          div(class = "justice-callout-title", "Percepción sobre la Justicia en Juárez"),
-          div(class = "d-flex align-items-center mb-3",
-              bsicons::bs_icon("shield-check", size = "2em", class = "me-3"),
-              div(class = "justice-callout-value", textOutput("justice_perception"))
-          ),
-          div(class = "justice-callout-subtitle", "En Juárez, ¿el que la hace, la paga? Es decir, ¿se castiga a quien comete algún delito o infracción?"),
-          div(class = "mt-3", "Escala: 1=Siempre, 2=Casi siempre, 3=Casi nunca, 4=Nunca")
-        )
-      )
-    ),
-    
-    # Tabset for histograms: Corruption punishment (Q123, Q124, Q125)
-    card(
-      card_header(
-        div(
-          class = "d-flex align-items-center",
-        "Percepción sobre Castigo a Servidores Públicos Corruptos",
-        create_dynamic_tooltip("punishment_tooltip")
-      )
-      ),
-      div(class = "gobierno-pills",
-      navset_pill(
+    # Corruption Punishment Tabs
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
         id = "punishment_tabs",
-
+        
+        # Municipal Government Tab
         nav_panel(
-          title = "Gobierno Municipal",
-          plotlyOutput("municipal_punishment_hist", height = "400px")
+          title = "Castigo Municipal",
+          value = "municipal_punishment",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Castigo a Servidores Públicos Corruptos - Gobierno Municipal",
+                  create_tooltip("<b>ID</b>: PAR Q123 <br>
+                    <b>Pregunta</b>: ¿Qué tan frecuente considera usted que se castiga a los servidores públicos corruptos en el gobierno municipal? <br>
+                     <b>Escala</b>: 1=Siempre; 2=Casi siempre; 3=Casi nunca; 4=Nunca; 5=NS/NC")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("municipal_punishment_hist", height = "450px")
+            )
+          )
         ),
+        
+        # State Government Tab
         nav_panel(
-          title = "Gobierno Estatal",
-          plotlyOutput("state_punishment_hist", height = "400px")
+          title = "Castigo Estatal",
+          value = "state_punishment",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Castigo a Servidores Públicos Corruptos - Gobierno Estatal",
+                  create_tooltip("<b>ID</b>: PAR Q124 <br>
+                    <b>Pregunta</b>: ¿Qué tan frecuente considera usted que se castiga a los servidores públicos corruptos en el gobierno estatal? <br>
+                     <b>Escala</b>: 1=Siempre; 2=Casi siempre; 3=Casi nunca; 4=Nunca; 5=NS/NC")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("state_punishment_hist", height = "450px")
+            )
+          )
         ),
+        
+        # Federal Government Tab
         nav_panel(
-          title = "Gobierno Federal",
-          plotlyOutput("federal_punishment_hist", height = "400px")
+          title = "Castigo Federal",
+          value = "federal_punishment",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Castigo a Servidores Públicos Corruptos - Gobierno Federal",
+                  create_tooltip("<b>ID</b>: PAR Q125 <br>
+                    <b>Pregunta</b>: ¿Qué tan frecuente considera usted que se castiga a los servidores públicos corruptos en el gobierno federal? <br>
+                     <b>Escala</b>: 1=Siempre; 2=Casi siempre; 3=Casi nunca; 4=Nunca; 5=NS/NC")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("federal_punishment_hist", height = "450px")
+            )
+          )
         )
       )
-    )
     ),
     
-    # Tabset for pie charts: Corruption acts (Q15.1, Q16.1, Q17.1)
-    card(
-      card_header(
-        div(
-          class = "d-flex align-items-center",
-        "Percepción sobre Actos de Corrupción en el Gobierno",
-      create_dynamic_tooltip("corruption_tooltip")
-    )),
-      div(class = "gobierno-pills",
-      navset_pill(
+    # Corruption Acts Tabs
+    div(
+      class = "plot-tabs-container",
+      
+      navset_tab(
         id = "corruption_tabs",
+        
+        # Municipal Corruption Tab
         nav_panel(
-          title = "Gobierno Municipal",
-          plotlyOutput("municipal_corruption_pie", height = "400px")
+          title = "Corrupción Municipal",
+          value = "municipal_corruption",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Percepción de Actos de Corrupción - Gobierno Municipal",
+                  create_tooltip("<b>ID</b>: PAR Q15.1 <br>
+                    <b>Pregunta</b>: ¿Qué tan frecuentes considera usted que son los actos de corrupción en el gobierno municipal? <br>
+                     <b>Escala</b>: 1=Muy frecuentes; 2=Frecuentes; 3=Poco frecuentes; 4=Nada frecuentes; 5=NS/NC")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("municipal_corruption_pie", height = "450px")
+            )
+          )
         ),
+        
+        # State Corruption Tab
         nav_panel(
-          title = "Gobierno Estatal",
-          plotlyOutput("state_corruption_pie", height = "400px")
+          title = "Corrupción Estatal",
+          value = "state_corruption",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Percepción de Actos de Corrupción - Gobierno Estatal",
+                  create_tooltip("<b>ID</b>: PAR Q16.1 <br>
+                    <b>Pregunta</b>: ¿Qué tan frecuentes considera usted que son los actos de corrupción en el gobierno estatal? <br>
+                     <b>Escala</b>: 1=Muy frecuentes; 2=Frecuentes; 3=Poco frecuentes; 4=Nada frecuentes; 5=NS/NC")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("state_corruption_pie", height = "450px")
+            )
+          )
         ),
+        
+        # Federal Corruption Tab
         nav_panel(
-          title = "Gobierno Federal",
-          plotlyOutput("federal_corruption_pie", height = "400px")
+          title = "Corrupción Federal",
+          value = "federal_corruption",
+          
+          div(
+            class = "plot-card plot-card-gobierno",
+            
+            div(
+              class = "plot-header",
+              div(
+                class = "plot-header-content",
+                h6(
+                  class = "plot-title",
+                  "Percepción de Actos de Corrupción - Gobierno Federal",
+                  create_tooltip("<b>ID</b>: PAR Q17.1 <br>
+                    <b>Pregunta</b>: ¿Qué tan frecuentes considera usted que son los actos de corrupción en el gobierno federal? <br>
+                     <b>Escala</b>: 1=Muy frecuentes; 2=Frecuentes; 3=Poco frecuentes; 4=Nada frecuentes; 5=NS/NC")
+                )
+              )
+            ),
+            
+            div(
+              class = "plot-content",
+              plotlyOutput("federal_corruption_pie", height = "450px")
+            )
+          )
         )
       )
     )
-    )
-    
-    
   )
 }

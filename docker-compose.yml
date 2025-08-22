@@ -1,34 +1,86 @@
-version: '3.8'
-
 services:
-  espejo-ciudadano:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: espejo-ciudadano-dashboard
+  traefik:
+    image: traefik:v3.3
+    container_name: espejo-traefik
+    restart: unless-stopped
+    command:
+      - --api.dashboard=true
+      - --api.insecure=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.dashboard.address=:8080
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=espejo-network
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --log.level=INFO
+      - --accesslog=true
     ports:
-      - "3838:3838"
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik-dashboard.rule=Host(`45.90.208.220`) && PathPrefix(`/api`) || Host(`45.90.208.220`) && PathPrefix(`/dashboard`)
+      - traefik.http.routers.traefik-dashboard.service=api@internal
+      - traefik.http.routers.traefik-dashboard.entrypoints=dashboard
+      - traefik.http.routers.traefik-dashboard.middlewares=traefik-auth
+      - traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PASSWORD_HASH}
     volumes:
-      # Mount data directory for updates without rebuilding
-      - ./data:/srv/shiny-server/espejo-ciudadano/data:ro
-      # Mount logs for debugging
-      - ./logs:/var/log/shiny-server
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-data:/data
+    networks:
+      - espejo-network
+
+  # DASHBOARD (ACTIVE)
+  espejo-ciudadano:
+    image: espejo-ciudadano:latest
+    container_name: espejo-dashboard
+    restart: unless-stopped
     environment:
       - SHINY_LOG_STDERR=1
-      - APPLICATION_LOGS_TO_STDOUT=true
-    restart: unless-stopped
+    volumes:
+      - shiny-logs:/var/log/shiny-server
+    networks:
+      - espejo-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3838/"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
-    # Resource limits to prevent container from consuming too much memory
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '1.0'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
+      start_period: 90s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.espejo-app.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.espejo-app.entrypoints=websecure
+      - traefik.http.routers.espejo-app.tls.certresolver=letsencrypt
+      - traefik.http.routers.espejo-app.service=espejo-app
+      - traefik.http.services.espejo-app.loadbalancer.server.port=3838
+      - traefik.http.services.espejo-app.loadbalancer.server.scheme=http
+      - traefik.http.middlewares.espejo-headers.headers.frameDeny=true
+      - traefik.http.middlewares.espejo-headers.headers.sslRedirect=true
+      - traefik.http.middlewares.espejo-headers.headers.browserXssFilter=true
+      - traefik.http.middlewares.espejo-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.espejo-headers.headers.forceSTSHeader=true
+      - traefik.http.middlewares.espejo-headers.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.espejo-headers.headers.stsPreload=true
+      - traefik.http.middlewares.espejo-headers.headers.stsSeconds=31536000
+      - traefik.http.routers.espejo-app.middlewares=espejo-headers
+
+networks:
+  espejo-network:
+    driver: bridge
+    name: espejo-network
+
+volumes:
+  traefik-data:
+    name: espejo-traefik-data
+  shiny-logs:
+    name: espejo-shiny-logs

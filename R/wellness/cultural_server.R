@@ -77,13 +77,11 @@ culturalServer <- function(input, output, session, current_theme = NULL) {
       paste("mapa_participacion_cultural_", selectedYear(), "_", Sys.Date(), ".png", sep = "")
     },
     content = function(file) {
-      # Note: Cultural section might not have map files, check if they exist
       map_path <- data_manager$get_map_path("mapa_participacion_cultural", selectedYear())
-      
       if (file.exists(map_path)) {
         file.copy(map_path, file)
       } else {
-        warning(paste("Cultural map file not found:", map_path))
+        warning(paste("Map file not found:", map_path))
         file.create(file)
       }
     }
